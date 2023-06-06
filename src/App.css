@@ -35,6 +35,7 @@ padding: 24px;
 position: absolute;
 bottom: 0;
 left: 0;right: 0;
+background-color: rgba(0, 0, 0, 0.5); /* Change this to your desired transparency level */
 }
 
 .chat-input-textarea{
@@ -58,7 +59,27 @@ left: 0;right: 0;
 
 .chat-log{
   text-align: left;
+  overflow-y: auto; /* Add scrollbar if content overflows */
+  max-height: 80vh; /* Adjust as per your needs */
 }
+
+/* The following styles are for a custom scrollbar appearance */
+/* The scrollbar track */
+.chat-log::-webkit-scrollbar {
+  width: 10px; /* Width of the scrollbar */
+}
+
+/* The scrollbar handle */
+.chat-log::-webkit-scrollbar-thumb {
+  background: #888; /* Color of the scrollbar */
+  border-radius: 5px; /* Rounded scrollbar */
+}
+
+/* On hover over the scrollbar handle */
+.chat-log::-webkit-scrollbar-thumb:hover {
+  background: #555; /* Darken scrollbar on hover */
+}
+
 
 .chat-message.chatgpt{
   background-color:#444654 ;

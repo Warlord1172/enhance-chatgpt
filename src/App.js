@@ -17,11 +17,7 @@ function App() {
     {
       user: "gpt",
       message: "How can i help you today?",
-    },
-    {
-      user: "me",
-      message: "i want to use chatgpt today..",
-    },
+    }
   ]);
 
   function clearChat() {
@@ -79,8 +75,9 @@ function App() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          messages,
-          currentModel,
+          message: input,
+          currentModel: currentModel,
+          isChatModel: currentModel.startsWith('gpt-'),
         }),
       });
   
@@ -89,6 +86,8 @@ function App() {
       }
   
       const data = await response.json();
+      console.log("Raw response:", data);
+
       setChatLog([...chatLogNew, { user: "gpt", message: `${data.message}` }]);
     } catch (error) {
       console.error("An error occurred:", error);
