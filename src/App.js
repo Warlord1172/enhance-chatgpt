@@ -2,12 +2,14 @@ import logo from "./logo.svg";
 import "./App.css";
 import "./normal.css";
 import { useState, useEffect } from "react";
+import Alert from 'react-bootstrap/Alert';
 
 function App() {
   useEffect(() => {
     getEngines();
   }, []);
-
+  const [errorMessage, setErrorMessage] = useState("");
+  const [showError, setShowError] = useState(false);
   const [input, setInput] = useState("");
   const [Models, setModels] = useState([{ id: "Loading...", ready: false }]);
   const [currentModel, setCurrentModel] = useState("gpt-3.5-turbo");
@@ -31,22 +33,30 @@ function App() {
     fetch("http://localhost:3080/models")
       .then((res) => res.json())
       .then((data) => {
-        console.log("Received data from the backend:", data); // Add this line
-        setModels(data.data); // Update this line to use the 'data' property
-        console.log("Models state updated:", Models); // Add this line
-      })
-      .then((data) => {
+        console.log("Received data from the backend:", data);
         if (data.data.length === 0) {
           setModels([{ id: "No models available", ready: false }]);
         } else {
           setModels(data.data);
         }
+        console.log("Models state updated:", Models);
       })
       .catch((error) => {
         console.error("Error fetching models:", error); // Add this line to catch errors
       });
   }
-
+  useEffect(() => {
+    if (errorMessage) {
+      alert(errorMessage);
+      setErrorMessage("");
+    }
+  }, [errorMessage]);
+  useEffect(() => {
+    if (errorMessage) {
+      setShowError(true);
+    }
+  }, [errorMessage]);
+  
   useEffect(() => {
     console.log("Models state changed:", Models);
   }, [Models]);
@@ -56,28 +66,40 @@ function App() {
     let chatLogNew = [...chatLog, { user: "me", message: `${input}` }];
     setInput("");
     setChatLog(chatLogNew);
-
+  
     const messages = chatLogNew.map((entry) => ({
       role: entry.user === "me" ? "user" : "assistant",
       content: entry.message,
     }));
-
-    const response = await fetch("http://localhost:3080/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        messages,
-        currentModel,
-      }),
-    });
-    const data = await response.json();
-    setChatLog([...chatLogNew, { user: "gpt", message: `${data.message}` }]);
+  
+    try {
+      const response = await fetch("http://localhost:3080/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messages,
+          currentModel,
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      setChatLog([...chatLogNew, { user: "gpt", message: `${data.message}` }]);
+    } catch (error) {
+      console.error("An error occurred:", error);
+      setErrorMessage(`Sorry, an error occurred: ${error.message}`);
+    }
   }
-
   return (
     <div className="App">
+      <Alert variant="danger" show={showError} onClose={() => setShowError(false)} dismissible>
+      {errorMessage}
+        </Alert>
       <aside className="sidemenu">
         <div className="side-menu-button" onClick={clearChat}>
           <span>+</span>
@@ -90,28 +112,22 @@ function App() {
           </p>
         </header>
         <div className="models">
-          <select>
-            {Models.length > 0 ? (
-              <select
-                onChange={(e) => {
-                  console.log("setting to..", e.target.value);
-                  setCurrentModel(e.target.value);
-                }}
-              >
-                {Models.map((model) => (
-                  <option
-                    key={model.id}
-                    value={model.id}
-                    disabled={!model.ready}
-                  >
-                    {model.id}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <p>Loading models...</p>
-            )}
-          </select>
+          {Models.length > 0 ? (
+            <select
+              onChange={(e) => {
+                console.log("setting to..", e.target.value);
+                setCurrentModel(e.target.value);
+              }}
+            >
+              {Models.map((model) => (
+                <option key={model.id} value={model.id} disabled={!model.ready}>
+                  {model.id}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <p>Loading models...</p>
+          )}
         </div>
       </aside>
       <section className="chatbox">
