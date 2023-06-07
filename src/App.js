@@ -1,31 +1,72 @@
+// Importing the necessary dependencies and styles
 import logo from "./logo.svg";
 import "./App.css";
 import "./normal.css";
-import { useState, useEffect } from "react";
-import Alert from 'react-bootstrap/Alert';
+import { useState, useEffect } from "react"; // React's built-in hooks
+import Alert from 'react-bootstrap/Alert'; // Bootstrap Alert for error messages
 
+// Main application component
 function App() {
+  // Runs once after initial render to get AI model engines
   useEffect(() => {
     getEngines();
   }, []);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [showError, setShowError] = useState(false);
-  const [input, setInput] = useState("");
-  const [Models, setModels] = useState([{ id: "Loading...", ready: false }]);
-  const [currentModel, setCurrentModel] = useState("gpt-3.5-turbo");
+  // Various state variables
+  const [systemRole, setSystemRole] = useState("system"); //
+  const [systemMessage, setSystemMessage] = useState("You are a helpful assistant."); //
+
+  const [currentThreadId, setCurrentThreadId] = useState(0); // Current thread ID
+  const [errorMessage, setErrorMessage] = useState(""); // Error message
+  const [showError, setShowError] = useState(false); // Flag for showing error
+  const [input, setInput] = useState(""); // Current input
+  const [Models, setModels] = useState([{ id: "Loading...", ready: false }]); // AI models
+  const [currentModel, setCurrentModel] = useState("gpt-3.5-turbo"); // Selected AI model
+  const [updatedSystemMessage, setUpdatedSystemMessage] = useState(false);
+
+  // Default chat log
   const [chatLog, setChatLog] = useState([
     {
       user: "gpt",
       message: "How can i help you today?",
     }
   ]);
+  // Default chat threads
+  const [chatThreads, setChatThreads] = useState([{
+    id: 0,
+    title: 'Chat 1',
+    chatLog: [{
+      user: "gpt",
+      message: "How can i help you today?",
+    }],
+  }]);
 
+   // Runs whenever current thread ID or chat threads change
+  useEffect(() => {
+    const currentThread = chatThreads.find(thread => thread.id === currentThreadId);
+    if (currentThread) {
+      setChatLog(currentThread.chatLog);
+    }
+  }, [currentThreadId, chatThreads]);
+  
+  // Function to clear chat
   function clearChat() {
-    setChatLog([]);
+    setChatThreads([
+      ...chatThreads, 
+      {
+        id: chatThreads.length,
+        title: `Chat ${chatThreads.length + 1}`,
+        chatLog: [{
+          user: "gpt",
+          message: "How can I help you today?",
+        }],
+      }
+    ]);
   }
-
+  
+  
+  // Function to get AI model engines from the backend
   async function getEngines() {
-    console.log("getEngines called"); // Add this line
+    console.log("getEngines called");
     fetch("http://localhost:3080/models")
       .then((res) => res.json())
       .then((data) => {
@@ -41,34 +82,41 @@ function App() {
         console.error("Error fetching models:", error); // Add this line to catch errors
       });
   }
+  // Runs when error message changes
   useEffect(() => {
     if (errorMessage) {
       alert(errorMessage);
       setErrorMessage("");
     }
   }, [errorMessage]);
+  // Runs when error message changes
   useEffect(() => {
     if (errorMessage) {
       setShowError(true);
     }
   }, [errorMessage]);
-  
+
+  // Runs when models state changes
   useEffect(() => {
     console.log("Models state changed:", Models);
   }, [Models]);
 
+  // Runs when system role changes
+  useEffect(() => {
+  setUpdatedSystemMessage(true);
+  }, [systemRole, systemMessage]);
+  // Function to handle form submission
   async function handleSubmit(e) {
     e.preventDefault();
     let chatLogNew = [...chatLog, { user: "me", message: `${input}` }];
     setInput("");
-    setChatLog(chatLogNew);
-  
     const messages = chatLogNew.map((entry) => ({
+       // Returns the role based on whether it was the user or the assistant who sent the message
       role: entry.user === "me" ? "user" : "assistant",
-      content: entry.message,
+      content: entry.message,  // Sets the message content
     }));
-  
     try {
+      // Sends a POST request to the API endpoint
       const response = await fetch("http://localhost:3080/chat", {
         method: "POST",
         headers: {
@@ -78,27 +126,46 @@ function App() {
           message: input,
           currentModel: currentModel,
           isChatModel: currentModel.startsWith('gpt-'),
+          systemRole: systemRole,  
+          systemMessage: systemMessage,  
+          updatedSystemMessage: updatedSystemMessage,
         }),
       });
-  
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-  
       const data = await response.json();
       console.log("Raw response:", data);
-
-      setChatLog([...chatLogNew, { user: "gpt", message: `${data.message}` }]);
+      // Updates the chat log with the assistant's response
+      chatLogNew = [...chatLogNew, { user: "gpt", message: `${data.message}` }];
+      setChatLog(chatLogNew);
+      setChatThreads(chatThreads.map(thread => {
+        if (thread.id !== currentThreadId) return thread;
+        return {
+          ...thread,
+          chatLog: chatLogNew
+        };
+      }));
+      setUpdatedSystemMessage(false);
     } catch (error) {
+      // Handles any errors
       console.error("An error occurred:", error);
       setErrorMessage(`Sorry, an error occurred: ${error.message}`);
     }
   }
+
+   // Render the application
   return (
     <div className="App">
-      <Alert variant="danger" show={showError} onClose={() => setShowError(false)} dismissible>
-      {errorMessage}
-        </Alert>
+      {/* Other parts of your application */}
+      <Alert
+        variant="danger"
+        show={showError}
+        onClose={() => setShowError(false)}
+        dismissible
+      >
+        {errorMessage}
+      </Alert>
       <aside className="sidemenu">
         <div className="side-menu-button" onClick={clearChat}>
           <span>+</span>
@@ -128,6 +195,30 @@ function App() {
             <p>Loading models...</p>
           )}
         </div>
+        <div className="system-message-settings">
+    <h4>System Message Settings</h4>
+    <div>
+      <label>Role: </label>
+      <input
+        type="text"
+        value={systemRole}
+        onChange={(e) => setSystemRole(e.target.value)}
+      />
+    </div>
+    <div>
+      <label>Content: </label>
+      <textarea
+        value={systemMessage}
+        onChange={(e) => setSystemMessage(e.target.value)}
+      />
+    </div>
+    <button onClick={() => setUpdatedSystemMessage(true)} className="System-Submit-Button">Update System Message</button>
+  </div>
+        <ChatThreadList
+          threads={chatThreads}
+          activeThreadId={currentThreadId}
+          onSelectThread={(id) => setCurrentThreadId(id)}
+        />
       </aside>
       <section className="chatbox">
         <div className="chat-log">
@@ -149,13 +240,36 @@ function App() {
     </div>
   );
 }
+// ChatThreadList component: displays a list of chat threads
+// It takes threads (array of thread data), activeThreadId (id of the currently active thread), 
+// and onSelectThread (function to handle when a thread is selected) as props
+function ChatThreadList({ threads, activeThreadId, onSelectThread }) {
+  return (
+    <div className="chat-thread-list">
+      {/* For each thread, create a div with a click handler that calls onSelectThread with the id of the thread */}
+      {threads.map(thread => (
+        <div
+          key={thread.id}
+          className={`chat-thread-title ${thread.id === activeThreadId ? 'active' : ''}`}
+          onClick={() => onSelectThread(thread.id)}
+        >
+          {thread.title}
+        </div>
+      ))}
+    </div>
+  );
+}
 
+// ChatMessage component: displays a single chat message
+// It takes a message (object containing the message data) as a prop
 const ChatMessage = ({ message }) => {
   return (
+    // Create a div with a conditional class based on whether the message was sent by the assistant
     <div className={`chat-message ${message.user === "gpt" && "chatgpt"}`}>
       <div className="chat-message-center">
         <div className={`avatar ${message.user === "gpt" && "chatgpt"}`}>
           {message.user === "gpt" && (
+            // SVG file that serves as Avatar Image
             <svg
               width={41}
               height={41}

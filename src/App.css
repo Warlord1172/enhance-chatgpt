@@ -21,6 +21,45 @@
   transition: ease 0.25s all;
 }
 
+.System-Submit-Button{
+  padding: 10px;
+  margin: 10px;
+  border: 1px solid #000;
+  border-radius: 5px;
+  background-color: #343541;
+  color: #fff;
+  transition: ease 0.25s all;
+}
+
+.System-Submit-Button:hover{
+  background-color:white;
+  border: 1px solid white;
+  color:#202123;
+}
+
+.chat-thread-list {
+  display: flex;
+  flex-direction: column;
+  transition: ease 0.25s all;
+}
+
+.chat-thread-title {
+  padding: 10px;
+  margin: 10px;
+  border: 1px solid #000;
+  border-radius: 5px;
+  background-color: #000;
+  color: #fff;
+  cursor: pointer;
+  transition: ease 0.5s all;
+}
+
+.chat-thread-title.active {
+  background-color: #fff;
+  color: #000;
+  transition: ease 0.5s all;
+}
+
 .side-menu-button span {
 padding-left:6px ;
 padding-right: 12px;
