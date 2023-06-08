@@ -3,7 +3,9 @@ import logo from "./logo.svg";
 import "./App.css";
 import "./normal.css";
 import { useState, useEffect } from "react"; // React's built-in hooks
-import Alert from 'react-bootstrap/Alert'; // Bootstrap Alert for error messages
+import Alert from "react-bootstrap/Alert"; // Bootstrap Alert for error messages
+import axios from 'axios';
+import CodeBlock from './codeBlock';
 
 // Main application component
 function App() {
@@ -11,9 +13,20 @@ function App() {
   useEffect(() => {
     getEngines();
   }, []);
+
+  //Code block function
+  useEffect(() => {
+    axios.get('/api/getCodeBlocks')
+      .then(response => {
+        setCodeBlocks(response.data);
+      });
+  }, []);
   // Various state variables
   const [systemRole, setSystemRole] = useState("system"); //
-  const [systemMessage, setSystemMessage] = useState("You are a helpful assistant."); //
+  const [systemMessage, setSystemMessage] = useState(
+    "You are a helpful assistant."
+  ); 
+  const [codeBlocks, setCodeBlocks] = useState([]);
   const [conversationHistory, setConversationHistory] = useState([]);
   const [currentThreadId, setCurrentThreadId] = useState(0); // Current thread ID
   const [errorMessage, setErrorMessage] = useState(""); // Error message
@@ -28,42 +41,49 @@ function App() {
     {
       user: "gpt",
       message: "How can i help you today?",
-    }
+    },
   ]);
   // Default chat threads
-  const [chatThreads, setChatThreads] = useState([{
-    id: 0,
-    title: 'Chat 1',
-    chatLog: [{
-      user: "gpt",
-      message: "How can i help you today?",
-    }],
-  }]);
+  const [chatThreads, setChatThreads] = useState([
+    {
+      id: 0,
+      title: "Chat 1",
+      chatLog: [
+        {
+          user: "gpt",
+          message: "How can i help you today?",
+        },
+      ],
+    },
+  ]);
 
-   // Runs whenever current thread ID or chat threads change
+  // Runs whenever current thread ID or chat threads change
   useEffect(() => {
-    const currentThread = chatThreads.find(thread => thread.id === currentThreadId);
+    const currentThread = chatThreads.find(
+      (thread) => thread.id === currentThreadId
+    );
     if (currentThread) {
       setChatLog(currentThread.chatLog);
     }
   }, [currentThreadId, chatThreads]);
-  
+
   // Function to clear chat
   function clearChat() {
     setChatThreads([
-      ...chatThreads, 
+      ...chatThreads,
       {
         id: chatThreads.length,
         title: `Chat ${chatThreads.length + 1}`,
-        chatLog: [{
-          user: "gpt",
-          message: "How can I help you today?",
-        }],
-      }
+        chatLog: [
+          {
+            user: "gpt",
+            message: "How can I help you today?",
+          },
+        ],
+      },
     ]);
   }
-  
-  
+
   // Function to get AI model engines from the backend
   async function getEngines() {
     console.log("getEngines called");
@@ -103,7 +123,7 @@ function App() {
 
   // Runs when system role changes
   useEffect(() => {
-  setUpdatedSystemMessage(true);
+    setUpdatedSystemMessage(true);
   }, [systemRole, systemMessage]);
   // Function to handle form submission
   async function handleSubmit(e) {
@@ -113,7 +133,7 @@ function App() {
 
     const messages = chatLogNew.map((entry) => ({
       role: entry.user === "me" ? "user" : "assistant",
-      content: entry.message, 
+      content: entry.message,
     }));
 
     setConversationHistory((prevHistory) => [
@@ -141,7 +161,7 @@ function App() {
           systemRole: systemRole,
           systemMessage: systemMessage,
           updatedSystemMessage: updatedSystemMessage,
-          conversationHistory: messages // send the prepared messages array
+          conversationHistory: messages, // send the prepared messages array
         }),
       });
       if (!response.ok) {
@@ -165,14 +185,14 @@ function App() {
       console.error("An error occurred:", error);
       setErrorMessage(`Sorry, an error occurred: ${error.message}`);
     }
-}
+  }
 
-
-   // Render the application
+  // Render the application
   return (
     <div className="App">
       {/* Other parts of your application */}
       <Alert
+        className="Alert-Notif"
         variant="danger"
         show={showError}
         onClose={() => setShowError(false)}
@@ -210,24 +230,29 @@ function App() {
           )}
         </div>
         <div className="system-message-settings">
-    <p>System Message Settings</p>
-    <div>
-      <label>Role: </label>
-      <input
-        type="text"
-        value={systemRole}
-        onChange={(e) => setSystemRole(e.target.value)}
-      />
-    </div>
-    <div>
-      <label>Content: </label>
-      <textarea
-        value={systemMessage}
-        onChange={(e) => setSystemMessage(e.target.value)}
-      />
-    </div>
-    <button onClick={() => setUpdatedSystemMessage(true)} className="System-Submit-Button">Update System Message</button>
-  </div>
+          <p>System Message Settings</p>
+          <div>
+            <label>Role: </label>
+            <input
+              type="text"
+              value={systemRole}
+              onChange={(e) => setSystemRole(e.target.value)}
+            />
+          </div>
+          <div>
+            <label>Content: </label>
+            <textarea
+              value={systemMessage}
+              onChange={(e) => setSystemMessage(e.target.value)}
+            />
+          </div>
+          <button
+            onClick={() => setUpdatedSystemMessage(true)}
+            className="System-Submit-Button"
+          >
+            Update System Message
+          </button>
+        </div>
         <ChatThreadList
           threads={chatThreads}
           activeThreadId={currentThreadId}
@@ -255,16 +280,18 @@ function App() {
   );
 }
 // ChatThreadList component: displays a list of chat threads
-// It takes threads (array of thread data), activeThreadId (id of the currently active thread), 
+// It takes threads (array of thread data), activeThreadId (id of the currently active thread),
 // and onSelectThread (function to handle when a thread is selected) as props
 function ChatThreadList({ threads, activeThreadId, onSelectThread }) {
   return (
     <div className="chat-thread-list">
       {/* For each thread, create a div with a click handler that calls onSelectThread with the id of the thread */}
-      {threads.map(thread => (
+      {threads.map((thread) => (
         <div
           key={thread.id}
-          className={`chat-thread-title ${thread.id === activeThreadId ? 'active' : ''}`}
+          className={`chat-thread-title ${
+            thread.id === activeThreadId ? "active" : ""
+          }`}
           onClick={() => onSelectThread(thread.id)}
         >
           {thread.title}

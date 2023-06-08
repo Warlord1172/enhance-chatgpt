@@ -69,6 +69,12 @@ padding-right: 12px;
   background-color:rgb(255,255,255,0.1) ;
 }
 
+.fade Alert-Notif alert alert-danger alert-dismissible show{
+  display:flex ;
+  position: absolute;
+  
+}
+
 .chat-input-holder{
 padding: 24px;
 position: absolute;
@@ -101,6 +107,36 @@ background-color: rgba(0, 0, 0, 0.5); /* Change this to your desired transparenc
   overflow-y: auto; /* Add scrollbar if content overflows */
   max-height: 80vh; /* Adjust as per your needs */
 }
+
+.code-block {
+  font-family: 'Ubuntu', sans-serif;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin: 10px 0;
+  overflow-x: auto;
+}
+
+.code-block-header {
+  font-size: 0.8em;
+  color: #888;
+  margin-bottom: 5px;
+}
+
+.copy-button {
+  float: right;
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 5px 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+
 
 /* The following styles are for a custom scrollbar appearance */
 /* The scrollbar track */
