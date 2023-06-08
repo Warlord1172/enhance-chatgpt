@@ -14,7 +14,7 @@ function App() {
   // Various state variables
   const [systemRole, setSystemRole] = useState("system"); //
   const [systemMessage, setSystemMessage] = useState("You are a helpful assistant."); //
-
+  const [conversationHistory, setConversationHistory] = useState([]);
   const [currentThreadId, setCurrentThreadId] = useState(0); // Current thread ID
   const [errorMessage, setErrorMessage] = useState(""); // Error message
   const [showError, setShowError] = useState(false); // Flag for showing error
@@ -110,13 +110,25 @@ function App() {
     e.preventDefault();
     let chatLogNew = [...chatLog, { user: "me", message: `${input}` }];
     setInput("");
+
     const messages = chatLogNew.map((entry) => ({
-       // Returns the role based on whether it was the user or the assistant who sent the message
       role: entry.user === "me" ? "user" : "assistant",
-      content: entry.message,  // Sets the message content
+      content: entry.message, 
     }));
+
+    setConversationHistory((prevHistory) => [
+      ...prevHistory,
+      {
+        role: "user",
+        content: input,
+      },
+    ]);
+
+    if (conversationHistory.length > 5) {
+      setConversationHistory((prevHistory) => prevHistory.slice(1));
+    }
+
     try {
-      // Sends a POST request to the API endpoint
       const response = await fetch("http://localhost:3080/chat", {
         method: "POST",
         headers: {
@@ -125,10 +137,11 @@ function App() {
         body: JSON.stringify({
           message: input,
           currentModel: currentModel,
-          isChatModel: currentModel.startsWith('gpt-'),
-          systemRole: systemRole,  
-          systemMessage: systemMessage,  
+          isChatModel: currentModel.startsWith("gpt-"),
+          systemRole: systemRole,
+          systemMessage: systemMessage,
           updatedSystemMessage: updatedSystemMessage,
+          conversationHistory: messages // send the prepared messages array
         }),
       });
       if (!response.ok) {
@@ -136,23 +149,24 @@ function App() {
       }
       const data = await response.json();
       console.log("Raw response:", data);
-      // Updates the chat log with the assistant's response
       chatLogNew = [...chatLogNew, { user: "gpt", message: `${data.message}` }];
       setChatLog(chatLogNew);
-      setChatThreads(chatThreads.map(thread => {
-        if (thread.id !== currentThreadId) return thread;
-        return {
-          ...thread,
-          chatLog: chatLogNew
-        };
-      }));
+      setChatThreads(
+        chatThreads.map((thread) => {
+          if (thread.id !== currentThreadId) return thread;
+          return {
+            ...thread,
+            chatLog: chatLogNew,
+          };
+        })
+      );
       setUpdatedSystemMessage(false);
     } catch (error) {
-      // Handles any errors
       console.error("An error occurred:", error);
       setErrorMessage(`Sorry, an error occurred: ${error.message}`);
     }
-  }
+}
+
 
    // Render the application
   return (
@@ -196,7 +210,7 @@ function App() {
           )}
         </div>
         <div className="system-message-settings">
-    <h4>System Message Settings</h4>
+    <p>System Message Settings</p>
     <div>
       <label>Role: </label>
       <input
