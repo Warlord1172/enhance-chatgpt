@@ -37,6 +37,10 @@
   color:#202123;
 }
 
+.confirm-msg{
+  color:green;
+}
+
 .chat-thread-list {
   display: flex;
   flex-direction: column;
@@ -108,6 +112,7 @@ background-color: rgba(0, 0, 0, 0.5); /* Change this to your desired transparenc
   max-height: 80vh; /* Adjust as per your needs */
 }
 
+
 .code-block {
   font-family: 'Ubuntu', sans-serif;
   background-color: #f9f9f9;
@@ -124,8 +129,8 @@ background-color: rgba(0, 0, 0, 0.5); /* Change this to your desired transparenc
 }
 
 .copy-button {
-  float: right;
-  background-color: #4CAF50; /* Green */
+  position: right;
+  background-color: #4CAF50;  /* Green */
   border: none;
   color: white;
   padding: 5px 10px;
@@ -136,6 +141,7 @@ background-color: rgba(0, 0, 0, 0.5); /* Change this to your desired transparenc
   margin: 4px 2px;
   cursor: pointer;
 }
+
 
 
 /* The following styles are for a custom scrollbar appearance */
