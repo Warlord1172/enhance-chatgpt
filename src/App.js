@@ -12,7 +12,7 @@ function App() {
   // Runs once after initial render to get AI model engines
   useEffect(() => {
     getEngines();
-},[]);
+});
 
   //Code block function
   useEffect(() => {
@@ -20,11 +20,11 @@ function App() {
       .then(response => {
         setCodeBlocks(response.data);
       });
-  }, []);
+  });
   // Various state variables
   const [systemRole, setSystemRole] = useState("system"); //
   const [systemMessage, setSystemMessage] = useState("You are a helpful assistant."); 
-  const [codeBlocks, setCodeBlocks] = useState([]);
+  const [setCodeBlocks] = useState([]);
   const [conversationHistory, setConversationHistory] = useState([]);
   const [currentThreadId, setCurrentThreadId] = useState(0); // Current thread ID
   const [errorMessage, setErrorMessage] = useState(""); // Error message
