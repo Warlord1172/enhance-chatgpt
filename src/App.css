@@ -7,6 +7,8 @@
   top: 0;bottom:0;left: 0;right: 0;
 }
 
+
+
 .sidemenu{
   width: 240px;
   padding: 10px;
@@ -80,11 +82,11 @@ padding-right: 12px;
 }
 
 .chat-input-holder{
-padding: 24px;
-position: absolute;
+display: inline;
+padding: 2px;
 bottom: 0;
-left: 0;right: 0;
-background-color: rgba(0, 0, 0, 0.5); /* Change this to your desired transparency level */
+left: 240px;right: 0;
+background-color: rgba(0, 0, 0, 0.041); /* Change this to your desired transparency level */
 }
 
 .chat-input-textarea{
@@ -101,15 +103,24 @@ background-color: rgba(0, 0, 0, 0.5); /* Change this to your desired transparenc
 }
 
 .chatbox{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   flex:1;
-  background-color: #343541;
+  background-image: linear-gradient(to bottom,  #ffffff 0%, #757575 30%, #202020 90%, #000000 100%  );
   position: relative;
+  overflow-y: auto; /* Add scrollbar if content overflows */
+  animation: movingGradient 5s linear infinite alternate;
 }
 
+
 .chat-log{
+  flex-grow: 1;
+  padding: 1em;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
   text-align: left;
-  overflow-y: auto; /* Add scrollbar if content overflows */
-  max-height: 80vh; /* Adjust as per your needs */
 }
 
 
@@ -164,10 +175,17 @@ background-color: rgba(0, 0, 0, 0.5); /* Change this to your desired transparenc
 
 .chat-message.chatgpt{
   background-color:#444654 ;
+  border-radius: 5px;
   
 }
 
+.chat-message.false{
+  background-color:#282c34 ;
+  border-radius: 5px;
+}
+
 .chat-message-center{
+  
   max-width: 640px;
   margin-left: auto;
   margin-right: auto;
@@ -178,6 +196,9 @@ background-color: rgba(0, 0, 0, 0.5); /* Change this to your desired transparenc
   
 }
 
+.Model-list{
+  left:0; right: 10;
+}
 .model-header {
   font-size: 1.5rem;
   font-weight: bold;
@@ -214,6 +235,8 @@ background-color: rgba(0, 0, 0, 0.5); /* Change this to your desired transparenc
   }
 }
 
+
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
@@ -236,4 +259,13 @@ background-color: rgba(0, 0, 0, 0.5); /* Change this to your desired transparenc
   to {
     transform: rotate(360deg);
   }
+}
+
+@keyframes movingGradient {
+ from {
+background-position: 0 0;
+}
+ to {
+background-position: 80% 80%;
+}
 }

@@ -122,7 +122,7 @@ function App() {
 
   // Runs when system role changes
   useEffect(() => {
-    setUpdatedSystemMessage(true);
+    setUpdatedSystemMessage(false);
   }, [systemRole, systemMessage]);
   // Function to handle form submission
   async function handleSubmit(e) {
@@ -134,7 +134,7 @@ function App() {
       role: entry.user === "me" ? "user" : "assistant",
       content: entry.message,
     }));
-
+    
     setConversationHistory((prevHistory) => [
       ...prevHistory,
       {
@@ -213,6 +213,7 @@ function App() {
         <div className="models">
           {Models.length > 0 ? (
             <select
+            className="Model-list"
               onChange={(e) => {
                 console.log("setting to..", e.target.value);
                 setCurrentModel(e.target.value);
@@ -247,6 +248,7 @@ function App() {
           </div>
           <button
             onClick={() => {
+              console.log(systemRole, systemMessage);
               setUpdatedSystemMessage(true);
               setSubmitConfirm("Changes have been submitted");
             }}
@@ -255,7 +257,7 @@ function App() {
             Update System Message
           </button>
           <p>
-            <div className="confirm-msg">{submitConfirm}</div>
+            <div className="confirm-msg">{updatedSystemMessage && "Changes have been submitted"}</div>
           </p>
         </div>
         <ChatThreadList
