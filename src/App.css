@@ -5,10 +5,14 @@
   color:white;
   position: absolute;
   top: 0;bottom:0;left: 0;right: 0;
+  height: 100%; 
+  width: 100%; 
+  margin: 0 auto;
 }
 
-
-
+.html { height: 100%; width: 80%; } 
+.body { height: 100%; width: 100%; margin: 0; padding: 0; 
+}
 .sidemenu{
   width: 240px;
   padding: 10px;
@@ -153,7 +157,14 @@ background-color: rgba(0, 0, 0, 0.041); /* Change this to your desired transpare
   cursor: pointer;
 }
 
-
+.language{
+  color: grey;
+  position: left;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+}
 
 /* The following styles are for a custom scrollbar appearance */
 /* The scrollbar track */

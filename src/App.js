@@ -4,7 +4,6 @@ import "./App.css";
 import "./normal.css";
 import { useState, useEffect } from "react"; // React's built-in hooks
 import Alert from "react-bootstrap/Alert"; // Bootstrap Alert for error messages
-import axios from 'axios';
 import CodeBlock from './codeBlock';
 
 // Main application component
@@ -13,18 +12,9 @@ function App() {
   useEffect(() => {
     getEngines();
 });
-
-  //Code block function
-  useEffect(() => {
-    axios.get('/api/getCodeBlocks')
-      .then(response => {
-        setCodeBlocks(response.data);
-      });
-  });
   // Various state variables
-  const [systemRole, setSystemRole] = useState("system"); //
   const [systemMessage, setSystemMessage] = useState("You are a helpful assistant."); 
-  const [setCodeBlocks] = useState([]);
+  //const [codeBlocks, setCodeBlocks] = useState([]);
   const [conversationHistory, setConversationHistory] = useState([]);
   const [currentThreadId, setCurrentThreadId] = useState(0); // Current thread ID
   const [errorMessage, setErrorMessage] = useState(""); // Error message
@@ -46,7 +36,7 @@ function App() {
   const [chatThreads, setChatThreads] = useState([
     {
       id: 0,
-      title: "Chat 1",
+      title: "Chat Room 1",
       chatLog: [
         {
           user: "gpt",
@@ -72,7 +62,7 @@ function App() {
       ...chatThreads,
       {
         id: chatThreads.length,
-        title: `Chat ${chatThreads.length + 1}`,
+        title: `Chat Room ${chatThreads.length + 1}`,
         chatLog: [
           {
             user: "gpt",
@@ -123,7 +113,7 @@ function App() {
   // Runs when system role changes
   useEffect(() => {
     setUpdatedSystemMessage(false);
-  }, [systemRole, systemMessage]);
+  }, [systemMessage]);
   // Function to handle form submission
   async function handleSubmit(e) {
     e.preventDefault();
@@ -134,7 +124,7 @@ function App() {
       role: entry.user === "me" ? "user" : "assistant",
       content: entry.message,
     }));
-    
+
     setConversationHistory((prevHistory) => [
       ...prevHistory,
       {
@@ -157,7 +147,7 @@ function App() {
           message: input,
           currentModel: currentModel,
           isChatModel: currentModel.startsWith("gpt-"),
-          systemRole: systemRole,
+          systemRole: "system",
           systemMessage: systemMessage,
           updatedSystemMessage: updatedSystemMessage,
           conversationHistory: messages, // send the prepared messages array
@@ -168,7 +158,25 @@ function App() {
       }
       const data = await response.json();
       console.log("Raw response:", data);
-      chatLogNew = [...chatLogNew, { user: "gpt", message: `${data.message}` }];
+      // Check if the response message is a code block
+      if (data.message.startsWith("```") && data.message.endsWith("```")) {
+        // Split the message to get the language and code
+        const splitMessage = data.message.split("\n");
+        const language = splitMessage[0].slice(3);
+        const code = splitMessage.slice(1, -1).join("\n");
+
+        // Add a codeBlock object to the chatLog instead of a regular message
+        chatLogNew = [
+          ...chatLogNew,
+          { user: "gpt", codeBlock: { language, code } },
+        ];
+      } else {
+        chatLogNew = [
+          ...chatLogNew,
+          { user: "gpt", message: `${data.message}` },
+        ];
+      }
+
       setChatLog(chatLogNew);
       setChatThreads(
         chatThreads.map((thread) => {
@@ -185,6 +193,29 @@ function App() {
       setErrorMessage(`Sorry, an error occurred: ${error.message}`);
     }
   }
+
+  // Function to resize the window
+  useEffect(() => {
+    const setWindowSize = () => {
+      const windowWidth = window.innerWidth * 0.8; // 80% of the browser window width
+      const windowHeight = window.innerHeight * 0.8; // 80% of the browser window height
+      window.resizeTo(windowWidth, windowHeight);
+    };
+
+    setWindowSize();
+    window.addEventListener("resize", setWindowSize);
+
+    return () => {
+      window.removeEventListener("resize", setWindowSize);
+    };
+  }, []);
+  useEffect(() => {
+    const setWindowZoom = () => {
+      document.documentElement.style.zoom = '80%';
+    };
+
+    setWindowZoom();
+  }, []);
 
   // Render the application
   return (
@@ -232,23 +263,15 @@ function App() {
         <div className="system-message-settings">
           <p>System Message Settings</p>
           <div>
-            <label>Role: </label>
-            <input
-              type="text"
-              value={systemRole}
-              onChange={(e) => setSystemRole(e.target.value)}
-            />
-          </div>
-          <div>
             <label>Content: </label>
             <textarea
-              value={systemMessage}
+              placeholder={systemMessage}
               onChange={(e) => setSystemMessage(e.target.value)}
             />
           </div>
           <button
             onClick={() => {
-              console.log(systemRole, systemMessage);
+              console.log(systemMessage);
               setUpdatedSystemMessage(true);
               setSubmitConfirm("Changes have been submitted");
             }}
@@ -321,6 +344,9 @@ function ChatThreadList({ threads, activeThreadId, onSelectThread }) {
 // ChatMessage component: displays a single chat message
 // It takes a message (object containing the message data) as a prop
 const ChatMessage = ({ message }) => {
+  if (message.codeBlock) {
+    return <CodeBlock code={message.codeBlock.code} language={message.codeBlock.language} />;
+  }
   return (
     // Create a div with a conditional class based on whether the message was sent by the assistant
     <div className={`chat-message ${message.user === "gpt" && "chatgpt"}`}>
@@ -347,5 +373,5 @@ const ChatMessage = ({ message }) => {
     </div>
   );
 };
-
 export default App;
+
