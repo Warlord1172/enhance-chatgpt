@@ -257,7 +257,7 @@ function App() {
             Update System Message
           </button>
           <p>
-            <div className="confirm-msg">{updatedSystemMessage && "Changes have been submitted"}</div>
+            <div className="confirm-msg">{updatedSystemMessage && submitConfirm}</div>
           </p>
         </div>
         <ChatThreadList
