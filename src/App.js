@@ -1,10 +1,12 @@
 // Importing the necessary dependencies and styles
-//import logo from "./logo.svg";
+
 import "./App.css";
 import "./normal.css";
 import { useState, useEffect } from "react"; // React's built-in hooks
 import Alert from "react-bootstrap/Alert"; // Bootstrap Alert for error messages
 import CodeBlock from './codeBlock';
+import { GoogleLogin} from "react-google-login";
+const clientId = "803137367147-ju4cmttatlrl6q9928mg4bgs3rdo2au3.apps.googleusercontent.com"; // Replace with your actual Client ID
 
 // Main application component
 function App() {
@@ -13,6 +15,7 @@ function App() {
     getEngines();
 });
   // Various state variables
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Google sign in 
   const [systemMessage, setSystemMessage] = useState("You are a helpful assistant."); 
   //const [codeBlocks, setCodeBlocks] = useState([]);
   const [conversationHistory, setConversationHistory] = useState([]);
@@ -45,6 +48,18 @@ function App() {
       ],
     },
   ]);
+
+  // Google sign in feature
+  const handleLoginSuccess = (response) => {
+  console.log("Login Success", response);
+  setIsLoggedIn(true);
+  // Additional logic for handling successful login
+};
+
+const handleLoginFailure = (response) => {
+  console.log("Login Failure", response);
+  // Additional logic for handling failed login
+};
 
   // Runs whenever current thread ID or chat threads change
   useEffect(() => {
@@ -244,7 +259,7 @@ function App() {
         <div className="models">
           {Models.length > 0 ? (
             <select
-            className="Model-list"
+              className="Model-list"
               onChange={(e) => {
                 console.log("setting to..", e.target.value);
                 setCurrentModel(e.target.value);
@@ -279,15 +294,34 @@ function App() {
           >
             Update System Message
           </button>
-          <p>
-            <div className="confirm-msg">{updatedSystemMessage && submitConfirm}</div>
-          </p>
+          
+            <div className="confirm-msg">
+              {updatedSystemMessage && submitConfirm}
+            </div>
+          
         </div>
         <ChatThreadList
           threads={chatThreads}
           activeThreadId={currentThreadId}
           onSelectThread={(id) => setCurrentThreadId(id)}
         />
+        <GoogleLogin
+  clientId={clientId}
+  onSuccess={handleLoginSuccess}
+  onFailure={handleLoginFailure}
+  cookiePolicy={"single_host_origin"}
+  render={(renderProps) => (
+    <button
+      className="Google-Signin"
+      onClick={renderProps.onClick}
+      disabled={renderProps.disabled}
+    >
+      <img src="/google.png" alt="Google Logo" className="google-logo" />
+      {isLoggedIn ? "Logout" : "Login with Google"}
+    </button>
+  )}
+/>
+
       </aside>
       <section className="chatbox">
         <div className="chat-log">
