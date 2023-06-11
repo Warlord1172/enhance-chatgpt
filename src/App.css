@@ -225,13 +225,13 @@ background-color: rgba(0, 0, 0, 0.041); /* Change this to your desired transpare
 
 .chat-message-center{
   
-  max-width: 640px;
+  max-width: 1800px;
   margin-left: auto;
   margin-right: auto;
   display:flex;
   padding: 12px;
-  padding-left: 24px;
-  padding-right: 24px;
+  padding-left: 4px;
+  padding-right: 4px;
   
 }
 
