@@ -142,7 +142,7 @@ background-color: rgba(0, 0, 0, 0.041); /* Change this to your desired transpare
   background-image: linear-gradient(to bottom,  #ffffff 0%, #757575 30%, #202020 90%, #000000 100%  );
   position: relative;
   overflow-y: auto; /* Add scrollbar if content overflows */
-  animation: movingGradient 5s linear infinite alternate;
+  animation: movingGradient 1s linear infinite alternate;
 }
 
 
@@ -171,6 +171,9 @@ background-color: rgba(0, 0, 0, 0.041); /* Change this to your desired transpare
   margin-bottom: 5px;
 }
 
+.code{
+  font-family: 'Ubuntu', sans-serif;
+}
 .copy-button {
   position: right;
   background-color: #4CAF50;  /* Green */
@@ -256,6 +259,9 @@ background-color: rgba(0, 0, 0, 0.041); /* Change this to your desired transpare
   width: 40px;
   height: 40px;
 }
+.avatar.false {
+  background: #fff;
+}
 
 .message{
   padding-left: 40px;
@@ -295,16 +301,18 @@ background-color: rgba(0, 0, 0, 0.041); /* Change this to your desired transpare
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
 }
 
 @keyframes movingGradient {
- from {
-background-position: 0 0;
-}
- to {
-background-position: 80% 80%;
-}
+  from {
+    background-position: 0 0;
+  }
+
+  to {
+    background-position: 80% 80%;
+  }
 }
