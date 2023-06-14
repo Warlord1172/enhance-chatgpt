@@ -1,6 +1,7 @@
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { solarizedlight } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { okaidia } from "react-syntax-highlighter/dist/esm/styles/prism";
 import React from "react";
+
 //codeBlock section
 const CodeBlock = ({ code, language }) => {
   const copyCodeToClipboard = () => {
@@ -15,7 +16,7 @@ const CodeBlock = ({ code, language }) => {
             Copy Code
           </button>
         </div>
-        <SyntaxHighlighter language={language} style={solarizedlight}>
+        <SyntaxHighlighter language={language} style={okaidia}>
           {code}
         </SyntaxHighlighter>
       </div>

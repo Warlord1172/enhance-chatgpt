@@ -2,11 +2,13 @@
 import CodeBlock from "./codeblock";
 import "./App.css";
 import "./normal.css";
+import { Modal, Button } from "react-bootstrap";
 import CustomIcon from './chatgptAvatar.js';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import { useState, useEffect } from "react"; // React's built-in hooks
 import Alert from "react-bootstrap/Alert"; // Bootstrap Alert for error messages
 import { GoogleLogin} from "react-google-login";
+import ChatThreadList from "./ChatThreadList";
 
 const clientId = "803137367147-ju4cmttatlrl6q9928mg4bgs3rdo2au3.apps.googleusercontent.com"; // Replace with your actual Client ID
 
@@ -15,10 +17,14 @@ function App() {
   // Runs once after initial render to get AI model engines
   useEffect(() => {
     getEngines();
-});
+  });
   // Various state variables
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Google sign in 
-  const [systemMessage, setSystemMessage] = useState("You are a helpful assistant."); // Default System message
+  const [showModal, setShowModal] = useState(true);
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Google sign in
+  const [systemMessage, setSystemMessage] = useState(
+    "You are a helpful assistant."
+  ); // Default System message
   const [conversationHistory, setConversationHistory] = useState([]); // Conversation History
   const [currentThreadId, setCurrentThreadId] = useState(0); // Current thread ID
   const [errorMessage, setErrorMessage] = useState(""); // Error message
@@ -27,7 +33,7 @@ function App() {
   const [Models, setModels] = useState([{ id: "Loading...", ready: false }]); // AI models
   const [currentModel, setCurrentModel] = useState("gpt-3.5-turbo"); // Selected AI model
   const [updatedSystemMessage, setUpdatedSystemMessage] = useState(false); //set System role
-  const [submitConfirm, setSubmitConfirm] = useState('');
+  const [submitConfirm, setSubmitConfirm] = useState("");
 
   // Default chat log
   const [chatLog, setChatLog] = useState([
@@ -52,15 +58,15 @@ function App() {
 
   // Google sign in feature
   const handleLoginSuccess = (response) => {
-  console.log("Login Success", response);
-  setIsLoggedIn(true);
-  // Additional logic for handling successful login
-};
+    console.log("Login Success", response);
+    setIsLoggedIn(true);
+    // Additional logic for handling successful login
+  };
 
-const handleLoginFailure = (response) => {
-  console.log("Login Failure", response);
-  // Additional logic for handling failed login
-};
+  const handleLoginFailure = (response) => {
+    console.log("Login Failure", response);
+    // Additional logic for handling failed login
+  };
 
   // Runs whenever current thread ID or chat threads change
   useEffect(() => {
@@ -88,7 +94,12 @@ const handleLoginFailure = (response) => {
       },
     ]);
   }
-
+  // Function to remove a chat thread
+  function removeThread(threadId) {
+    setChatThreads((prevThreads) =>
+      prevThreads.filter((thread) => thread.id !== threadId)
+    );
+  }
   // Function to get AI model engines from the backend
   async function getEngines() {
     console.log("getEngines called");
@@ -110,14 +121,10 @@ const handleLoginFailure = (response) => {
   // Runs when error message changes
   useEffect(() => {
     if (errorMessage) {
-      alert(errorMessage);
-      setErrorMessage("");
-    }
-  }, [errorMessage]);
-  // Runs when error message changes
-  useEffect(() => {
-    if (errorMessage) {
       setShowError(true);
+      setErrorMessage(`An error has occurred, Please reload the Window`);
+    } else {
+      setShowError(false);
     }
   }, [errorMessage]);
 
@@ -134,13 +141,13 @@ const handleLoginFailure = (response) => {
   async function handleSubmit(e) {
     e.preventDefault();
     let chatLogNew = [...chatLog, { user: "me", message: `${input}` }];
+    console.log("input:", input); // Log the input value
     setInput("");
-
     const messages = chatLogNew.map((entry) => ({
       role: entry.user === "me" ? "user" : "assistant",
       content: entry.message,
     }));
-
+    console.log("messages:", messages); // Log the prepared messages array
     setConversationHistory((prevHistory) => [
       ...prevHistory,
       {
@@ -148,11 +155,9 @@ const handleLoginFailure = (response) => {
         content: input,
       },
     ]);
-
     if (conversationHistory.length > 5) {
       setConversationHistory((prevHistory) => prevHistory.slice(1));
     }
-
     try {
       const response = await fetch("http://localhost:3080/chat", {
         method: "POST",
@@ -173,24 +178,28 @@ const handleLoginFailure = (response) => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      console.log("Raw response:", data);
-      // Check if the response message is a code block
-      if (data.message.startsWith("```") && data.message.endsWith("```")) {
-        // Split the message to get the language and code
-        const splitMessage = data.message.split("\n");
-        const language = splitMessage[0].slice(3);
-        const code = splitMessage.slice(1, -1).join("\n");
-
-        // Add a codeBlock object to the chatLog instead of a regular message
-        chatLogNew = [
-          ...chatLogNew,
-          { user: "gpt", codeBlocks: { language, code } },
-        ];
+      console.log("Raw response:", data); // Log the raw response data
+      // Check if the response includes a codeBlocks array
+      if (data.codeBlocks) {
+        // Iterate over each code block and add it to the chatLog
+        data.codeBlocks.forEach((codeBlock) => {
+          // Extract the language and code from the code block
+          const { language, code } = codeBlock;
+          // Add a codeBlock object to the chatLog instead of a regular message
+          chatLogNew = [
+            ...chatLogNew,
+            { user: "gpt", codeBlocks: { language, code } },
+            { user: "gpt", message: `${data.message}` },
+          ];
+        });
+        console.log("chatLogNew with code block:", chatLogNew);
       } else {
+        // If no codeBlocks, add the message as is
         chatLogNew = [
           ...chatLogNew,
           { user: "gpt", message: `${data.message}` },
         ];
+        console.log("chatLogNew without code block:", chatLogNew);
       }
 
       setChatLog(chatLogNew);
@@ -205,11 +214,10 @@ const handleLoginFailure = (response) => {
       );
       setUpdatedSystemMessage(false);
     } catch (error) {
-      console.error("An error occurred:", error);
+      console.error("An error occurred:", error); // Log any errors
       setErrorMessage(`Sorry, an error occurred: ${error.message}`);
     }
   }
-
   // Function to resize the window
   useEffect(() => {
     const setWindowSize = () => {
@@ -227,15 +235,55 @@ const handleLoginFailure = (response) => {
   }, []);
   useEffect(() => {
     const setWindowZoom = () => {
-      document.documentElement.style.zoom = '80%';
+      document.documentElement.style.zoom = "80%";
     };
 
     setWindowZoom();
   }, []);
 
+  // Function to handle closing the modal
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
   // Render the application
   return (
     <div className="App">
+      {/* Other parts of your application */}
+      {/* Modal for introduction and login options */}
+<Modal show={showModal} onHide={handleCloseModal} backdrop="static">
+  <Modal.Header closeButton>
+    <Modal.Title>Welcome to the Application</Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    <p>Introduction text goes here...</p>
+  </Modal.Body>
+  <Modal.Footer>
+    <GoogleLogin
+      clientId={clientId}
+      onSuccess={handleLoginSuccess}
+      onFailure={handleLoginFailure}
+      cookiePolicy={"single_host_origin"}
+      render={(renderProps) => (
+        <button
+          className="Google-Signin"
+          onClick={renderProps.onClick}
+          disabled={renderProps.disabled}
+        >
+          <img
+            src="/google.png"
+            alt="Google Logo"
+            className="google-logo"
+          />
+          {isLoggedIn ? "Logout" : "Login with Google"}
+        </button>
+      )}
+    />
+    <Button variant="secondary" onClick={handleCloseModal}>
+      Continue as Guest
+    </Button>
+  </Modal.Footer>
+</Modal>
+
       {/* Other parts of your application */}
       <Alert
         className="Alert-Notif"
@@ -244,7 +292,8 @@ const handleLoginFailure = (response) => {
         onClose={() => setShowError(false)}
         dismissible
       >
-        {errorMessage}
+        <Alert.Heading>Error</Alert.Heading>
+        <p>{errorMessage}</p>
       </Alert>
       <aside className="sidemenu">
         <div className="side-menu-button" onClick={clearChat}>
@@ -295,34 +344,37 @@ const handleLoginFailure = (response) => {
           >
             Update System Message
           </button>
-          
-            <div className="confirm-msg">
-              {updatedSystemMessage && submitConfirm}
-            </div>
-          
+
+          <div className="confirm-msg">
+            {updatedSystemMessage && submitConfirm}
+          </div>
         </div>
         <ChatThreadList
           threads={chatThreads}
           activeThreadId={currentThreadId}
           onSelectThread={(id) => setCurrentThreadId(id)}
+          onRemoveThread={removeThread}
         />
         <GoogleLogin
-  clientId={clientId}
-  onSuccess={handleLoginSuccess}
-  onFailure={handleLoginFailure}
-  cookiePolicy={"single_host_origin"}
-  render={(renderProps) => (
-    <button
-      className="Google-Signin"
-      onClick={renderProps.onClick}
-      disabled={renderProps.disabled}
-    >
-      <img src="/google.png" alt="Google Logo" className="google-logo" />
-      {isLoggedIn ? "Logout" : "Login with Google"}
-    </button>
-  )}
-/>
-
+          clientId={clientId}
+          onSuccess={handleLoginSuccess}
+          onFailure={handleLoginFailure}
+          cookiePolicy={"single_host_origin"}
+          render={(renderProps) => (
+            <button
+              className="Google-Signin"
+              onClick={renderProps.onClick}
+              disabled={renderProps.disabled}
+            >
+              <img
+                src="/google.png"
+                alt="Google Logo"
+                className="google-logo"
+              />
+              {isLoggedIn ? "Logout" : "Login with Google"}
+            </button>
+          )}
+        />
       </aside>
       <section className="chatbox">
         <div className="chat-log">
@@ -335,7 +387,6 @@ const handleLoginFailure = (response) => {
                   language={message.codeBlocks.language}
                 />
               );
-              
             } else {
               return <ChatMessage key={index} message={message} />;
             }
@@ -356,32 +407,12 @@ const handleLoginFailure = (response) => {
     </div>
   );
 }
-// ChatThreadList component: displays a list of chat threads
-// It takes threads (array of thread data), activeThreadId (id of the currently active thread),
-// and onSelectThread (function to handle when a thread is selected) as props
-function ChatThreadList({ threads, activeThreadId, onSelectThread }) {
-  return (
-    <div className="chat-thread-list">
-      {/* For each thread, create a div with a click handler that calls onSelectThread with the id of the thread */}
-      {threads.map((thread) => (
-        <div
-          key={thread.id}
-          className={`chat-thread-title ${
-            thread.id === activeThreadId ? "active" : ""
-          }`}
-          onClick={() => onSelectThread(thread.id)}>
-          {thread.title}
-        </div>
-      ))}
-    </div>
-  );
-}
 // ChatMessage component: displays a single chat message
 // It takes a message (object containing the message data) as a prop
 const ChatMessage = ({ message }) => {
-  console.log(message);
+  console.log('ChatMessage message:', message);
     if (message.codeBlocks) {
-      console.log("codeBlock is present")
+      console.log("codeBlocks is present")
       return (
         <div className={`chat-message ${message.user === "gpt" && "chatgpt"}`}>
           <div className="chat-message-center">
@@ -399,7 +430,7 @@ const ChatMessage = ({ message }) => {
         </div>
       );
     } else if (message.message) {
-      console.log("codeBlock is not present")
+      console.log("codeBlocks is not present")
 
       return (
         <div className={`chat-message ${message.user === "gpt" && "chatgpt"}`}>

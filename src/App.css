@@ -13,10 +13,38 @@
 .html { height: 100%; width: 80%; } 
 .body { height: 100%; width: 100%; margin: 0; padding: 0; 
 }
+.modal-backdrop.show {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 160vw;
+  height: 160vh;
+  z-index: 1040;
+  background-color: rgba(0, 0, 0, 0.774);
+}
+
+.modal-backdrop.fade{
+  width: 160vw;
+  height: 160vh;
+  opacity: 0;
+}
+
+.Alert-Notif {
+  position: fixed;
+  top: 50%;
+  left: 65%;
+  transform: translate(-50%, -50%);
+  z-index: 9999; /* Adjust the z-index value if necessary */
+  max-width: 400px; /* Adjust the maximum width to your preference */
+  height: 120px; /* Allow the height to adjust based on content */
+  margin-left: -400px; /* Remove the left margin */
+}
+
 .sidemenu{
   width: 240px;
   padding: 10px;
   background-color: #202123;
+  
 }
 
 .side-menu-button{
@@ -50,6 +78,8 @@
 .chat-thread-list {
   display: flex;
   flex-direction: column;
+  max-height: 60vh;
+  overflow-y: auto;
   transition: ease 0.25s all;
 }
 
@@ -68,6 +98,19 @@
   background-color: #fff;
   color: #000;
   transition: ease 0.5s all;
+}
+
+.chat-thread-title button {
+  background-color: transparent;
+  border: none;
+  color: grey;
+  margin-left: 10px;
+  cursor: pointer;
+  transition: ease 0.25s all;
+}
+
+.chat-thread-title button:hover {
+  color: red;
 }
 
 .side-menu-button span {
@@ -158,26 +201,31 @@ background-color: rgba(0, 0, 0, 0.041); /* Change this to your desired transpare
 
 .code-block {
   font-family: 'Ubuntu', sans-serif;
-  background-color: #f9f9f9;
-  border: 1px solid #ddd;
+  background-color: #000;
+  border: 5px solid #111111;
   padding: 10px;
   margin: 10px 0;
   overflow-x: auto;
   color: #000;
+  border-radius: 5px;
 }
-
 .code-block-header {
+  display: flex;
+  justify-content: space-between;
   font-size: 0.8em;
   color: #888;
   margin-bottom: 5px;
 }
 
+.code-block.element.style{
+  background-color: #282c34;
+}
 .code{
   font-family: 'Ubuntu', sans-serif;
 }
 .copy-button {
   position: right;
-  background-color: #4CAF50;  /* Green */
+  background-color: #282c34;  /* grey */
   border: none;
   color: white;
   padding: 5px 10px;
