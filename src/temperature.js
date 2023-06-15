@@ -1,33 +1,30 @@
 import React, { useState } from "react";
 
-function NumberSlider({ minValue, maxValue, initialValue,setTemperature}) {
+const NumberSlider = ({ minValue, maxValue, initialValue, onChange }) => {
     const [value, setValue] = useState(initialValue);
 
-    const incrementValue = () => {
-        const newValue = (value + 0.1).toFixed(1); // Round to tenths decimal place
-        if (parseFloat(newValue) <= maxValue) {
-            setValue(parseFloat(newValue));
-            setTemperature(parseFloat(newValue));
-        }
+    const handleIncrement = () => {
+        const newValue = Math.min(maxValue, parseFloat((value + 0.1).toFixed(1)));
+        setValue(newValue);
+        onChange(newValue);
     };
 
-    const decrementValue = () => {
-        const newValue = (value - 0.1).toFixed(1); // Round to tenths decimal place
-        if (parseFloat(newValue) >= minValue) {
-            setValue(parseFloat(newValue));
-            setTemperature(parseFloat(newValue));
-        }
+    const handleDecrement = () => {
+        const newValue = Math.max(minValue, parseFloat((value - 0.1).toFixed(1)));
+        setValue(newValue);
+        onChange(newValue);
     };
 
     return (
-    <div className="number-slider">
-        <p>Conscience</p>
-        <div className="circle">{value}</div>
-        <div className="buttons">
-        <button onClick={decrementValue}>-</button>
-        <button onClick={incrementValue}>+</button>
+        <div className="number-slider">
+            <p>Conscience</p>
+            <div className="circle">{value}</div>
+            <div className="buttons">
+                <button onClick={handleDecrement}>-</button>
+                <button onClick={handleIncrement}>+</button>
+            </div>
         </div>
-    </div>
     );
 }
+
 export default NumberSlider;

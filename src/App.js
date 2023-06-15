@@ -36,6 +36,7 @@ function App() {
   const [updatedSystemMessage, setUpdatedSystemMessage] = useState(false); //set System role
   const [submitConfirm, setSubmitConfirm] = useState("");
   const [temperature,setTemperature] = useState(0.5);
+  const [tempTemperature, setTempTemperature] = useState(temperature); // temporary temperature state
 
   // Default chat log
   const [chatLog, setChatLog] = useState([
@@ -124,7 +125,7 @@ function App() {
   useEffect(() => {
     if (errorMessage) {
       setShowError(true);
-      setErrorMessage(`An error has occurred, Please reload the Window`);
+      setErrorMessage(`An error has occurred: The AI just got up and left this server. Please reload the Window`);
     } else {
       setShowError(false);
     }
@@ -174,7 +175,7 @@ function App() {
           systemMessage: systemMessage,
           updatedSystemMessage: updatedSystemMessage,
           conversationHistory: messages, // send the prepared messages array
-          //temperature: temperature,
+          temperature: temperature,
         }),
       });
       if (!response.ok) {
@@ -243,7 +244,13 @@ function App() {
 
     setWindowZoom();
   }, []);
-
+  // effect for temperature
+  useEffect(() => {
+    console.log("Temperature changed: ", temperature);
+  }, [temperature]);
+  const handletempSubmit = () => {
+        setTemperature(tempTemperature); // update actual temperature state
+    };
   // Function to handle closing the modal
   const handleCloseModal = () => {
     setShowModal(false);
@@ -340,14 +347,16 @@ function App() {
           <NumberSlider
             minValue={0}
             maxValue={1}
-            initialValue={temperature}
-            onChange={(e) => setTemperature(temperature)}
+            initialValue={tempTemperature}
+            onChange={setTempTemperature}
           />
           <button
             onClick={() => {
+              handletempSubmit();
               console.log(systemMessage);
               setUpdatedSystemMessage(true);
               setSubmitConfirm("Changes have been submitted");
+              console.log(`temperature set to: ${temperature}`);
             }}
             className="System-Submit-Button"
           >
