@@ -1,5 +1,6 @@
 // Importing the necessary dependencies and styles
 import CodeBlock from "./codeblock";
+import NumberSlider from "./temperature";
 import "./App.css";
 import "./normal.css";
 import { Modal, Button } from "react-bootstrap";
@@ -34,6 +35,7 @@ function App() {
   const [currentModel, setCurrentModel] = useState("gpt-3.5-turbo"); // Selected AI model
   const [updatedSystemMessage, setUpdatedSystemMessage] = useState(false); //set System role
   const [submitConfirm, setSubmitConfirm] = useState("");
+  const [temperature,setTemperature] = useState(0.5);
 
   // Default chat log
   const [chatLog, setChatLog] = useState([
@@ -172,6 +174,7 @@ function App() {
           systemMessage: systemMessage,
           updatedSystemMessage: updatedSystemMessage,
           conversationHistory: messages, // send the prepared messages array
+          //temperature: temperature,
         }),
       });
       if (!response.ok) {
@@ -334,6 +337,12 @@ function App() {
               onChange={(e) => setSystemMessage(e.target.value)}
             />
           </div>
+          <NumberSlider
+            minValue={0}
+            maxValue={1}
+            initialValue={temperature}
+            onChange={(e) => setTemperature(temperature)}
+          />
           <button
             onClick={() => {
               console.log(systemMessage);
