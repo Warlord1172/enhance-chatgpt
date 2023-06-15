@@ -250,39 +250,39 @@ function App() {
     <div className="App">
       {/* Other parts of your application */}
       {/* Modal for introduction and login options */}
-<Modal show={showModal} onHide={handleCloseModal} backdrop="static">
-  <Modal.Header closeButton>
-    <Modal.Title>Welcome to the Application</Modal.Title>
-  </Modal.Header>
-  <Modal.Body>
-    <p>Introduction text goes here...</p>
-  </Modal.Body>
-  <Modal.Footer>
-    <GoogleLogin
-      clientId={clientId}
-      onSuccess={handleLoginSuccess}
-      onFailure={handleLoginFailure}
-      cookiePolicy={"single_host_origin"}
-      render={(renderProps) => (
-        <button
-          className="Google-Signin"
-          onClick={renderProps.onClick}
-          disabled={renderProps.disabled}
-        >
-          <img
-            src="/google.png"
-            alt="Google Logo"
-            className="google-logo"
+      <Modal show={showModal} onHide={handleCloseModal} backdrop="static">
+        <Modal.Header closeButton>
+          <Modal.Title>Welcome to the Application</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Introduction text goes here...</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <GoogleLogin
+            clientId={clientId}
+            onSuccess={handleLoginSuccess}
+            onFailure={handleLoginFailure}
+            cookiePolicy={"single_host_origin"}
+            render={(renderProps) => (
+              <button
+                className="Google-Signin"
+                onClick={renderProps.onClick}
+                disabled={renderProps.disabled}
+              >
+                <img
+                  src="/google.png"
+                  alt="Google Logo"
+                  className="google-logo"
+                />
+                {isLoggedIn ? "Logout" : "Login with Google"}
+              </button>
+            )}
           />
-          {isLoggedIn ? "Logout" : "Login with Google"}
-        </button>
-      )}
-    />
-    <Button variant="secondary" onClick={handleCloseModal}>
-      Continue as Guest
-    </Button>
-  </Modal.Footer>
-</Modal>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Continue as Guest
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       {/* Other parts of your application */}
       <Alert
