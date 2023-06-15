@@ -8,10 +8,9 @@ import CustomIcon from './chatgptAvatar.js';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import { useState, useEffect } from "react"; // React's built-in hooks
 import Alert from "react-bootstrap/Alert"; // Bootstrap Alert for error messages
-import { GoogleLogin} from "react-google-login";
 import ChatThreadList from "./ChatThreadList";
+import GoogleSignInButton from './googleLogin'; 
 
-const clientId = "803137367147-ju4cmttatlrl6q9928mg4bgs3rdo2au3.apps.googleusercontent.com"; // Replace with your actual Client ID
 
 // Main application component
 function App() {
@@ -21,8 +20,6 @@ function App() {
   });
   // Various state variables
   const [showModal, setShowModal] = useState(true);
-
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Google sign in
   const [systemMessage, setSystemMessage] = useState(
     "You are a helpful assistant."
   ); // Default System message
@@ -58,19 +55,6 @@ function App() {
       ],
     },
   ]);
-
-  // Google sign in feature
-  const handleLoginSuccess = (response) => {
-    console.log("Login Success", response);
-    setIsLoggedIn(true);
-    // Additional logic for handling successful login
-  };
-
-  const handleLoginFailure = (response) => {
-    console.log("Login Failure", response);
-    // Additional logic for handling failed login
-  };
-
   // Runs whenever current thread ID or chat threads change
   useEffect(() => {
     const currentThread = chatThreads.find(
@@ -262,32 +246,13 @@ function App() {
       {/* Modal for introduction and login options */}
       <Modal show={showModal} onHide={handleCloseModal} backdrop="static">
         <Modal.Header closeButton>
-          <Modal.Title>Welcome to the Application</Modal.Title>
+          <Modal.Title>Welcome to the ChatGPT Playground!</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>Introduction text goes here...</p>
+          <p><center>The ChatGPT Playground is an interactive AI tool, allowing users to delve into detailed dialogues across a myriad of topics. It's not just for entertainment, but also a resource for education, brainstorming, and problem-solving. Have fun!</center></p>
         </Modal.Body>
         <Modal.Footer>
-          <GoogleLogin
-            clientId={clientId}
-            onSuccess={handleLoginSuccess}
-            onFailure={handleLoginFailure}
-            cookiePolicy={"single_host_origin"}
-            render={(renderProps) => (
-              <button
-                className="Google-Signin"
-                onClick={renderProps.onClick}
-                disabled={renderProps.disabled}
-              >
-                <img
-                  src="/google.png"
-                  alt="Google Logo"
-                  className="google-logo"
-                />
-                {isLoggedIn ? "Logout" : "Login with Google"}
-              </button>
-            )}
-          />
+        <GoogleSignInButton />
           <Button variant="secondary" onClick={handleCloseModal}>
             Continue as Guest
           </Button>
@@ -373,26 +338,7 @@ function App() {
           onSelectThread={(id) => setCurrentThreadId(id)}
           onRemoveThread={removeThread}
         />
-        <GoogleLogin
-          clientId={clientId}
-          onSuccess={handleLoginSuccess}
-          onFailure={handleLoginFailure}
-          cookiePolicy={"single_host_origin"}
-          render={(renderProps) => (
-            <button
-              className="Google-Signin"
-              onClick={renderProps.onClick}
-              disabled={renderProps.disabled}
-            >
-              <img
-                src="/google.png"
-                alt="Google Logo"
-                className="google-logo"
-              />
-              {isLoggedIn ? "Logout" : "Login with Google"}
-            </button>
-          )}
-        />
+        <GoogleSignInButton />
       </aside>
       <section className="chatbox">
         <div className="chat-log">
