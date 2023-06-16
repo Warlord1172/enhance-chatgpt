@@ -108,7 +108,7 @@ function App() {
   useEffect(() => {
     if (errorMessage) {
       setShowError(true);
-      setErrorMessage(`An error has occurred: The AI just got up and left this server. Please reload the Window`);
+      setErrorMessage(`An error has occurred: The AI just got up and left this server. Please reload the Window or change the language model for the AI.`);
     } else {
       setShowError(false);
     }
@@ -166,12 +166,14 @@ function App() {
       }
       const data = await response.json();
       console.log("Raw response:", data); // Log the raw response data
-      chatLogNew = [
-        ...chatLogNew,
-        { user: "assistant", message: data.message },
-      ];
+      if (data.message) {
+        chatLogNew = [
+          ...chatLogNew,
+          { user: "assistant", message: data.message },
+        ];
+      }
       // Check if the response includes a codeBlocks array
-      if (data.codeBlocks.length > 0) {
+      if (data.codeBlocks && data.codeBlocks.length > 0) {
         // Iterate over each code block and add it to the chatLog
         data.codeBlocks.forEach((codeBlock) => {
           // Extract the language and code from the code block
@@ -202,6 +204,7 @@ function App() {
       setErrorMessage(`Sorry, an error occurred: ${error.message}`);
     }
   }
+  
   // Function to resize the window
   useEffect(() => {
     const setWindowSize = () => {

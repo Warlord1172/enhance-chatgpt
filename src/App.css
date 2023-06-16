@@ -36,7 +36,7 @@
   transform: translate(-50%, -50%);
   z-index: 9999; /* Adjust the z-index value if necessary */
   max-width: 400px; /* Adjust the maximum width to your preference */
-  height: 120px; /* Allow the height to adjust based on content */
+  height: 140px; /* Allow the height to adjust based on content */
   margin-left: -400px; /* Remove the left margin */
 }
 
