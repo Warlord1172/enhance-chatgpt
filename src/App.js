@@ -166,8 +166,12 @@ function App() {
       }
       const data = await response.json();
       console.log("Raw response:", data); // Log the raw response data
+      chatLogNew = [
+        ...chatLogNew,
+        { user: "assistant", message: data.message },
+      ];
       // Check if the response includes a codeBlocks array
-      if (data.codeBlocks) {
+      if (data.codeBlocks.length > 0) {
         // Iterate over each code block and add it to the chatLog
         data.codeBlocks.forEach((codeBlock) => {
           // Extract the language and code from the code block
@@ -176,19 +180,12 @@ function App() {
           chatLogNew = [
             ...chatLogNew,
             { user: "assistant", codeBlocks: { language, code } },
-            { user: "assistant", message: `${data.message}` },
           ];
         });
         console.log("chatLogNew with code block:", chatLogNew);
       } else {
-        // If no codeBlocks, add the message as is
-        chatLogNew = [
-          ...chatLogNew,
-          { user: "assistant", message: `${data.message}` },
-        ];
         console.log("chatLogNew without code block:", chatLogNew);
       }
-
       setChatLog(chatLogNew);
       setChatThreads(
         chatThreads.map((thread) => {
