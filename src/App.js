@@ -21,8 +21,7 @@ function App() {
   // Various state variables
   const [showModal, setShowModal] = useState(true);
   const [systemMessage, setSystemMessage] = useState(
-    "You are a helpful assistant."
-  ); // Default System message
+"You are a helpful assistant."); // Default System message
   const [conversationHistory, setConversationHistory] = useState([]); // Conversation History
   const [currentThreadId, setCurrentThreadId] = useState(0); // Current thread ID
   const [errorMessage, setErrorMessage] = useState(""); // Error message
@@ -38,7 +37,7 @@ function App() {
   // Default chat log
   const [chatLog, setChatLog] = useState([
     {
-      user: "gpt",
+      user: "assistant",
       message: "How can i help you today?",
     },
   ]);
@@ -49,7 +48,7 @@ function App() {
       title: "Chat Room 1",
       chatLog: [
         {
-          user: "gpt",
+          user: "assistant",
           message: "How can i help you today?",
         },
       ],
@@ -74,7 +73,7 @@ function App() {
         title: `Chat Room ${chatThreads.length + 1}`,
         chatLog: [
           {
-            user: "gpt",
+            user: "assistant",
             message: "How can I help you today?",
           },
         ],
@@ -176,8 +175,8 @@ function App() {
           // Add a codeBlock object to the chatLog instead of a regular message
           chatLogNew = [
             ...chatLogNew,
-            { user: "gpt", codeBlocks: { language, code } },
-            { user: "gpt", message: `${data.message}` },
+            { user: "assistant", codeBlocks: { language, code } },
+            { user: "assistant", message: `${data.message}` },
           ];
         });
         console.log("chatLogNew with code block:", chatLogNew);
@@ -185,7 +184,7 @@ function App() {
         // If no codeBlocks, add the message as is
         chatLogNew = [
           ...chatLogNew,
-          { user: "gpt", message: `${data.message}` },
+          { user: "assistant", message: `${data.message}` },
         ];
         console.log("chatLogNew without code block:", chatLogNew);
       }
@@ -378,10 +377,10 @@ const ChatMessage = ({ message }) => {
     if (message.codeBlocks) {
       console.log("codeBlocks is present")
       return (
-        <div className={`chat-message ${message.user === "gpt" && "chatgpt"}`}>
+        <div className={`chat-message ${message.user === "assistant" && "chatgpt"}`}>
           <div className="chat-message-center">
-            <div className={`avatar ${message.user === "gpt" && "chatgpt"}`}>
-              {message.user === "gpt" && (
+            <div className={`avatar ${message.user === "assistant" && "chatgpt"}`}>
+              {message.user === "assistant" && (
               <CustomIcon/>
               )}
             </div>
@@ -397,10 +396,10 @@ const ChatMessage = ({ message }) => {
       console.log("codeBlocks is not present")
 
       return (
-        <div className={`chat-message ${message.user === "gpt" && "chatgpt"}`}>
+        <div className={`chat-message ${message.user === "assistant" && "chatgpt"}`}>
           <div className="chat-message-center">
-            <div className={`avatar ${message.user === "gpt" && "chatgpt"}`}>
-            {message.user === "gpt" && (
+            <div className={`avatar ${message.user === "assistant" && "chatgpt"}`}>
+            {message.user === "assistant" && (
               <CustomIcon/>
               )}
             </div>
