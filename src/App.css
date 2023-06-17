@@ -202,12 +202,18 @@ background-color: rgba(0, 0, 0, 0.041); /* Change this to your desired transpare
 .code-block {
   font-family: 'Ubuntu', sans-serif;
   background-color: #000;
-  border: 5px solid #111111;
+  border: 5px solid #111;
   padding: 10px;
   margin: 10px 0;
   overflow-x: auto;
   color: #000;
   border-radius: 5px;
+  filter: blur(4px);
+  transition: all 0.25s ease;
+}
+.code-block:hover{
+  border: 5px solid #fff;
+  filter: blur(0px);
 }
 .code-block-header {
   display: flex;

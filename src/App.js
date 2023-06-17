@@ -10,7 +10,7 @@ import { useState, useEffect } from "react"; // React's built-in hooks
 import Alert from "react-bootstrap/Alert"; // Bootstrap Alert for error messages
 import ChatThreadList from "./ChatThreadList";
 import GoogleSignInButton from './googleLogin'; 
-
+import ResizableTextArea from "./ResizableTextArea";
 
 // Main application component
 function App() {
@@ -93,10 +93,11 @@ function App() {
       .then((res) => res.json())
       .then((data) => {
         console.log("Received data from the backend:", data);
-        if (data.data.length === 0) {
+        if (!data.availableModels || data.availableModels.length === 0) {
           setModels([{ id: "No models available", ready: false }]);
-        } else {
-          setModels(data.data);
+        } else { 
+          const formattedModels = data.availableModels.map(model => ({ id: model, ready: true }));
+          setModels(formattedModels);
         }
         console.log("Models state updated:", Models);
       })
@@ -108,7 +109,9 @@ function App() {
   useEffect(() => {
     if (errorMessage) {
       setShowError(true);
-      setErrorMessage(`An error has occurred: The AI just got up and left this server. Please reload the Window or change the language model for the AI.`);
+      setErrorMessage(
+        `An error has occurred: The AI just got up and left this server. Please reload the Window or change the language model for the AI.`
+      );
     } else {
       setShowError(false);
     }
@@ -248,10 +251,17 @@ function App() {
           <Modal.Title>Welcome to the ChatGPT Playground!</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p><center>The ChatGPT Playground is an interactive AI tool, allowing users to delve into detailed dialogues across a myriad of topics. It's not just for entertainment, but also a resource for education, brainstorming, and problem-solving. Have fun!</center></p>
+          <p>
+            <center>
+              The ChatGPT Playground is an interactive AI tool, allowing users
+              to delve into detailed dialogues across a myriad of topics. It's
+              not just for entertainment, but also a resource for education,
+              brainstorming, and problem-solving. Have fun!
+            </center>
+          </p>
         </Modal.Body>
         <Modal.Footer>
-        <GoogleSignInButton />
+          <GoogleSignInButton />
           <Button variant="secondary" onClick={handleCloseModal}>
             Continue as Guest
           </Button>
@@ -356,15 +366,16 @@ function App() {
           })}
         </div>
         <div className="chat-input-holder">
+          
           <form onSubmit={handleSubmit}>
-            <input
+            <ResizableTextArea
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              rows="1"
               className="chat-input-textarea"
               placeholder="Insert Text Here..."
-            ></input>
+            />
           </form>
+          <p>This project may produce inaccurate information about people, places, or facts. User discretion is advised. </p>
         </div>
       </section>
     </div>
