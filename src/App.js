@@ -10,8 +10,8 @@ import { useState, useEffect } from "react"; // React's built-in hooks
 import Alert from "react-bootstrap/Alert"; // Bootstrap Alert for error messages
 import ChatThreadList from "./ChatThreadList";
 import GoogleSignInButton from './googleLogin'; 
-import ResizableTextArea from "./ResizableTextArea";
-import TableComponent from "./tablecomponent";
+import ResizableInput from "./ResizableTextArea";
+//import TableComponent from "./tablecomponent";
 import MarkdownIt from 'markdown-it';
 import parse from 'html-react-parser';
 
@@ -130,9 +130,13 @@ function App() {
     setUpdatedSystemMessage(false);
   }, [systemMessage]);
   // Function to handle form submission
-  async function handleSubmit(e) {
-    e.preventDefault();
-    let chatLogNew = [...chatLog, { user: "me", message: `${input}` }];
+  async function handleSubmit(e, inputValue) {
+    // If an event is provided, prevent the default form submission event
+    if (e) e.preventDefault();
+  
+    // Use the inputValue argument if it's provided, otherwise use input from the state
+    const finalInput = inputValue || input;
+    let chatLogNew = [...chatLog, { user: "me", message: finalInput }];
     console.log("input:", input); // Log the input value
     setInput("");
     const messages = chatLogNew.map((entry) => ({
@@ -369,16 +373,19 @@ function App() {
           })}
         </div>
         <div className="chat-input-holder">
-          
           <form onSubmit={handleSubmit}>
-            <ResizableTextArea
+            <ResizableInput
               value={input}
               onChange={(e) => setInput(e.target.value)}
               className="chat-input-textarea"
               placeholder="Insert Text Here..."
+              handleSubmit={(value) => handleSubmit(null, value)}
             />
           </form>
-          <p>This project may produce inaccurate information about people, places, or facts. User discretion is advised. </p>
+          <p>
+            This project may produce inaccurate information about people,
+            places, or facts. User discretion is advised.
+          </p>
         </div>
       </section>
     </div>
