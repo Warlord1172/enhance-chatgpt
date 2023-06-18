@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-const CustomIcon = ({
+const chatgpticon = ({
     className = "h-6 w-6",
     fill = "currentColor",
     width = 41,
@@ -20,4 +21,50 @@ const CustomIcon = ({
     />
     </svg>
 );
-export default CustomIcon;
+const UserIcon = ({
+    className = "h-6 w-6",
+    fill = "currentColor",
+    width = 41,
+    height = 41,
+}) => (
+    // SVG path for the User icon
+    <svg
+        width={width}
+        height={height}
+        fill={fill}
+        xmlns="http://www.w3.org/2000/svg"
+        strokeWidth={1.5}
+        className={className}
+    />
+);
+
+const Avatar = ({ isChatGPT = false }) => {
+    console.log(`Rendering Avatar with isChatGPT=${isChatGPT}`);
+    const [avatarUrl, setAvatarUrl] = useState(null);
+
+    useEffect(() => {
+        if (!isChatGPT) {
+            console.trace('Rendering Avatar with isChatGPT=false');
+            axios.get('/api/current_user')
+                .then(res => {
+                    setAvatarUrl(res.data.userProfilePicture);
+                })
+                .catch(console.error);
+        }
+    }, [isChatGPT]);
+
+    const IconComponent = avatarUrl ? null : (isChatGPT ? chatgpticon : UserIcon);
+
+    return (
+        <div
+        className={`avatar ${isChatGPT === true ? 'chatgpt' : ''}`} 
+        style={avatarUrl ? { backgroundImage: `url(${avatarUrl})` } : {}}
+        >
+        {IconComponent && <IconComponent />}
+        </div>
+    );
+};
+
+
+export default Avatar;
+

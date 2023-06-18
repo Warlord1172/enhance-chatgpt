@@ -4,13 +4,16 @@ import NumberSlider from "./temperature";
 import "./App.css";
 import "./normal.css";
 import { Modal, Button } from "react-bootstrap";
-import CustomIcon from './chatgptAvatar.js';
+import Avatar from './chatgptAvatar.js';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import { useState, useEffect } from "react"; // React's built-in hooks
 import Alert from "react-bootstrap/Alert"; // Bootstrap Alert for error messages
 import ChatThreadList from "./ChatThreadList";
 import GoogleSignInButton from './googleLogin'; 
 import ResizableTextArea from "./ResizableTextArea";
+import TableComponent from "./tablecomponent";
+import MarkdownIt from 'markdown-it';
+import parse from 'html-react-parser';
 
 // Main application component
 function App() {
@@ -384,45 +387,55 @@ function App() {
 // ChatMessage component: displays a single chat message
 // It takes a message (object containing the message data) as a prop
 const ChatMessage = ({ message }) => {
-  console.log('ChatMessage message:', message);
-    if (message.codeBlocks) {
-      console.log("codeBlocks is present")
-      return (
-        <div className={`chat-message ${message.user === "assistant" && "chatgpt"}`}>
-          <div className="chat-message-center">
-            <div className={`avatar ${message.user === "assistant" && "chatgpt"}`}>
-              {message.user === "assistant" && (
-              <CustomIcon/>
-              )}
-            </div>
-            <div className="message">
-              <ReactMarkdown>{message.message}</ReactMarkdown>
-            </div>
-            {/* Use the CodeBlock component here */}
-          <CodeBlock code={message.codeBlocks.code} language={message.codeBlocks.language} />
-          </div>
-        </div>
-      );
-    } else if (message.message) {
-      console.log("codeBlocks is not present")
+  const md = new MarkdownIt();
 
-      return (
-        <div className={`chat-message ${message.user === "assistant" && "chatgpt"}`}>
-          <div className="chat-message-center">
-            <div className={`avatar ${message.user === "assistant" && "chatgpt"}`}>
+    const extractTables = (markdownString) => {
+      const htmlString = md.render(markdownString);
+      const htmlElements = parse(htmlString);
+
+      return htmlElements.filter(element => element.type === 'table');
+    };
+  if (message.codeBlocks) {
+    // If the message contains a code block, render it using the CodeBlock component
+    return (
+      <div className={`chat-message ${message.user === "assistant" && "chatgpt"}`}>
+        <div className="chat-message-center">
+          <div className={`avatar ${message.user === "assistant" && "chatgpt"}`}>
             {message.user === "assistant" && (
-              <CustomIcon/>
-              )}
-            </div>
-            <div className="message">
-              <ReactMarkdown>{message.message}</ReactMarkdown>
-            </div>
+              <Avatar isChatGPT={true} />
+            )}
+          </div>
+          <div className="message">
+            <ReactMarkdown>{message.message}</ReactMarkdown>
+            <CodeBlock code={message.codeBlocks.code} language={message.codeBlocks.language} />
           </div>
         </div>
-      );
-    } else {
-      return null;
-    }
+      </div>
+    );
+  } else {
+    const markdownString = message.message;
+    const tables = extractTables(markdownString);
+    // Otherwise, render the message as markdown
+    return (
+      <div className={`chat-message ${message.user === "assistant" && "chatgpt"}`}>
+        <div className="chat-message-center">
+          <div className={`avatar ${message.user === "assistant" && "chatgpt"}`}>
+            {message.user === "assistant" && (
+              <Avatar isChatGPT={true} />
+            )}
+          </div>
+          <div className="message">
+            <ReactMarkdown>{message.message}</ReactMarkdown>
+            {/* Render tables here */}
+              <div className="Table">{tables.map((table, index) => (
+                <div key={index}>{table}</div>
+              ))}
+          </div></div>
+              
+        </div>
+      </div>
+    );
+  }
 };
 export default App;
 

@@ -128,9 +128,10 @@ padding-right: 12px;
   
 }
 
-.Google-Signin {
+#Google-Signin {
   position: absolute;
-  bottom: 10px; left: 30px;
+  bottom: 10px; 
+  left: 30px;
   padding-bottom: 0%;
   background-color: #fff;
   color: #000;
@@ -142,8 +143,7 @@ padding-right: 12px;
   font: bold;
 }
 
-.Google-Signin:hover {
-
+#Google-Signin:hover {
   border-color: #000;
   background-color: #000; /* Replace with your desired hover color */
   color: #fff; /* Replace with your desired hover text color */
@@ -338,6 +338,50 @@ background-color: rgba(0, 0, 0, 0.041); /* Change this to your desired transpare
   height: 40vmin;
   pointer-events: none;
 }
+
+.message {
+  margin: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.Table {
+  margin-bottom: 20px;
+  box-shadow: 0px 1px 3px rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: #000;
+  transition: all 0.10s ease-in;
+}
+.Table:hover{
+  background-color: #0000008e;
+}
+.Table Table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.Table th,
+.Table td {
+  padding: 12px 15px;
+  text-align: left;
+}
+
+.Table thead {
+  color: #f3f3f3;
+}
+
+.Table tbody tr:nth-child(odd) {
+  color: #f9f9f9;
+}
+
+.Table tbody tr:nth-child(even) {
+  color: #ffffff;
+}
+
+.Table tbody tr:hover {
+  color: #e9e9e9;
+}
+
 
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
