@@ -9,12 +9,12 @@ import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import { useState, useEffect } from "react"; // React's built-in hooks
 import Alert from "react-bootstrap/Alert"; // Bootstrap Alert for error messages
 import ChatThreadList from "./ChatThreadList";
-import GoogleSignInButton from './googleLogin'; 
 import ResizableInput from "./ResizableTextArea";
 //import TableComponent from "./tablecomponent";
 import MarkdownIt from 'markdown-it';
 import parse from 'html-react-parser';
-
+import fetch from "node-fetch";
+//import axios from 'axios';
 // Main application component
 function App() {
   // Runs once after initial render to get AI model engines
@@ -23,8 +23,10 @@ function App() {
   });
   // Various state variables
   const [showModal, setShowModal] = useState(true);
+  const [showOpenAIModal, setShowOpenAIModal] = useState(false);
   const [systemMessage, setSystemMessage] = useState(
-"You are a helpful assistant."); // Default System message
+    "You are a helpful assistant."
+  ); // Default System message
   const [conversationHistory, setConversationHistory] = useState([]); // Conversation History
   const [currentThreadId, setCurrentThreadId] = useState(0); // Current thread ID
   const [errorMessage, setErrorMessage] = useState(""); // Error message
@@ -34,9 +36,95 @@ function App() {
   const [currentModel, setCurrentModel] = useState("gpt-3.5-turbo"); // Selected AI model
   const [updatedSystemMessage, setUpdatedSystemMessage] = useState(false); //set System role
   const [submitConfirm, setSubmitConfirm] = useState("");
-  const [temperature,setTemperature] = useState(0.5);
+  const [temperature, setTemperature] = useState(0.5);
   const [tempTemperature, setTempTemperature] = useState(temperature); // temporary temperature state
+  const [isLoading, setIsLoading] = useState(false); // Loading state
+  const [openAIKey, setOpenAIKey] = useState(""); // Add a new state variable to store the input value
 
+  //google sign in functionality
+  /*
+  function GoogleSignInButton() {
+    const [setIsLoggedIn] = useState(false);
+    const clientId = "803137367147-ju4cmttatlrl6q9928mg4bgs3rdo2au3.apps.googleusercontent.com";
+    const loginUri = "http://localhost:3000/api/auth";
+
+    // Load the Google's library in your component
+    useEffect(() => {
+        const script = document.createElement('script');
+        script.src = 'https://accounts.google.com/gsi/client';
+        script.async = true;
+        script.defer = true;
+        script.onload = () => {
+            window.google.accounts.id.initialize({
+                client_id: clientId,
+                callback: handleCredentialResponse,
+                cancel_on_tap_outside: false,
+            });
+            window.google.accounts.id.renderButton(
+                document.getElementById("Google-Signin"),
+                {
+                    theme: 'outline',
+                    size: 'large',
+                    locale: 'en',
+                    width: '240px',
+                    height: '50px',
+                }
+            );
+            window.google.accounts.id.prompt();
+        }
+        document.body.appendChild(script);
+        return () => {
+            document.body.removeChild(script);
+        }
+    }, []);
+
+    const handleCredentialResponse = (response) => {
+        console.log('Credential Response:', response);
+        setIsLoggedIn(true);
+        // Send token to your server here
+        axios.post('/api/auth', {
+            token: response.credential
+        }).then(res => {
+            // You can save the user data here
+            console.log(res.data);
+        }).catch(err => {
+            setIsLoggedIn(false);
+            // Handle error here
+            console.error(err);
+        });
+    };
+
+    return (
+        <div id="Google-Signin" />
+    );
+}
+*/
+  // key handling
+  // Update the input value in state whenever it changes
+  const handleOpenAIKeyChange = (event) => {
+    setOpenAIKey(event.target.value);
+  };
+  // The submit handler now uses the value from state
+  const handleOpenAIKeySubmit = () => {
+    console.log("OpenAI key submitted:", openAIKey);
+
+    fetch("http://localhost:3080/api/save-key", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ key: openAIKey }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to save the key");
+        }
+        setShowOpenAIModal(false); // Close the modal after submission
+      })
+      .catch((error) => {
+        console.error("Error saving the key:", error);
+      });
+  };
   // Default chat log
   const [chatLog, setChatLog] = useState([
     {
@@ -98,8 +186,11 @@ function App() {
         console.log("Received data from the backend:", data);
         if (!data.availableModels || data.availableModels.length === 0) {
           setModels([{ id: "No models available", ready: false }]);
-        } else { 
-          const formattedModels = data.availableModels.map(model => ({ id: model, ready: true }));
+        } else {
+          const formattedModels = data.availableModels.map((model) => ({
+            id: model,
+            ready: true,
+          }));
           setModels(formattedModels);
         }
         console.log("Models state updated:", Models);
@@ -133,7 +224,8 @@ function App() {
   async function handleSubmit(e, inputValue) {
     // If an event is provided, prevent the default form submission event
     if (e) e.preventDefault();
-  
+    // Set the loading state to true
+    setIsLoading(true);
     // Use the inputValue argument if it's provided, otherwise use input from the state
     const finalInput = inputValue || input;
     let chatLogNew = [...chatLog, { user: "me", message: finalInput }];
@@ -208,13 +300,15 @@ function App() {
           };
         })
       );
+      // Set the loading state to false after receiving the response
+      setIsLoading(false);
       setUpdatedSystemMessage(false);
     } catch (error) {
       console.error("An error occurred:", error); // Log any errors
       setErrorMessage(`Sorry, an error occurred: ${error.message}`);
     }
   }
-  
+
   // Function to resize the window
   useEffect(() => {
     const setWindowSize = () => {
@@ -242,11 +336,16 @@ function App() {
     console.log("Temperature changed: ", temperature);
   }, [temperature]);
   const handletempSubmit = () => {
-        setTemperature(tempTemperature); // update actual temperature state
-    };
+    setTemperature(tempTemperature); // update actual temperature state
+  };
   // Function to handle closing the modal
   const handleCloseModal = () => {
     setShowModal(false);
+    setShowOpenAIModal(true);
+  };
+
+  const handleCloseOpenAIModal = () => {
+    setShowOpenAIModal(false);
   };
   // Render the application
   return (
@@ -268,14 +367,44 @@ function App() {
           </p>
         </Modal.Body>
         <Modal.Footer>
-          <GoogleSignInButton />
+          {//<GoogleSignInButton />
+          }
           <Button variant="secondary" onClick={handleCloseModal}>
-            Continue as Guest
+            Continue
           </Button>
         </Modal.Footer>
       </Modal>
-
-      {/* Other parts of your application */}
+      <Modal
+        show={showOpenAIModal}
+        onHide={handleCloseOpenAIModal}
+        backdrop="static"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Enter OpenAI Key</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Please enter your OpenAI key:</p>
+          <input
+            type="text"
+            onChange={handleOpenAIKeyChange} // Update this
+          />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="primary"
+            onClick={handleOpenAIKeySubmit} // Update this
+          >
+            Submit
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      {/* Loading popup */}
+      {isLoading && (
+        <div className="loading-popup">
+          <div className="loading-animation"></div>
+          <p className="loading-text">Generating message and updating log...</p>
+        </div>
+      )}
       <Alert
         className="Alert-Notif"
         variant="danger"
@@ -354,7 +483,8 @@ function App() {
           onSelectThread={(id) => setCurrentThreadId(id)}
           onRemoveThread={removeThread}
         />
-        <GoogleSignInButton />
+        {//<GoogleSignInButton />
+        }
       </aside>
       <section className="chatbox">
         <div className="chat-log">
@@ -391,30 +521,35 @@ function App() {
     </div>
   );
 }
-// ChatMessage component: displays a single chat message
-// It takes a message (object containing the message data) as a prop
 const ChatMessage = ({ message }) => {
   const md = new MarkdownIt();
 
-    const extractTables = (markdownString) => {
-      const htmlString = md.render(markdownString);
-      const htmlElements = parse(htmlString);
+  const extractTables = (markdownString) => {
+    const htmlString = md.render(markdownString);
+    const htmlElements = parse(htmlString);
 
-      return htmlElements.filter(element => element.type === 'table');
-    };
+    return htmlElements.filter((element) => element.type === "table");
+  };
+
+  const isChatGPT = message.user === "assistant"; // Determine if the message is from ChatGPT
+
   if (message.codeBlocks) {
-    // If the message contains a code block, render it using the CodeBlock component
     return (
-      <div className={`chat-message ${message.user === "assistant" && "chatgpt"}`}>
+      <div className={`chat-message ${isChatGPT && "chatgpt"}`}>
         <div className="chat-message-center">
-          <div className={`avatar ${message.user === "assistant" && "chatgpt"}`}>
-            {message.user === "assistant" && (
+          <div className={`avatar ${isChatGPT && "chatgpt"}`}>
+            {isChatGPT ? (
               <Avatar isChatGPT={true} />
+            ) : (
+              <Avatar isChatGPT={false} />
             )}
           </div>
           <div className="message">
             <ReactMarkdown>{message.message}</ReactMarkdown>
-            <CodeBlock code={message.codeBlocks.code} language={message.codeBlocks.language} />
+            <CodeBlock
+              code={message.codeBlocks.code}
+              language={message.codeBlocks.language}
+            />
           </div>
         </div>
       </div>
@@ -422,23 +557,25 @@ const ChatMessage = ({ message }) => {
   } else {
     const markdownString = message.message;
     const tables = extractTables(markdownString);
-    // Otherwise, render the message as markdown
+
     return (
-      <div className={`chat-message ${message.user === "assistant" && "chatgpt"}`}>
+      <div className={`chat-message ${isChatGPT && "chatgpt"}`}>
         <div className="chat-message-center">
-          <div className={`avatar ${message.user === "assistant" && "chatgpt"}`}>
-            {message.user === "assistant" && (
+          <div className={`avatar ${isChatGPT && "chatgpt"}`}>
+            {isChatGPT ? (
               <Avatar isChatGPT={true} />
+            ) : (
+              <Avatar isChatGPT={false} />
             )}
           </div>
           <div className="message">
             <ReactMarkdown>{message.message}</ReactMarkdown>
-            {/* Render tables here */}
-              <div className="Table">{tables.map((table, index) => (
+            <div className="Table">
+              {tables.map((table, index) => (
                 <div key={index}>{table}</div>
               ))}
-          </div></div>
-              
+            </div>
+          </div>
         </div>
       </div>
     );

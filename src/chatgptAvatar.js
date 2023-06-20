@@ -1,5 +1,3 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 
 const chatgpticon = ({
     className = "h-6 w-6",
@@ -21,50 +19,41 @@ const chatgpticon = ({
     />
     </svg>
 );
+
+
 const UserIcon = ({
     className = "h-6 w-6",
-    fill = "currentColor",
+    fill = "#000000",
     width = 41,
     height = 41,
-}) => (
-    // SVG path for the User icon
+  }) => (
     <svg
-        width={width}
-        height={height}
-        fill={fill}
-        xmlns="http://www.w3.org/2000/svg"
-        strokeWidth={1.5}
-        className={className}
-    />
-);
-
-const Avatar = ({ isChatGPT = false }) => {
+      width={width}
+      height={height}
+      fill={fill}
+      xmlns="http://www.w3.org/2000/svg"
+      strokeWidth={1.5}
+      className={className}
+      viewBox="0 0 24 24"
+    >
+      <circle cx="12" cy="7" r="5" stroke="#000000" strokeWidth="2" fill="none" />
+      <path d="M12 12c3.9 0 7 3.1 7 7H5c0-3.9 3.1-7 7-7z" stroke="#000000" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+  const Avatar = ({ isChatGPT = false }) => {
     console.log(`Rendering Avatar with isChatGPT=${isChatGPT}`);
-    const [avatarUrl, setAvatarUrl] = useState(null);
-
-    useEffect(() => {
-        if (!isChatGPT) {
-            console.trace('Rendering Avatar with isChatGPT=false');
-            axios.get('/api/current_user')
-                .then(res => {
-                    setAvatarUrl(res.data.userProfilePicture);
-                })
-                .catch(console.error);
-        }
-    }, [isChatGPT]);
-
-    const IconComponent = avatarUrl ? null : (isChatGPT ? chatgpticon : UserIcon);
-
+  
+    const IconComponent = isChatGPT ? chatgpticon : (isChatGPT === false ? UserIcon : null);
+    console.log('IconComponent:', IconComponent);
+  
     return (
-        <div
-        className={`avatar ${isChatGPT === true ? 'chatgpt' : ''}`} 
-        style={avatarUrl ? { backgroundImage: `url(${avatarUrl})` } : {}}
-        >
+      <div
+        className={`avatar ${isChatGPT === true ? 'chatgpt' : ''}`}
+      >
         {IconComponent && <IconComponent />}
-        </div>
+      </div>
     );
-};
-
+  };
 
 export default Avatar;
 

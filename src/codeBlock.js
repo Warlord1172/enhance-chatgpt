@@ -4,15 +4,18 @@ import React from "react";
 
 //codeBlock section
 const CodeBlock = ({ code, language }) => {
-  const copyCodeToClipboard = () => {
-    navigator.clipboard.writeText(code);
-  };
   return (
     <div className="message">
       <div className="code-block">
         <div className="code-block-header">
           <span className="language">{language}</span>
-          <button className="copy-button" onClick={copyCodeToClipboard}>
+          <button
+            className="copy-button"
+            onClick={() => {
+              navigator.clipboard.writeText(code);
+              document.querySelector(".copy-button").innerText = "Code Copied";
+            }}
+          >
             Copy Code
           </button>
         </div>
