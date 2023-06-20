@@ -1,10 +1,11 @@
+/* eslint-disable no-const-assign */
 const express = require("express");
 const cors = require("cors");
 const https = require("https");
 const app = express();
 const port = 3080;
 
-
+/*
 //google server side
 const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client('803137367147-ju4cmttatlrl6q9928mg4bgs3rdo2au3.apps.googleusercontent.com');
@@ -78,7 +79,7 @@ function ensureAuthenticated(req, res, next) {
 app.get('/api/current_user', ensureAuthenticated, (req, res) => {
   res.json({ userProfilePicture: req.user.photos[0].value });
 });
-
+*/
 
 // max_token limits
 const modelTokenLimits = {
@@ -169,6 +170,7 @@ const Codelanguage = {
 
 // Import the natural library and its Tokenizer
 const natural = require("natural");
+// eslint-disable-next-line no-unused-vars
 const tokenizer = new natural.WordTokenizer();
 console.log('Library and Tokenizer loaded');
 let defaultAssistantMessage = "Anything else?";
@@ -188,7 +190,6 @@ const addMessageToConversationHistory = (message, safeTokensForHistory) => {
 app.use(cors());
 app.use(express.json());
 console.log('Middleware configured');
-let apiKey;  // Initialize a variable to store the API key in memory
 let globalApiKey; // Define a global variable to store the API key
 // api key handling
 app.post("/api/save-key", (req, res) => {
@@ -601,7 +602,6 @@ const getModels   = (Key) => {
 
 // define the caching duration (1 hour in this example)
 const cacheDuration = 60 * 60 * 1000; // milliseconds
-const cron = require('node-cron');
 let lastFetchTime = null;
 let storedModels = null;
 // parse application/x-www-form-urlencoded
