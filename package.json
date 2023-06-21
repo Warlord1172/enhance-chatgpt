@@ -42,7 +42,7 @@
     "eject": "react-scripts eject",
     "start-server": "node backend.js",
     "test-server": "echo \"Error: no test specified\" && exit 1",
-    "start": "concurrently \"npm run start-client\" \"npm run start-server\"",
+    "start": "npm run start-server",
     "build": "npm run build-client"
   },
   "eslintConfig": {
