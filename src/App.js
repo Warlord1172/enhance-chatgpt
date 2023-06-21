@@ -8,8 +8,8 @@ import Avatar from './enhance-chatgpt/src/chatgptAvatar.js';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import { useState, useEffect } from "react"; // React's built-in hooks
 import Alert from "react-bootstrap/Alert"; // Bootstrap Alert for error messages
-import ChatThreadList from "./enhance-chatgpt/src/ChatThreadList";
-import ResizableInput from "./enhance-chatgpt/src/ResizableTextArea";
+import ChatThreadList from "./ChatThreadList";
+import ResizableInput from "./ResizableTextArea";
 //import TableComponent from "./tablecomponent";
 import MarkdownIt from 'markdown-it';
 import parse from 'html-react-parser';
