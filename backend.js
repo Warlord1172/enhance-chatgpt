@@ -567,7 +567,7 @@ app.post("/chat", async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Example app listening at ${port}`);
+  console.log(`Example app listening at https://chatgpt-playground.onrender.com:${port}`);
 });
 
 
