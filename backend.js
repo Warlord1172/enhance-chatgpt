@@ -3,7 +3,9 @@ const express = require("express");
 const cors = require("cors");
 const https = require("https");
 const app = express();
-const port = process.env.PORT || 10080;
+// Set the PORT environment variable to a custom value
+process.env.PORT = '10080';
+const port  = process.env.PORT;
 
 /*
 //google server side
@@ -554,7 +556,7 @@ app.post("/chat", async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Example app listening at: ${port}`);
+  console.log(`Example app listening at ${port}`);
 });
 
 
