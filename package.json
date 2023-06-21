@@ -36,7 +36,6 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "prebuild": "npm install -g react-scripts",
     "start-client": "react-scripts start",
     "build-client": "react-scripts build",
     "test-client": "react-scripts test",
@@ -66,6 +65,7 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "concurrently": "^8.2.0"
+    "concurrently": "^8.2.0",
+    "react-scripts": "^5.0.1"
   }
 }
