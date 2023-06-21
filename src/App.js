@@ -1,5 +1,5 @@
 // Importing the necessary dependencies and styles
-import CodeBlock from "./codeblock";
+import CodeBlock from "./codeblock.js";
 import NumberSlider from "./temperature";
 import "./App.css";
 import "./normal.css";
