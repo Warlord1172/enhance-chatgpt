@@ -36,14 +36,15 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start-client": "react-scripts build",
+    "start-client": "react-scripts start", 
     "build-client": "react-scripts build",
     "test-client": "react-scripts test",
     "eject": "react-scripts eject",
     "start-server": "node backend.js",
     "test-server": "echo \"Error: no test specified\" && exit 1",
-    "start": "concurrently \"npm run start-client\" \"npm run start-server\"",
-    "build": "npm run build-client"
+    "start": "concurrently \"npm run build-client && serve -s build\" \"npm run start-server\"", 
+    "build": "npm run build-client",
+    "serve": "serve -s build" 
   },
   "eslintConfig": {
     "extends": [
