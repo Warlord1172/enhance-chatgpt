@@ -37,7 +37,7 @@
   },
   "scripts": {
     "start-client": "react-scripts start",
-    "build-client": "react-scripts build --output-path=build",
+    "build-client": "react-scripts build",
     "test-client": "react-scripts test",
     "eject": "react-scripts eject",
     "start-server": "node backend.js",
