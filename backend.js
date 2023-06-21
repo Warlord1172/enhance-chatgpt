@@ -193,6 +193,7 @@ const addMessageToConversationHistory = (message, safeTokensForHistory) => {
 app.use(cors());
 app.use(express.json());
 
+app.use(cors({ origin: 'https://chatgpt-playground.onrender.com' }));
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, 'build')));
 
