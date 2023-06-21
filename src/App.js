@@ -180,7 +180,7 @@ function App() {
   // Function to get AI model engines from the backend
   async function getEngines() {
     console.log("getEngines called");
-    fetch("http://localhost:3080/models")
+    fetch(`${process.env.REACT_APP_API_ENDPOINT}/models`)
       .then((res) => res.json())
       .then((data) => {
         console.log("Received data from the backend:", data);
@@ -247,7 +247,7 @@ function App() {
       setConversationHistory((prevHistory) => prevHistory.slice(1));
     }
     try {
-      const response = await fetch("http://localhost:3080/chat", {
+      const response = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
