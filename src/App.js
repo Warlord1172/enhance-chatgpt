@@ -1,6 +1,6 @@
 // Importing the necessary dependencies and styles
 import CodeBlock from "./enhance-chatgpt/src/codeblock.js";
-import NumberSlider from "./enhance-chatgpt/src/temperature";
+import NumberSlider from "./temperature";
 import "./enhance-chatgpt/src/App.css";
 import "./enhance-chatgpt/src/normal.css";
 import { Modal, Button } from "react-bootstrap";
