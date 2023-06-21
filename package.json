@@ -36,6 +36,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "prebuild": "npm install -g react-scripts",
     "start-client": "react-scripts start",
     "build-client": "react-scripts build",
     "test-client": "react-scripts test",
