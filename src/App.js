@@ -1,15 +1,15 @@
 // Importing the necessary dependencies and styles
-import CodeBlock from "./codeblock.js";
-import NumberSlider from "./temperature";
-import "./App.css";
-import "./normal.css";
+import CodeBlock from "./enhance-chatgpt/src/codeblock.js";
+import NumberSlider from "./enhance-chatgpt/src/temperature";
+import "./enhance-chatgpt/src/App.css";
+import "./enhance-chatgpt/src/normal.css";
 import { Modal, Button } from "react-bootstrap";
-import Avatar from './chatgptAvatar.js';
+import Avatar from './enhance-chatgpt/src/chatgptAvatar.js';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import { useState, useEffect } from "react"; // React's built-in hooks
 import Alert from "react-bootstrap/Alert"; // Bootstrap Alert for error messages
-import ChatThreadList from "./ChatThreadList";
-import ResizableInput from "./ResizableTextArea";
+import ChatThreadList from "./enhance-chatgpt/src/ChatThreadList";
+import ResizableInput from "./enhance-chatgpt/src/ResizableTextArea";
 //import TableComponent from "./tablecomponent";
 import MarkdownIt from 'markdown-it';
 import parse from 'html-react-parser';
