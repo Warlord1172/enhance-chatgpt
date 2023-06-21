@@ -3,7 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const https = require("https");
 const app = express();
-const port = 3080;
+const port = process.env.PORT || 3080;
 
 /*
 //google server side
@@ -554,7 +554,7 @@ app.post("/chat", async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
+  console.log(`Example app listening at: ${port}`);
 });
 
 
