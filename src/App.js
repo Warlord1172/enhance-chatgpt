@@ -108,7 +108,7 @@ function App() {
   const handleOpenAIKeySubmit = () => {
     console.log("OpenAI key submitted:", openAIKey);
 
-    fetch("http://localhost:3080/api/save-key", {
+    fetch(`${process.env.REACT_APP_API_ENDPOINT}/api/save-key`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
