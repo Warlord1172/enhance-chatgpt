@@ -1,10 +1,10 @@
 // Importing the necessary dependencies and styles
-import CodeBlock from "./src/codeblock.js";
+import CodeBlock from "./codeblock.js";
 import NumberSlider from "./temperature";
-import "./src/App.css";
-import "./src/normal.css";
+import "./App.css";
+import "./normal.css";
 import { Modal, Button } from "react-bootstrap";
-import Avatar from './src/chatgptAvatar.js';
+import Avatar from './chatgptAvatar.js';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import { useState, useEffect } from "react"; // React's built-in hooks
 import Alert from "react-bootstrap/Alert"; // Bootstrap Alert for error messages
