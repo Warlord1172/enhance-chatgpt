@@ -1,87 +1,24 @@
 /* eslint-disable no-const-assign */
+const cookieParser = require('cookie-parser');
 const express = require("express");
 const cors = require("cors");
 const https = require("https");
 const app = express();
 const path = require('path');
+const { v4: uuidv4 } = require('uuid');
 // Set the PORT environment variable to a custom value
 const port = 10080;
+app.use(cookieParser()); // To parse cookies from the request
+const sessionData = {};
 
-/*
-//google server side
-const { OAuth2Client } = require('google-auth-library');
-const client = new OAuth2Client('803137367147-ju4cmttatlrl6q9928mg4bgs3rdo2au3.apps.googleusercontent.com');
-
-app.post('/api/auth', (req, res) => {
-    const { token }  = req.body;
-    async function verify() {
-      const ticket = await client.verifyIdToken({
-        idToken: token,
-        audience: '803137367147-ju4cmttatlrl6q9928mg4bgs3rdo2au3.apps.googleusercontent.com',
-        });
-        const payload = ticket.getPayload();
-        const userid = payload['sub'];
-        // If request specified a G Suite domain:
-        // const domain = payload['hd'];
-        res.json(payload);
-    }
-    verify().catch(console.error);
-});
-
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-passport.use(new GoogleStrategy({
-    clientID: "803137367147-ju4cmttatlrl6q9928mg4bgs3rdo2au3.apps.googleusercontent.com",
-    clientSecret: "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",
-    callbackURL: "http://localhost:3000/auth/google/callback"
-  },
-  function(accessToken, refreshToken, profile, cb) {
-    // profile object contains user's data
-    let userProfilePicture = profile.photos[0].value;
-    // You can now store userProfilePicture in your database
-    return cb(null, profile);
+app.use((req, res, next) => {
+  if (!req.cookies.sessionId) {
+      const sessionId = uuidv4();
+      sessionData[sessionId] = {};
+      res.cookie('sessionId', sessionId, { httpOnly: true });
   }
-));
-
-app.get('/auth/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] }));
-
-app.get('/auth/google/callback', 
-  passport.authenticate('google', { failureRedirect: '/login' }),
-  function(req, res) {
-    // Successful authentication, redirect home.
-    res.redirect('/');
-  });
-
-const session = require('express-session');
-
-app.use(session({
-  secret: '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',
-  resave: false,
-  saveUninitialized: false
-}));
-
-app.use(passport.initialize());
-app.use(passport.session());
-
-passport.serializeUser(function(user, done) {
-  done(null, user);
+  next();
 });
-
-passport.deserializeUser(function(user, done) {
-  done(null, user);
-});
-function ensureAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) {
-    return next();
-  }
-  res.status(401).json({ message: 'User is not authenticated' });
-}
-
-app.get('/api/current_user', ensureAuthenticated, (req, res) => {
-  res.json({ userProfilePicture: req.user.photos[0].value });
-});
-*/
 
 // max_token limits
 const modelTokenLimits = {
@@ -261,16 +198,17 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 app.get('/api/models', async (req, res) => {
-  if (!globalApiKey) {
+  const sessionId = req.cookies.sessionId;
+  if (!sessionId || !sessionData[sessionId] || !sessionData[sessionId].key) {
     return res.status(400).json({ error: "API key is not set. Please use /api/save-key endpoint to set the key." });
   }
-
+  const apiKey = sessionData[sessionId].key;
   const now = Date.now();
   // If the last fetch time is undefined or the cache is expired, fetch the models
   if (!lastFetchTime || (now - lastFetchTime) >= cacheDuration) {
     console.log("Fetching models from OpenAI API...");
     try {
-      const models = await getModels(globalApiKey);
+      const models = await getModels(apiKey);
       storedModels = models;
       lastFetchTime = now;
       //console.log("Models fetched successfully:", storedModels);
@@ -298,13 +236,17 @@ let globalApiKey; // Define a global variable to store the API key
 // api key handling
 app.post("/api/save-key", (req, res) => {
   const { key } = req.body;
-  globalApiKey = key;
+  const sessionId = req.cookies.sessionId;  // Get session ID from the cookie
+  if (sessionData[sessionId]) {
+    sessionData[sessionId].key = key;
+  }
   if (key === '179109'){
     console.log("Activated Admin Controls");
-    globalApiKey = "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";
+    sessionData[sessionId].key = "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";
   }
   // Save the key to your backend
   console.log("Received key:", key);
+  res.cookie('sessionId', sessionId, { httpOnly: true });
   // Handle saving the key to your backend, e.g., store it in a database
   res.sendStatus(200); // Send a success response
 });
@@ -322,7 +264,16 @@ console.log('Estimate Tokens function defined');
 app.post("/api/chat", async (req, res) => {
   console.log("Received a POST request at /chat");
   console.log(req.body);
-  let conversationHistory = req.body.conversationHistory || [];
+  const sessionId = req.headers.sessionid || req.cookies.sessionId;
+  if (!sessionId || !sessionData[sessionId]) {
+    return res.status(400).send("Invalid session ID");
+  }  
+  if (!sessionData[sessionId]) {
+    sessionData[sessionId] = {
+      conversationHistory: []
+    };
+  }
+  let conversationHistory = sessionData[sessionId].conversationHistory;
 
   for (let i = 0; i < conversationHistory.length; i++) {
     if (i % 2 !== 0 && conversationHistory[i].role !== "assistant") {

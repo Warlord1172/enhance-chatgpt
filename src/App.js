@@ -14,6 +14,7 @@ import ResizableInput from "./ResizableTextArea";
 import MarkdownIt from 'markdown-it';
 import parse from 'html-react-parser';
 import fetch from "node-fetch";
+import uuid from "uuid";
 //import axios from 'axios';
 // Main application component
 function App() {
@@ -22,6 +23,7 @@ function App() {
     getEngines();
   });
   // Various state variables
+  const [sessionId, setSessionId] = useState(null);
   const [openAIKeyFound, setOpenAIKeyFound] = useState(false);
   const [showModal, setShowModal] = useState(true);
   const [showOpenAIModal, setShowOpenAIModal] = useState(false);
@@ -42,64 +44,10 @@ function App() {
   const [isLoading, setIsLoading] = useState(false); // Loading state
   const [openAIKey, setOpenAIKey] = useState(""); // Add a new state variable to store the input value
 
-  //google sign in functionality
-  /*
-  function GoogleSignInButton() {
-    const [setIsLoggedIn] = useState(false);
-    const clientId = "803137367147-ju4cmttatlrl6q9928mg4bgs3rdo2au3.apps.googleusercontent.com";
-    const loginUri = "http://localhost:3000/api/auth";
-
-    // Load the Google's library in your component
-    useEffect(() => {
-        const script = document.createElement('script');
-        script.src = 'https://accounts.google.com/gsi/client';
-        script.async = true;
-        script.defer = true;
-        script.onload = () => {
-            window.google.accounts.id.initialize({
-                client_id: clientId,
-                callback: handleCredentialResponse,
-                cancel_on_tap_outside: false,
-            });
-            window.google.accounts.id.renderButton(
-                document.getElementById("Google-Signin"),
-                {
-                    theme: 'outline',
-                    size: 'large',
-                    locale: 'en',
-                    width: '240px',
-                    height: '50px',
-                }
-            );
-            window.google.accounts.id.prompt();
-        }
-        document.body.appendChild(script);
-        return () => {
-            document.body.removeChild(script);
-        }
-    }, []);
-
-    const handleCredentialResponse = (response) => {
-        console.log('Credential Response:', response);
-        setIsLoggedIn(true);
-        // Send token to your server here
-        axios.post('/api/auth', {
-            token: response.credential
-        }).then(res => {
-            // You can save the user data here
-            console.log(res.data);
-        }).catch(err => {
-            setIsLoggedIn(false);
-            // Handle error here
-            console.error(err);
-        });
-    };
-
-    return (
-        <div id="Google-Signin" />
-    );
-}
-*/
+  // Generate a new session ID when the component first mounts
+  useEffect(() => {
+    setSessionId(uuid.v4());
+  }, []);
   // key handling
   // Update the input value in state whenever it changes
   const handleOpenAIKeyChange = (event) => {
@@ -167,6 +115,7 @@ function App() {
 
   // Function to clear chat
   function clearChat() {
+    setSessionId(uuid.v4()); // generate a new session ID
     setChatThreads([
       ...chatThreads,
       {
@@ -277,6 +226,7 @@ function App() {
           updatedSystemMessage: updatedSystemMessage,
           conversationHistory: messages, // send the prepared messages array
           temperature: temperature,
+          sessionId: sessionId, // include the sessionId here
         }),
       });
       if (!response.ok) {
