@@ -275,7 +275,7 @@ app.post("/api/chat", async (req, res) => {
       conversationHistory: []
     };
   }
-  let conversationHistory = sessionData[sessionId]?.conversationHistory;
+  const conversationHistory = req.body.conversationHistory || [];
 
 if (conversationHistory) {
   for (let i = 0; i < conversationHistory.length; i++) {
@@ -583,7 +583,7 @@ if (conversationHistory) {
         language: language,
       });
     }
-  }
+  }     
         // Add the assistant message to the conversation history only if there's content or code blocks
         if (
           assistantMessage.content.trim() !== "" ||
