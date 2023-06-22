@@ -180,7 +180,7 @@ function App() {
   // Function to get AI model engines from the backend
   async function getEngines() {
     console.log("getEngines called");
-    fetch(`https://chatgpt-playground.onrender.com:10000/api/models`)
+    fetch(`https://chatgpt-playground.onrender.com/api/models`)
       .then((res) => res.json())
       .then((data) => {
         console.log("Received data from the backend:", data);
@@ -247,7 +247,7 @@ function App() {
       setConversationHistory((prevHistory) => prevHistory.slice(1));
     }
     try {
-      const response = await fetch(`https://chatgpt-playground.onrender.com:10000/api/chat`, {
+      const response = await fetch(`https://chatgpt-playground.onrender.com/api/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
