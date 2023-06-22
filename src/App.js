@@ -22,6 +22,7 @@ function App() {
     getEngines();
   });
   // Various state variables
+  const [openAIKeyfound] = useState(false);
   const [showModal, setShowModal] = useState(true);
   const [showOpenAIModal, setShowOpenAIModal] = useState(false);
   const [systemMessage, setSystemMessage] = useState(
@@ -115,9 +116,20 @@ function App() {
       },
       body: JSON.stringify({ key: openAIKey }),
     })
+    
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to save the key");
+        }
+        if(!openAIKey){
+          setShowError(true);
+          setErrorMessage(
+          `An error has occurred: No OpenAI key was found, Please refresh the Window`
+          );
+        }
+        else{
+          setShowError(false);
+          openAIKeyfound(true);
         }
         setShowOpenAIModal(false); // Close the modal after submission
       })
@@ -179,6 +191,7 @@ function App() {
   }
   // Function to get AI model engines from the backend
   async function getEngines() {
+    if(openAIKeyfound){
     console.log("getEngines called");
     fetch(`https://chatgpt-playground.onrender.com/api/models`)
       .then((res) => res.json())
@@ -198,6 +211,10 @@ function App() {
       .catch((error) => {
         console.error("Error fetching models:", error); // Add this line to catch errors
       });
+    }
+    else{
+      console.error("No OpenAI key has been provided");
+    }
   }
   // Runs when error message changes
   useEffect(() => {
@@ -379,9 +396,7 @@ function App() {
         onHide={handleCloseOpenAIModal}
         backdrop="static"
       >
-        <Modal.Header closeButton>
           <Modal.Title>Enter OpenAI Key</Modal.Title>
-        </Modal.Header>
         <Modal.Body>
           <p>Please enter your OpenAI key:</p>
           <input
