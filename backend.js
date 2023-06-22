@@ -278,6 +278,7 @@ app.post("/api/chat", async (req, res) => {
   }
   let conversationHistory = sessionData[sessionId]?.conversationHistory;
 
+if (conversationHistory) {
   for (let i = 0; i < conversationHistory.length; i++) {
     if (i % 2 !== 0 && conversationHistory[i].role !== "assistant") {
       // If the conversation message is supposed to be from the assistant but isn't
@@ -287,17 +288,17 @@ app.post("/api/chat", async (req, res) => {
       });
     }
   }
+
   // Check for undefined or missing 'content' in the conversation history
   for (let message of conversationHistory) {
     if (message.content === undefined || message.content === null) {
-      //console.log("Found a message with undefined or null content", message);
-
-      // insert default assistant message to message.content
+      // Insert default assistant message to message.content
       message.content = defaultAssistantMessage;
-      // NOTE: No need to send an error and clear the conversation history anymore,
+      // No need to send an error and clear the conversation history anymore,
       // as we're now providing a default message for undefined or null content.
     }
   }
+}
   const prompt = req.body.message;
   if (!prompt) {
     return res.status(400).send("No message content provided");
