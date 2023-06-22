@@ -14,7 +14,7 @@ import ResizableInput from "./ResizableTextArea";
 import MarkdownIt from 'markdown-it';
 import parse from 'html-react-parser';
 import fetch from "node-fetch";
-import uuid from "uuid";
+import { v4 as uuidv4 } from "uuid";
 //import axios from 'axios';
 // Main application component
 function App() {
@@ -46,7 +46,7 @@ function App() {
 
   // Generate a new session ID when the component first mounts
   useEffect(() => {
-    setSessionId(uuid.v4());
+    setSessionId(uuidv4());
   }, []);
   // key handling
   // Update the input value in state whenever it changes
@@ -64,17 +64,16 @@ function App() {
       },
       body: JSON.stringify({ key: openAIKey }),
     })
-    
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to save the key");
         }
-        if(openAIKey === null){
+        if (openAIKey === null) {
           setShowError(true);
           setErrorMessage(
-          `An error has occurred: No OpenAI key was found, Please refresh the Window`
+            `An error has occurred: No OpenAI key was found, Please refresh the Window`
           );
-        }  
+        }
         setShowError(false);
         setOpenAIKeyFound(true); // Update the state variable to true
         setShowOpenAIModal(false); // Close the modal after submission
@@ -212,23 +211,26 @@ function App() {
       setConversationHistory((prevHistory) => prevHistory.slice(1));
     }
     try {
-      const response = await fetch(`https://chatgpt-playground.onrender.com/api/chat`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: input,
-          currentModel: currentModel,
-          isChatModel: currentModel.startsWith("gpt-"),
-          systemRole: "system",
-          systemMessage: systemMessage,
-          updatedSystemMessage: updatedSystemMessage,
-          conversationHistory: messages, // send the prepared messages array
-          temperature: temperature,
-          sessionId: sessionId, // include the sessionId here
-        }),
-      });
+      const response = await fetch(
+        `https://chatgpt-playground.onrender.com/api/chat`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message: input,
+            currentModel: currentModel,
+            isChatModel: currentModel.startsWith("gpt-"),
+            systemRole: "system",
+            systemMessage: systemMessage,
+            updatedSystemMessage: updatedSystemMessage,
+            conversationHistory: messages, // send the prepared messages array
+            temperature: temperature,
+            sessionId: sessionId, // include the sessionId here
+          }),
+        }
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -333,7 +335,8 @@ function App() {
           </p>
         </Modal.Body>
         <Modal.Footer>
-          {//<GoogleSignInButton />
+          {
+            //<GoogleSignInButton />
           }
           <Button variant="secondary" onClick={handleCloseModal}>
             Continue
@@ -345,7 +348,7 @@ function App() {
         onHide={handleCloseOpenAIModal}
         backdrop="static"
       >
-          <Modal.Title>Enter OpenAI Key</Modal.Title>
+        <Modal.Title>Enter OpenAI Key</Modal.Title>
         <Modal.Body>
           <p>Please enter your OpenAI key:</p>
           <input
@@ -447,7 +450,8 @@ function App() {
           onSelectThread={(id) => setCurrentThreadId(id)}
           onRemoveThread={removeThread}
         />
-        {//<GoogleSignInButton />
+        {
+          //<GoogleSignInButton />
         }
       </aside>
       <section className="chatbox">
