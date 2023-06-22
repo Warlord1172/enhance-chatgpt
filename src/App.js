@@ -192,7 +192,7 @@ function App() {
     if (openAIKeyFound) {
       console.log("getEngines called");
       try {
-        const response = await fetch(`https://chatgpt-playground.onrender.com:10080/api/models`);
+        const response = await fetch(`/api/models`);
         if (!response.ok) {
           throw new Error("Failed to fetch models");
         }
