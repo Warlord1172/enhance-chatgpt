@@ -189,7 +189,7 @@ function App() {
   }
   // Function to get AI model engines from the backend
   async function getEngines() {
-    if(openAIKeyfound){
+    if(openAIKeyfound === true){
     console.log("getEngines called");
     fetch(`https://chatgpt-playground.onrender.com/api/models`)
       .then((res) => res.json())
@@ -210,7 +210,7 @@ function App() {
         console.error("Error fetching models:", error); // Add this line to catch errors
       });
     }
-    else{
+    if(openAIKeyfound === false){
       console.error("No OpenAI key has been provided");
     }
   }
