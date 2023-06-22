@@ -5,7 +5,7 @@ const https = require("https");
 const app = express();
 const path = require('path');
 // Set the PORT environment variable to a custom value
-process.env.PORT = '10080';
+process.env.PORT = '3080';
 const port  = process.env.PORT;
 
 /*
@@ -193,7 +193,7 @@ const addMessageToConversationHistory = (message, safeTokensForHistory) => {
 app.use(cors());
 app.use(express.json());
 
-app.use(cors({ origin: 'https://chatgpt-playground.onrender.com' }));
+app.use(cors({ origin: 'http://localhost:3000' }));
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, 'build')));
 
@@ -568,7 +568,7 @@ app.post("/chat", async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Example app listening at https://chatgpt-playground.onrender.com:${port}`);
+  console.log(`Example app listening at http://localhost:${port}`);
 });
 
 
