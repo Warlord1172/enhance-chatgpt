@@ -273,7 +273,7 @@ app.post("/api/chat", async (req, res) => {
       conversationHistory: []
     };
   }
-  let conversationHistory = sessionData[sessionId].conversationHistory;
+  let conversationHistory = sessionData[sessionId]?.conversationHistory;
 
   for (let i = 0; i < conversationHistory.length; i++) {
     if (i % 2 !== 0 && conversationHistory[i].role !== "assistant") {
