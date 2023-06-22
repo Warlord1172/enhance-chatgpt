@@ -232,7 +232,6 @@ app.get('*', (req, res) => {
 });
 
 console.log('Middleware configured');
-let globalApiKey; // Define a global variable to store the API key
 // api key handling
 app.post("/api/save-key", (req, res) => {
   const { key } = req.body;
@@ -311,7 +310,7 @@ if (conversationHistory) {
   const isChatModel = model.startsWith("gpt-"); // check if model is a chat model
   console.log(`Model: ${model}, Max Tokens for Model: ${maxTokensForModel}`);
   console.log(`Is Chat Model: ${isChatModel}`);
-  console.log(`Key: ${globalApiKey}`)
+  console.log(`Key: ${sessionData[sessionId].key}`)
   const path = isChatModel
     ? `/v1/chat/completions`
     : `/v1/engines/${model}/completions`;
@@ -322,7 +321,7 @@ if (conversationHistory) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${globalApiKey}`,
+      Authorization: `Bearer ${sessionData[sessionId].key}`,
     },
   };
   console.log(`Path: ${path}`);
