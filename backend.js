@@ -273,15 +273,15 @@ app.get('/api/models', async (req, res) => {
       const models = await getModels(globalApiKey);
       storedModels = models;
       lastFetchTime = now;
-      console.log("Models fetched successfully:", storedModels);
+      //console.log("Models fetched successfully:", storedModels);
     } catch (error) {
-      console.error("Failed to fetch models:", error);
+      //console.error("Failed to fetch models:", error);
       return res.status(500).json({ error: "Failed to fetch models" });
     }
   }
 
   // Return the cached models
-  console.log("Returning cached models:", storedModels);
+  //console.log("Returning cached models:", storedModels);
   res.json(storedModels);
 });
 
