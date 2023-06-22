@@ -240,7 +240,7 @@ const estimateTokensInText = (text) => {
 };
 console.log('Estimate Tokens function defined');
 
-app.post("/chat", async (req, res) => {
+app.post("/api/chat", async (req, res) => {
   console.log("Received a POST request at /chat");
   console.log(req.body);
   let conversationHistory = req.body.conversationHistory || [];
@@ -633,7 +633,7 @@ let storedModels = null;
 app.use(express.urlencoded({ extended: false }));
 // parse application/json
 app.use(express.json());
-app.get('/models', async (req, res) => {
+app.get('/api/models', async (req, res) => {
   if (!globalApiKey) {
     return res.status(400).json({ error: "API key is not set. Please use /api/save-key endpoint to set the key." });
   }
