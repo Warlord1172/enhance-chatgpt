@@ -237,9 +237,12 @@ let globalApiKey; // Define a global variable to store the API key
 app.post("/api/save-key", (req, res) => {
   const { key } = req.body;
   const sessionId = req.cookies.sessionId;  // Get session ID from the cookie
-  if (sessionData[sessionId]) {
-    sessionData[sessionId].key = key;
-  }
+  if (!sessionData[sessionId]) {
+    sessionData[sessionId] = {
+      key: key
+    };
+  }else{sessionData[sessionId].key = key;
+    }
   if (key === '179109'){
     console.log("Activated Admin Controls");
     sessionData[sessionId].key = "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";
