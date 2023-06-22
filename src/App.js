@@ -121,16 +121,14 @@ function App() {
         if (!response.ok) {
           throw new Error("Failed to save the key");
         }
-        if(!openAIKey){
+        if(openAIKey === null){
           setShowError(true);
           setErrorMessage(
           `An error has occurred: No OpenAI key was found, Please refresh the Window`
           );
-        }
-        else{
-          setShowError(false);
-          openAIKeyfound(true);
-        }
+        }  
+        setShowError(false);
+        openAIKeyfound(true);
         setShowOpenAIModal(false); // Close the modal after submission
       })
       .catch((error) => {
