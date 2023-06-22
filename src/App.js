@@ -114,7 +114,7 @@ function App() {
 
   // Function to clear chat
   function clearChat() {
-    setSessionId(uuid.v4()); // generate a new session ID
+    setSessionId(uuidv4()); // generate a new session ID
     setChatThreads([
       ...chatThreads,
       {
