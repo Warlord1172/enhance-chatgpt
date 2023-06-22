@@ -22,7 +22,7 @@ function App() {
     getEngines();
   });
   // Various state variables
-  const [openAIKeyfound] = useState(false);
+  const [openAIKeyFound, setOpenAIKeyFound] = useState(false);
   const [showModal, setShowModal] = useState(true);
   const [showOpenAIModal, setShowOpenAIModal] = useState(false);
   const [systemMessage, setSystemMessage] = useState(
@@ -128,7 +128,7 @@ function App() {
           );
         }  
         setShowError(false);
-        openAIKeyfound(true);
+        setOpenAIKeyFound(true); // Update the state variable to true
         setShowOpenAIModal(false); // Close the modal after submission
       })
       .catch((error) => {
@@ -189,11 +189,14 @@ function App() {
   }
   // Function to get AI model engines from the backend
   async function getEngines() {
-    if(openAIKeyfound === true){
-    console.log("getEngines called");
-    fetch(`https://chatgpt-playground.onrender.com/api/models`)
-      .then((res) => res.json())
-      .then((data) => {
+    if (openAIKeyFound) {
+      console.log("getEngines called");
+      try {
+        const response = await fetch(`https://chatgpt-playground.onrender.com/api/models`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch models");
+        }
+        const data = await response.json();
         console.log("Received data from the backend:", data);
         if (!data.availableModels || data.availableModels.length === 0) {
           setModels([{ id: "No models available", ready: false }]);
@@ -205,12 +208,10 @@ function App() {
           setModels(formattedModels);
         }
         console.log("Models state updated:", Models);
-      })
-      .catch((error) => {
-        console.error("Error fetching models:", error); // Add this line to catch errors
-      });
-    }
-    if(openAIKeyfound === false){
+      } catch (error) {
+        console.error("Error fetching models:", error);
+      }
+    } else {
       console.error("No OpenAI key has been provided");
     }
   }
