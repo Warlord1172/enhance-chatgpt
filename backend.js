@@ -584,7 +584,7 @@ app.listen(port, () => {
 
 
 
-const getModels   = (Key) => {
+const getModels = (Key) => {
   return new Promise((resolve, reject) => {
     const options = {
       hostname: "api.openai.com",
@@ -604,7 +604,7 @@ const getModels   = (Key) => {
       response.on("end", () => {
         try {
           // A list of available models
-          const availableModels = ["gpt-3.5-turbo-0301", "gpt-4-0613", "gpt-4-0314","gpt-3.5-turbo-16k-0613","gpt-3.5-turbo","gpt-3.5-turbo-0613","gpt-4","gpt-3.5-turbo-16k"];
+          const availableModels = ["gpt-3.5-turbo-0301", "gpt-4-0613", "gpt-4-0314", "gpt-3.5-turbo-16k-0613", "gpt-3.5-turbo", "gpt-3.5-turbo-0613", "gpt-4", "gpt-3.5-turbo-16k"];
           const parsedData = JSON.parse(data);
           const engines = parsedData.data;
           const deprecatedModelsList = engines.filter(engine => !availableModels.includes(engine.id));
@@ -618,7 +618,7 @@ const getModels   = (Key) => {
       });
     });
     request.on("error", (err) => {
-      console.error(err);
+      console.error("Request error:", err);
       reject(err);
     });
     request.end();
@@ -629,10 +629,12 @@ const getModels   = (Key) => {
 const cacheDuration = 60 * 60 * 1000; // milliseconds
 let lastFetchTime = null;
 let storedModels = null;
+
 // parse application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: false }));
 // parse application/json
 app.use(express.json());
+
 app.get('/api/models', async (req, res) => {
   if (!globalApiKey) {
     return res.status(400).json({ error: "API key is not set. Please use /api/save-key endpoint to set the key." });
@@ -641,17 +643,21 @@ app.get('/api/models', async (req, res) => {
   const now = Date.now();
   // If the last fetch time is undefined or the cache is expired, fetch the models
   if (!lastFetchTime || (now - lastFetchTime) >= cacheDuration) {
+    console.log("Fetching models from OpenAI API...");
     try {
       const models = await getModels(globalApiKey);
       storedModels = models;
       lastFetchTime = now;
+      console.log("Models fetched successfully:", storedModels);
     } catch (error) {
-      console.error("Failed to fetch models", error);
+      console.error("Failed to fetch models:", error);
       return res.status(500).json({ error: "Failed to fetch models" });
     }
   }
 
   // Return the cached models
+  console.log("Returning cached models:", storedModels);
   res.json(storedModels);
 });
+
 
