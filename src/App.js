@@ -111,7 +111,18 @@ function App() {
       setChatLog(currentThread.chatLog);
     }
   }, [currentThreadId, chatThreads]);
-
+  
+  const downloadChat = (threadId) => {
+  const thread = chatThreads.find((thread) => thread.id === threadId);
+  if (thread) {
+    const conversation = thread.chatLog.map((message) => `${message.user}: ${message.message}`).join('\n');
+    const element = document.createElement('a');
+    const file = new Blob([conversation], { type: 'text/plain' });
+    element.href = URL.createObjectURL(file);
+    element.download = `chat_${threadId}.txt`;
+    element.click();
+  }
+};
   // Function to clear chat
   function clearChat() {
     setSessionId(uuidv4()); // generate a new session ID
@@ -449,6 +460,7 @@ function App() {
           activeThreadId={currentThreadId}
           onSelectThread={(id) => setCurrentThreadId(id)}
           onRemoveThread={removeThread}
+          onHoverThread={downloadChat}
         />
         {
           //<GoogleSignInButton />
