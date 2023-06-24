@@ -46,7 +46,7 @@ const modelTokenLimits = {
 
 const Codelanguage = {
   Python: ["Python", "py"],
-  Javascript: ["Javascript", "js"],
+  Javascript: ["JavaScript", "js"],
   Java: ["Java"],
   csharp: ["csharp"],
   Ruby: ["Ruby"],
