@@ -7,7 +7,7 @@ const app = express();
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 // Set the PORT environment variable to a custom value
-const port = 10080;
+const port = 3080;
 app.use(cookieParser()); // To parse cookies from the request
 const sessionData = {};
 
@@ -129,7 +129,7 @@ const addMessageToConversationHistory = (message, safeTokensForHistory) => {
 app.use(cors());
 app.use(express.json());
 
-app.use(cors({ origin: 'https://chatgpt-playground.onrender.com' }));
+app.use(cors({ origin: 'http://localhost:3080' }));
 
 // Cors handling
 app.use((err, req, res, next) => {
@@ -466,7 +466,9 @@ if (conversationHistory) {
         let finalResponse = {
           message: "",
           codeBlocks: [],
-          tables: []
+          tables: [],
+          imageUrls: [], // Initialize imageUrls to an empty array
+          
         };
         // If there is a code block
         if (responseMessage.includes("```")) {
@@ -527,6 +529,8 @@ if (conversationHistory) {
             message: responseMessage,
             codeBlocks: [], // initialize codeBlocks to an empty array
             tables: [],
+            imageUrls: [], // Initialize imageUrls to an empty array
+            
           };
         }
         // Check if the message contains a table
@@ -537,13 +541,19 @@ if (conversationHistory) {
 
           // Remove tables from the message
           const parsedTables = tables.map((tableString) => {
-            const lines = tableString.split('\n').filter(line => line.trim() !== '');
-            const headers = lines[0].split('|').map(header => header.trim());
-            const rows = lines.slice(1).map(rowString => rowString.split('|').map(cell => cell.trim()));
-          
+            const lines = tableString
+              .split("\n")
+              .filter((line) => line.trim() !== "");
+            const headers = lines[0].split("|").map((header) => header.trim());
+            const rows = lines
+              .slice(1)
+              .map((rowString) =>
+                rowString.split("|").map((cell) => cell.trim())
+              );
+
             return { headers, rows };
           });
-          
+
           finalResponse.tables = parsedTables;
         } else {
           // No table detected in the response
@@ -551,7 +561,16 @@ if (conversationHistory) {
           finalResponse = {
             message: responseMessage,
             codeBlocks: finalResponse.codeBlocks || [], // keep the existing value or initialize to an empty array
+            imageUrls: [], // Initialize imageUrls to an empty array
+            
           };
+        }
+        // Check if the message contains image references
+        const imageRegex = /!\[.*?\]\((.*?)\)/g;
+        let match;
+        while ((match = imageRegex.exec(finalResponse.message)) !== null) {
+          const imageUrl = match[1];
+          finalResponse.imageUrls.push(imageUrl);
         }
         // If there is a message, add it to the conversation history
         // Create the base assistant message
@@ -597,7 +616,8 @@ if (conversationHistory) {
           message: finalResponse.message,
           codeBlocks: finalResponse.codeBlocks,
           tables: finalResponse.tables,
-      });
+          imageUrls: finalResponse.imageUrls,     
+        });
       }
     });
   });
@@ -612,7 +632,7 @@ if (conversationHistory) {
 });
 
 app.listen(port, () => {
-  console.log(`Example app listening at https://chatgpt-playground.onrender.com:${port}`);
+  console.log(`Example app listening at http://localhost:${port}`);
 });
 
 

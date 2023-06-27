@@ -4,15 +4,15 @@ import NumberSlider from "./temperature";
 import "./App.css";
 import "./normal.css";
 import { Modal, Button } from "react-bootstrap";
-import Avatar from './chatgptAvatar';
-import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
+import Avatar from "./chatgptAvatar";
+import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import { useState, useEffect } from "react"; // React's built-in hooks
 import Alert from "react-bootstrap/Alert"; // Bootstrap Alert for error messages
 import ChatThreadList from "./ChatThreadList";
 import ResizableInput from "./ResizableTextArea";
 //import TableComponent from "./tablecomponent";
-import MarkdownIt from 'markdown-it';
-import parse from 'html-react-parser';
+import MarkdownIt from "markdown-it";
+import parse from "html-react-parser";
 import fetch from "node-fetch";
 import { v4 as uuidv4 } from "uuid";
 //import axios from 'axios';
@@ -57,7 +57,7 @@ function App() {
   const handleOpenAIKeySubmit = () => {
     console.log("OpenAI key submitted:", openAIKey);
 
-    fetch(`https://chatgpt-playground.onrender.com/api/save-key`, {
+    fetch(`/api/save-key`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -111,18 +111,20 @@ function App() {
       setChatLog(currentThread.chatLog);
     }
   }, [currentThreadId, chatThreads]);
-  
+
   const downloadChat = (threadId) => {
-  const thread = chatThreads.find((thread) => thread.id === threadId);
-  if (thread) {
-    const conversation = thread.chatLog.map((message) => `${message.user}: ${message.message}`).join('\n');
-    const element = document.createElement('a');
-    const file = new Blob([conversation], { type: 'text/plain' });
-    element.href = URL.createObjectURL(file);
-    element.download = `chat_${threadId}.txt`;
-    element.click();
-  }
-};
+    const thread = chatThreads.find((thread) => thread.id === threadId);
+    if (thread) {
+      const conversation = thread.chatLog
+        .map((message) => `${message.user}: ${message.message}`)
+        .join("\n");
+      const element = document.createElement("a");
+      const file = new Blob([conversation], { type: "text/plain" });
+      element.href = URL.createObjectURL(file);
+      element.download = `chat_${threadId}.txt`;
+      element.click();
+    }
+  };
   // Function to clear chat
   function clearChat() {
     setSessionId(uuidv4()); // generate a new session ID
@@ -222,26 +224,23 @@ function App() {
       setConversationHistory((prevHistory) => prevHistory.slice(1));
     }
     try {
-      const response = await fetch(
-        `https://chatgpt-playground.onrender.com/api/chat`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            message: input,
-            currentModel: currentModel,
-            isChatModel: currentModel.startsWith("gpt-"),
-            systemRole: "system",
-            systemMessage: systemMessage,
-            updatedSystemMessage: updatedSystemMessage,
-            conversationHistory: messages, // send the prepared messages array
-            temperature: temperature,
-            sessionId: sessionId, // include the sessionId here
-          }),
-        }
-      );
+      const response = await fetch(`/api/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: input,
+          currentModel: currentModel,
+          isChatModel: currentModel.startsWith("gpt-"),
+          systemRole: "system",
+          systemMessage: systemMessage,
+          updatedSystemMessage: updatedSystemMessage,
+          conversationHistory: messages, // send the prepared messages array
+          temperature: temperature,
+          sessionId: sessionId, // include the sessionId here
+        }),
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -562,4 +561,3 @@ const ChatMessage = ({ message }) => {
   }
 };
 export default App;
-
