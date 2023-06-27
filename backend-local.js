@@ -572,6 +572,7 @@ if (conversationHistory) {
           const imageUrl = match[1];
           finalResponse.imageUrls.push(imageUrl);
         }
+        console.log(`identified image:${finalResponse.imageUrls}`)
         // If there is a message, add it to the conversation history
         // Create the base assistant message
         let assistantMessage = {
