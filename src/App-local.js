@@ -57,7 +57,7 @@ function App() {
   const handleOpenAIKeySubmit = () => {
     console.log("OpenAI key submitted:", openAIKey);
 
-    fetch(`/api/save-key`, {
+    fetch(`/API/save-key`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -153,7 +153,7 @@ function App() {
     if (openAIKeyFound) {
       console.log("getEngines called");
       try {
-        const response = await fetch(`/api/models`);
+        const response = await fetch(`/API/models`);
         if (!response.ok) {
           throw new Error("Failed to fetch models");
         }
@@ -224,7 +224,7 @@ function App() {
       setConversationHistory((prevHistory) => prevHistory.slice(1));
     }
     try {
-      const response = await fetch(`/api/chat`, {
+      const response = await fetch(`/API/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

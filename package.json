@@ -46,7 +46,7 @@
     "test-server": "echo \"Error: no test specified\" && exit 1",
     "start": "npm run start-server",
     "build": "npm run build-client",
-    "start-Localbuild": "concurrently \"npm run start-client\" \"node backend-local.js\""
+    "Debug-Mode": "concurrently \"npm run start-client\" \"node backend-local.js\""
   },
   "eslintConfig": {
     "extends": [
