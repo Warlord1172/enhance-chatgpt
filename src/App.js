@@ -57,7 +57,7 @@ function App() {
   const handleOpenAIKeySubmit = () => {
     console.log("OpenAI key submitted:", openAIKey);
 
-    fetch(`http://localhost:3080/api/save-key`, {
+    fetch(`/api/save-key`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -223,7 +223,7 @@ function App() {
     }
     try {
       const response = await fetch(
-        `http://localhost:3080/api/chat`,
+        `/api/chat`,
         {
           method: "POST",
           headers: {
