@@ -57,7 +57,7 @@ function App() {
   const handleOpenAIKeySubmit = () => {
     console.log("OpenAI key submitted:", openAIKey);
 
-    fetch(`https://chatgpt-playground.onrender.com/api/save-key`, {
+    fetch(`http://localhost:3080/api/save-key`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -223,7 +223,7 @@ function App() {
     }
     try {
       const response = await fetch(
-        `https://chatgpt-playground.onrender.com/api/chat`,
+        `http://localhost:3080/api/chat`,
         {
           method: "POST",
           headers: {
