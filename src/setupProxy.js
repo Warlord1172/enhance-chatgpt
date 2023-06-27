@@ -4,7 +4,7 @@ module.exports = function(app) {
     app.use(
     '/api',
     createProxyMiddleware({
-        target: 'https://chatgpt-playground.onrender.com:10080',
+        target: 'http://localhost:3080',
         changeOrigin: true,
     })
     );

@@ -45,7 +45,8 @@
     "start-server": "node backend.js",
     "test-server": "echo \"Error: no test specified\" && exit 1",
     "start": "npm run start-server",
-    "build": "npm run build-client"
+    "build": "npm run build-client",
+    "start-build": "concurrently \"npm run start-client\" \"npm run start-server\""
   },
   "eslintConfig": {
     "extends": [
