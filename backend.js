@@ -197,7 +197,7 @@ app.use(express.urlencoded({ extended: false }));
 // parse application/json
 app.use(express.json());
 
-app.get('/api/models', async (req, res) => {
+app.get('api/models', async (req, res) => {
   const sessionId = req.cookies.sessionId;
   if (!sessionId || !sessionData[sessionId] || !sessionData[sessionId].key) {
     return res.status(400).json({ error: "API key is not set. Please use /api/save-key endpoint to set the key." });
@@ -233,7 +233,7 @@ app.get('*', (req, res) => {
 
 console.log('Middleware configured');
 // api key handling
-app.post("/api/save-key", (req, res) => {
+app.post("api/save-key", (req, res) => {
   const { key } = req.body;
   const sessionId = req.cookies.sessionId;  // Get session ID from the cookie
   sessionData[sessionId] = {
@@ -263,7 +263,7 @@ const estimateTokensInText = (text) => {
 };
 console.log('Estimate Tokens function defined');
 
-app.post("/api/chat", async (req, res) => {
+app.post("api/chat", async (req, res) => {
   console.log("Received a POST request at /chat");
   console.log(req.body);
   const sessionId = req.headers.sessionid || req.cookies.sessionId;
