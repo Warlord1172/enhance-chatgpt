@@ -216,17 +216,21 @@ background-color: rgba(0, 0, 0, 0.041); /* Change this to your desired transpare
   box-shadow: 0 0 8px 0 rgb(0,0,0,0.25);
 }
 
-.chatbox{
+.Chat-box-section {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   flex:1;
   background-image: linear-gradient(to bottom,  #ffffff 0%, #757575 30%, #202020 90%, #000000 100%  );
   position: relative;
-  overflow-y: auto; /* Add scrollbar if content overflows */
+  overflow-y: auto;
   animation: movingGradient 1s linear infinite alternate;
 }
 
+.inverted {
+  background-image: linear-gradient(to bottom, #000000 0%, #202020 70%, #757575 150%, #ffffff 180%);
+  transition: background-image 1s ease-in-out;
+}
 
 .chat-log{
   flex-grow: 1;
@@ -428,6 +432,31 @@ background-color: rgba(0, 0, 0, 0.041); /* Change this to your desired transpare
   color: #e9e9e9;
 }
 
+.image-section {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.image-section img {
+  max-width: 100%;
+  height: auto;
+  margin: 0.5rem;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.loading-spinner img {
+  max-width: 100%;
+  height: auto;
+}
 
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
@@ -471,3 +500,4 @@ background-color: rgba(0, 0, 0, 0.041); /* Change this to your desired transpare
     background-position: 80% 80%;
   }
 }
+

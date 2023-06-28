@@ -468,7 +468,6 @@ if (conversationHistory) {
           codeBlocks: [],
           tables: [],
           imageUrls: [], // Initialize imageUrls to an empty array
-          
         };
         // If there is a code block
         if (responseMessage.includes("```")) {
@@ -530,7 +529,6 @@ if (conversationHistory) {
             codeBlocks: [], // initialize codeBlocks to an empty array
             tables: [],
             imageUrls: [], // Initialize imageUrls to an empty array
-            
           };
         }
         // Check if the message contains a table
@@ -562,17 +560,16 @@ if (conversationHistory) {
             message: responseMessage,
             codeBlocks: finalResponse.codeBlocks || [], // keep the existing value or initialize to an empty array
             imageUrls: [], // Initialize imageUrls to an empty array
-            
           };
         }
         // Check if the message contains image references
-        const imageRegex = /!\[.*?\]\((.*?)\)/g;
+        const imageRegex = /https?:\/\/.*\.(?:png|jpg|jpeg|gif)/g;
         let match;
         while ((match = imageRegex.exec(finalResponse.message)) !== null) {
-          const imageUrl = match[1];
+          const imageUrl = match[0];
           finalResponse.imageUrls.push(imageUrl);
         }
-        console.log(`identified image:${finalResponse.imageUrls}`)
+        console.log(`identified image: ${finalResponse.imageUrls}`);
         // If there is a message, add it to the conversation history
         // Create the base assistant message
         let assistantMessage = {
@@ -581,29 +578,29 @@ if (conversationHistory) {
           codeBlocks: [], // Default to an empty array
         };
 
-    // If there were code blocks, add each to the codeBlocks property of the assistant message
-    if (finalResponse.codeBlocks.length > 0) {
-      finalResponse.codeBlocks.forEach((block) => {
-          // Only add the block if there's code in it
-          if (block.code && block.code.trim() !== "") {
+        // If there were code blocks, add each to the codeBlocks property of the assistant message
+        if (finalResponse.codeBlocks.length > 0) {
+          finalResponse.codeBlocks.forEach((block) => {
+            // Only add the block if there's code in it
+            if (block.code && block.code.trim() !== "") {
               assistantMessage.codeBlocks.push({
-                  text: block.code,
-                  code: true,
-                  language: block.language,
+                text: block.code,
+                code: true,
+                language: block.language,
               });
+            }
+          });
+        } else {
+          let line = finalResponse.responseMessage || ""; // if responseMessage is undefined, assign an empty string to line
+          if (line.startsWith("```")) {
+            const language = line.slice(3) || "Not Identified";
+            assistantMessage.codeBlocks.push({
+              text: "",
+              code: true,
+              language: language,
+            });
           }
-      });
-  }else{
-    let line = finalResponse.responseMessage || ""; // if responseMessage is undefined, assign an empty string to line
-    if (line.startsWith("```")) {
-      const language = line.slice(3) || "Not Identified";
-      assistantMessage.codeBlocks.push({
-        text: "",
-        code: true,
-        language: language,
-      });
-    }
-  }     
+        }
         // Add the assistant message to the conversation history only if there's content or code blocks
         if (
           assistantMessage.content.trim() !== "" ||
@@ -617,7 +614,7 @@ if (conversationHistory) {
           message: finalResponse.message,
           codeBlocks: finalResponse.codeBlocks,
           tables: finalResponse.tables,
-          imageUrls: finalResponse.imageUrls,     
+          imageUrls: finalResponse.imageUrls,
         });
       }
     });
