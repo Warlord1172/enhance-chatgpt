@@ -93,6 +93,21 @@
   text-align: left;
   transition: ease 0.25s all;
 }
+.scroll-to-latest{
+  background-color: #0000008e;
+  padding: 12px;
+  margin-top: 1rem;
+  color: #ffffff;
+  border: 1px solid rgb(0, 0, 0);
+  border-radius: 5px;
+  text-align: center;
+  transition: ease 0.25s all;
+  position: fixed;
+}
+
+.scroll-to-latest:hover{
+  border-color: #fff;
+}
 
 .System-Submit-Button{
   padding: 10px;
@@ -240,8 +255,19 @@ background-color: rgba(0, 0, 0, 0.041); /* Change this to your desired transpare
   gap: 1em;
   text-align: left;
 }
-
-
+.Code-Block-Visibility {
+  background-color: #282c34;  /* grey */
+  border: none;
+  margin: 1rem;
+  color: white;
+  padding: 12px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.25s ease-in;
+}
 .code-block {
   font-family: 'Ubuntu', sans-serif;
   background-color: #000;
@@ -252,8 +278,11 @@ background-color: rgba(0, 0, 0, 0.041); /* Change this to your desired transpare
   color: #000;
   border-radius: 5px;
   filter: blur(1px);
-  transition: all 0.25s ease;
+  transition: all 0.25s ease; 
+
 }
+
+
 .code-block:hover{
   border: 5px solid #fff;
   filter: blur(0px);

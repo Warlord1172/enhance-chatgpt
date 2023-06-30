@@ -54,25 +54,24 @@ function App() {
     setIsChat(!isChat);
     toggleInverted();
   };
-  
+
   function toggleInverted() {
-    const chatBox = document.querySelector('.Chat-box-section');
-    
+    const chatBox = document.querySelector(".Chat-box-section");
+
     // Toggle the 'inverted' class
-    chatBox.classList.toggle('inverted');
-    
+    chatBox.classList.toggle("inverted");
+
     // Trigger a reflow to apply the style changes immediately
     void chatBox.offsetWidth;
-    
+
     // Add a transition class to enable the transition effect
-    chatBox.classList.add('transition');
-    
+    chatBox.classList.add("transition");
+
     // Remove the transition class after a short delay to complete the transition
     setTimeout(() => {
-      chatBox.classList.remove('transition');
+      chatBox.classList.remove("transition");
     }, 1000);
   }
-
 
   // key handling
   // Update the input value in state whenever it changes
@@ -328,6 +327,17 @@ function App() {
     }
   }
 
+  // chat log functions
+  const chatBoxSection = document.querySelector(".Chat-box-section");
+
+  const scrollToBottom = () => {
+    chatBoxSection.scrollTo({
+      top: chatBoxSection.scrollHeight,
+      behavior: "smooth",
+    });
+  };
+
+
   // Function to resize the window
   useEffect(() => {
     const setWindowSize = () => {
@@ -362,7 +372,6 @@ function App() {
     setShowModal(false);
     setShowOpenAIModal(true);
   };
-
   const handleCloseOpenAIModal = () => {
     setShowOpenAIModal(false);
   };
@@ -509,6 +518,9 @@ function App() {
       </aside>
       <div className={`Chat-box-section ${isChat ? "" : "inverted"}`}>
         <section className="chatbox">
+          <button className="scroll-to-latest" onClick={scrollToBottom}>
+            Scroll to Latest
+          </button>
           <div className="chat-log">
             {chatLog.map((message, index) => {
               if (message.codeBlocks) {
@@ -545,82 +557,80 @@ function App() {
   );
 }
 const ChatMessage = ({ message }) => {
-    const md = new MarkdownIt();
+  const md = new MarkdownIt();
 
-    const extractTables = (markdownString) => {
-        const htmlString = md.render(markdownString);
-        const htmlElements = parse(htmlString);
-        return htmlElements.filter((element) => element.type === "table");
-    };
-
-    const isChatGPT = message.user === "assistant"; // Determine if the message is from ChatGPT
-
-    if (message.codeBlocks) {
-        return (
-            <div className={`chat-message ${isChatGPT && "chatgpt"}`}>
-                <div className="chat-message-center">
-                    <div className={`avatar ${isChatGPT && "chatgpt"}`}>
-                        {isChatGPT ? (
-                            <Avatar isChatGPT={true} />
-                        ) : (
-                            <Avatar isChatGPT={false} />
-                        )}
-                    </div>
-                    <div className="message">
-                        <ReactMarkdown>{message.message}</ReactMarkdown>
-                        <CodeBlock
-                            code={message.codeBlocks.code}
-                            language={message.codeBlocks.language}
-                        />
-                    </div>
-                </div>
+  const extractTables = (markdownString) => {
+    const htmlString = md.render(markdownString);
+    const htmlElements = parse(htmlString);
+    return htmlElements.filter((element) => element.type === "table");
+  };
+  const isChatGPT = message.user === "assistant"; // Determine if the message is from ChatGPT
+  
+  if (message.codeBlocks) {
+    return (
+      <div className={`chat-message ${isChatGPT && "chatgpt"}`}>
+        <div className="chat-message-center">
+          <div className={`avatar ${isChatGPT && "chatgpt"}`}>
+            {isChatGPT ? (
+              <Avatar isChatGPT={true} />
+            ) : (
+              <Avatar isChatGPT={false} />
+            )}
+          </div>
+          <div className="message">
+            <ReactMarkdown>{message.message}</ReactMarkdown>
+            <CodeBlock
+              code={message.codeBlocks.code}
+              language={message.codeBlocks.language}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  } else {
+    const markdownString = message.message;
+    const tables = extractTables(markdownString);
+    return (
+      <div className={`chat-message ${isChatGPT && "chatgpt"}`}>
+        <div className="chat-message-center">
+          <div className={`avatar ${isChatGPT && "chatgpt"}`}>
+            {isChatGPT ? (
+              <Avatar isChatGPT={true} />
+            ) : (
+              <Avatar isChatGPT={false} />
+            )}
+          </div>
+          <div className="message">
+            <ReactMarkdown>{message.message}</ReactMarkdown>
+            {message.imageUrls && message.imageUrls.length > 0 && (
+              <div className="image-section">
+                {message.imageUrls.map((imageUrl, index) => (
+                  <img
+                    src={imageUrl}
+                    key={index}
+                    alt={`drawing ${index + 1}`}
+                  />
+                ))}
+                {message.imageUrls.length === 0 && (
+                  <div className="loading-spinner">
+                    {" "}
+                    <img
+                      src="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif"
+                      alt="loading spinner"
+                    />{" "}
+                  </div>
+                )}
+              </div>
+            )}
+            <div className="Table">
+              {tables.map((table, index) => (
+                <div key={index}>{table}</div>
+              ))}
             </div>
-        );
-    } else {
-        const markdownString = message.message;
-        const tables = extractTables(markdownString);
-
-        return (
-            <div className={`chat-message ${isChatGPT && "chatgpt"}`}>
-                <div className="chat-message-center">
-                    <div className={`avatar ${isChatGPT && "chatgpt"}`}>
-                        {isChatGPT ? (
-                            <Avatar isChatGPT={true} />
-                        ) : (
-                            <Avatar isChatGPT={false} />
-                        )}
-                    </div>
-                    <div className="message">
-                        <ReactMarkdown>{message.message}</ReactMarkdown>
-                        {message.imageUrls && message.imageUrls.length > 0 && (
-                            <div className="image-section">
-                                {message.imageUrls.map((imageUrl, index) => (
-                                    <img
-                                        src={imageUrl}
-                                        key={index}
-                                        alt={`drawing ${index + 1}`}
-                                    />
-                                ))}
-                                {message.imageUrls.length === 0 && (
-                                    <div className="loading-spinner">
-                                        {" "}
-                                        <img
-                                            src="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif"
-                                            alt="loading spinner"
-                                        />{" "}
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                        <div className="Table">
-                            {tables.map((table, index) => (
-                                <div key={index}>{table}</div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
+          </div>
+        </div>
+      </div>
+    );
+  }
 };
 export default App;
