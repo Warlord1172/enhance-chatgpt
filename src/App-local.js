@@ -6,7 +6,7 @@ import "./normal.css";
 import { Modal, Button } from "react-bootstrap";
 import Avatar from "./chatgptAvatar";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
-import { useState, useEffect } from "react"; // React's built-in hooks
+import { useState, useEffect} from "react"; // React's built-in hooks
 import Alert from "react-bootstrap/Alert"; // Bootstrap Alert for error messages
 import ChatThreadList from "./ChatThreadList";
 import ResizableInput from "./ResizableTextArea";
@@ -44,6 +44,7 @@ function App() {
   const [tempTemperature, setTempTemperature] = useState(temperature); // temporary temperature state
   const [isLoading, setIsLoading] = useState(false); // Loading state
   const [openAIKey, setOpenAIKey] = useState(""); // Add a new state variable to store the input value
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // hamburger menu
 
   // Generate a new session ID when the component first mounts
   useEffect(() => {
@@ -72,6 +73,10 @@ function App() {
       chatBox.classList.remove("transition");
     }, 1000);
   }
+  // hamburger menu
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
 
   // key handling
   // Update the input value in state whenever it changes
@@ -328,15 +333,13 @@ function App() {
   }
 
   // chat log functions
-  const chatBoxSection = document.querySelector(".Chat-box-section");
 
   const scrollToBottom = () => {
-    chatBoxSection.scrollTo({
-      top: chatBoxSection.scrollHeight,
+    window.scrollTo({
+      top: document.body.scrollHeight,
       behavior: "smooth",
     });
   };
-
 
   // Function to resize the window
   useEffect(() => {
@@ -353,12 +356,30 @@ function App() {
       window.removeEventListener("resize", setWindowSize);
     };
   }, []);
+
   useEffect(() => {
     const setWindowZoom = () => {
       document.documentElement.style.zoom = "80%";
     };
 
     setWindowZoom();
+  }, []);
+
+  // Add a state variable to track the menu width
+  const [isMenuMaxWidth, setIsMenuMaxWidth] = useState(false);
+
+  // Add a useEffect hook to check the menu width on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMenuMaxWidth(window.innerWidth <= 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Check the menu width on initial load
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
   // effect for temperature
   useEffect(() => {
@@ -442,83 +463,97 @@ function App() {
         <Alert.Heading>Error</Alert.Heading>
         <p>{errorMessage}</p>
       </Alert>
-      <aside className="sidemenu">
-        <div className="side-menu-button" onClick={clearChat}>
-          <span>+</span>
-          New Chat
-        </div>
-        <button onClick={handleSwitch}>{isChat ? "Chat" : "Image"}</button>
-        <header className="model-header">
-          <p>
-            Selected Model:{" "}
-            <span style={{ color: "green" }}>{currentModel}</span>
-          </p>
-        </header>
-        <div className="models">
-          {Models.length > 0 ? (
-            <select
-              className="Model-list"
-              onChange={(e) => {
-                console.log("setting to..", e.target.value);
-                setCurrentModel(e.target.value);
-              }}
-            >
-              {Models.map((model) => (
-                <option key={model.id} value={model.id} disabled={!model.ready}>
-                  {model.id}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <p>Loading models...</p>
-          )}
-        </div>
-        <div className="system-message-settings">
-          <p>System Message Settings</p>
-          <div>
-            <label>Content: </label>
-            <textarea
-              placeholder={systemMessage}
-              onChange={(e) => setSystemMessage(e.target.value)}
-            />
-          </div>
-          <NumberSlider
-            minValue={0}
-            maxValue={1}
-            initialValue={tempTemperature}
-            onChange={setTempTemperature}
-          />
-          <button
-            onClick={() => {
-              handletempSubmit();
-              console.log(systemMessage);
-              setUpdatedSystemMessage(true);
-              setSubmitConfirm("Changes have been submitted");
-              console.log(`temperature set to: ${temperature}`);
-            }}
-            className="System-Submit-Button"
-          >
-            Update System Message
-          </button>
 
-          <div className="confirm-msg">
-            {updatedSystemMessage && submitConfirm}
+      {/* Side menu */}
+      {isMenuOpen && (
+        <aside className="sidemenu">
+          <div className="side-menu-button" onClick={clearChat}>
+            <span>+</span>
+            New Chat
           </div>
-        </div>
-        <ChatThreadList
-          threads={chatThreads}
-          activeThreadId={currentThreadId}
-          onSelectThread={(id) => setCurrentThreadId(id)}
-          onRemoveThread={removeThread}
-          onHoverThread={downloadChat}
-        />
-        {
-          //<GoogleSignInButton />
-        }
-      </aside>
+          <button onClick={handleSwitch}>{isChat ? "Chat" : "Image"}</button>
+          <header className="model-header">
+            <p>
+              Selected Model:{" "}
+              <span style={{ color: "green" }}>{currentModel}</span>
+            </p>
+          </header>
+          <div className="models">
+            {Models.length > 0 ? (
+              <select
+                className="Model-list"
+                onChange={(e) => {
+                  console.log("setting to..", e.target.value);
+                  setCurrentModel(e.target.value);
+                }}
+              >
+                {Models.map((model) => (
+                  <option
+                    key={model.id}
+                    value={model.id}
+                    disabled={!model.ready}
+                  >
+                    {model.id}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <p>Loading models...</p>
+            )}
+          </div>
+          <div className="system-message-settings">
+            <p>System Message Settings</p>
+            <div>
+              <label>Content: </label>
+              <textarea
+                placeholder={systemMessage}
+                onChange={(e) => setSystemMessage(e.target.value)}
+              />
+            </div>
+            <NumberSlider
+              minValue={0}
+              maxValue={1}
+              initialValue={tempTemperature}
+              onChange={setTempTemperature}
+            />
+            <button
+              onClick={() => {
+                handletempSubmit();
+                console.log(systemMessage);
+                setUpdatedSystemMessage(true);
+                setSubmitConfirm("Changes have been submitted");
+                console.log(`temperature set to: ${temperature}`);
+              }}
+              className="System-Submit-Button"
+            >
+              Update System Message
+            </button>
+
+            <div className="confirm-msg">
+              {updatedSystemMessage && submitConfirm}
+            </div>
+          </div>
+          <ChatThreadList
+            threads={chatThreads}
+            activeThreadId={currentThreadId}
+            onSelectThread={(id) => setCurrentThreadId(id)}
+            onRemoveThread={removeThread}
+            onHoverThread={downloadChat}
+          />
+          {
+            //<GoogleSignInButton />
+          }
+        </aside>
+      )}
+      {/* Hamburger menu button */}
+      <button className="hamburger" onClick={toggleMenu}>
+        <span className="line"></span>
+        <span className="line"></span>
+        <span className="line"></span>
+      </button>
       <div className={`Chat-box-section ${isChat ? "" : "inverted"}`}>
         <section className="chatbox">
-          <button className="scroll-to-latest" onClick={scrollToBottom}>
+          <button className={`scroll-to-latest ${isMenuMaxWidth ? "" : "visible"}`} onClick={scrollToBottom}>
             Scroll to Latest
           </button>
           <div className="chat-log">
