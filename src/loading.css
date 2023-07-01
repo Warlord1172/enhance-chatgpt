@@ -1,11 +1,17 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
 .main-loading-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%; 
-    width: 100%; 
-    background: #333333;
-}  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* changed from 100% to 100vh */
+  width: 100%;
+  background: #333333;
+}
 
 .main-loading-animation {
     position: relative;
@@ -14,7 +20,8 @@
     border-radius: 50%;
     background: linear-gradient(#f07e6e, #84cdfa, #5ad1cd);
     animation: loadingAnimation 1.2s linear infinite;
-}
+    margin: 0 auto; /* added to center the animation horizontally */
+  }
   
   @keyframes loadingAnimation {
     0% {
@@ -60,11 +67,15 @@
     border-radius: 50%;
 }
 
-  .main-loading-text {
+main-loading-text {
     font-size: 16px;
     font-weight: bold;
-    color: linear-gradient(to right,#000000 0%, #202020 33%, #757575 66%, #ffffff 99%);;
-    animation: textAnimation 2s infinite;
+    background: linear-gradient(to right, #000000 0%, #202020 33%, #757575 66%, #ffffff 99%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: textAnimation 1s infinite linear; /* changed duration to 1s and added linear timing function */
+    text-align: center; /* added to center the text horizontally */
   }
   
   @keyframes textAnimation {
