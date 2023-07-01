@@ -420,6 +420,8 @@ function App() {
         <Alert.Heading>Error</Alert.Heading>
         <p>{errorMessage}</p>
       </Alert>
+      {/* Side menu */}
+      {isMenuOpen && (
       <aside className="sidemenu">
         <div className="side-menu-button" onClick={clearChat}>
           <span>+</span>
@@ -493,6 +495,7 @@ function App() {
           //<GoogleSignInButton />
         }
       </aside>
+      )}
       {/* Hamburger menu button */}
       <button className="hamburger" onClick={toggleMenu}>
         <span className="line"></span>
