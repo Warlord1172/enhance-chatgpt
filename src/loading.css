@@ -3,17 +3,16 @@
     justify-content: center;
     align-items: center;
     height: 100vh;
+    background: #333333;
   }
   
   .main-loading-animation {
-    width: 50px;
-    height: 50px;
-    border: 3px solid white;
-    border-top-color: transparent;
-    border-radius: 50%;    
-    margin: 0 auto; /* Center the loading animation horizontally */
-    margin-top: 20px; /* Add top margin for spacing */
-    animation: loadingAnimation 2s infinite;
+    position: relative;
+    width: 350px;
+    height: 350px;
+    border-radius: 50%;
+    background: linear-gradient(#f07e6e, #84cdfa, #5ad1cd);
+    animation: loadingAnimation 1.2s linear infinite;
   }
   
   @keyframes loadingAnimation {
@@ -24,7 +23,42 @@
         transform: rotate(360deg);
       }
   }
-  
+  .main-loading-animation span {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: linear-gradient(#f07e6e, #84cdfa, #5ad1cd);
+}
+
+.main-loading-animation span:nth-child(1) {
+    filter: blur(5px);
+}
+
+.main-loading-animation span:nth-child(2) {
+    filter: blur(10px);
+}
+
+.main-loading-animation span:nth-child(3) {
+    filter: blur(25px);
+}
+
+.main-loading-animation span:nth-child(4) {
+    filter: blur(50px);
+}
+
+.main-loading-animation:after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    background: #f1f1f1;
+    border: solid white 10px;
+    border-radius: 50%;
+}
+
   .main-loading-text {
     font-size: 16px;
     font-weight: bold;
