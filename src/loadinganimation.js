@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 const Loading = () => {
   return (
     <div className="main-loading-container">
-      <div className="main-loading-animation">  
+      <div className="main-loading-animation">
         <span></span>
         <span></span>
         <span></span>
