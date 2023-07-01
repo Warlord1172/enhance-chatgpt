@@ -3,6 +3,7 @@ import CodeBlock from "./codeblock";
 import NumberSlider from "./temperature";
 import "./App.css";
 import "./normal.css";
+import "./loading.css";
 import { Modal, Button } from "react-bootstrap";
 import Avatar from './chatgptAvatar';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
@@ -15,6 +16,7 @@ import MarkdownIt from 'markdown-it';
 import parse from 'html-react-parser';
 import fetch from "node-fetch";
 import { v4 as uuidv4 } from "uuid";
+import Loading from "./loadinganimation";
 //import axios from 'axios';
 // Main application component
 function App() {
@@ -353,8 +355,19 @@ function App() {
   const handleCloseOpenAIModal = () => {
     setShowOpenAIModal(false);
   };
+  // App loading 
+  const [apploading, setapploading] = useState(true);
+  useEffect(() => {
+    const loadingTimeout = setTimeout(() => {
+      setapploading(false);
+    }, 3000); // Simulating a 3-second loading delay
+
+    return () => clearTimeout(loadingTimeout);
+  }, []);
   // Render the application
   return (
+  <div className="app-loading-container">
+    {apploading ? <Loading /> :
     <div className="App">
       {/* Other parts of your application */}
       {/* Modal for introduction and login options */}
@@ -539,9 +552,10 @@ function App() {
         </div>
       </section>
       </div>
+    </div>}
     </div>
-  );
-}
+    );
+};
 const ChatMessage = ({ message }) => {
   const md = new MarkdownIt();
 
