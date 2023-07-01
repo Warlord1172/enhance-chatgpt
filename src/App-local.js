@@ -378,7 +378,7 @@ function App() {
   const [apploading, setapploading] = useState(true);
   useEffect(() => {
     const loadingTimeout = setTimeout(() => {
-      setapploading(false);
+      setapploading(true);
     }, 3000); // Simulating a 3-second loading delay
 
     return () => clearTimeout(loadingTimeout);

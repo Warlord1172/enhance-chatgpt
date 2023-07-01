@@ -1,5 +1,4 @@
 import './loading.css';
-import React, { useState, useEffect } from 'react';
 
 const Loading = () => {
   return (
@@ -7,6 +6,7 @@ const Loading = () => {
       <div className="main-loading-animation">
         <span></span>
         <span></span>
+        
         <span></span>
         <span></span>
       </div>
