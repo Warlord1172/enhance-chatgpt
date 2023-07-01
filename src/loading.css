@@ -63,21 +63,15 @@
   .main-loading-text {
     font-size: 16px;
     font-weight: bold;
-    color: #333333;
+    color: linear-gradient(to right,#000000 0%, #202020 33%, #757575 66%, #ffffff 99%);;
     animation: textAnimation 2s infinite;
   }
   
   @keyframes textAnimation {
     0% {
-      opacity: 0;
-      transform: translateX(-100%);
-    }
-    50% {
-      opacity: 1;
-      transform: translateX(0%);
-    }
-    100% {
-      opacity: 0;
-      transform: translateX(100%);
-    }
+        background-position: 0% 0%;
+      }
+      100% {
+        background-position: 100% 100%;
+      }
   }
