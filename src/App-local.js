@@ -23,7 +23,6 @@ function App() {
     getEngines();
   });
   // Various state variables
-  const [isChat, setIsChat] = useState(true);
   const [sessionId, setSessionId] = useState(null);
   const [openAIKeyFound, setOpenAIKeyFound] = useState(false);
   const [showModal, setShowModal] = useState(true);
@@ -50,29 +49,6 @@ function App() {
   useEffect(() => {
     setSessionId(uuidv4());
   }, []);
-  // switch button handling
-  const handleSwitch = () => {
-    setIsChat(!isChat);
-    toggleInverted();
-  };
-
-  function toggleInverted() {
-    const chatBox = document.querySelector(".Chat-box-section");
-
-    // Toggle the 'inverted' class
-    chatBox.classList.toggle("inverted");
-
-    // Trigger a reflow to apply the style changes immediately
-    void chatBox.offsetWidth;
-
-    // Add a transition class to enable the transition effect
-    chatBox.classList.add("transition");
-
-    // Remove the transition class after a short delay to complete the transition
-    setTimeout(() => {
-      chatBox.classList.remove("transition");
-    }, 1000);
-  }
   // hamburger menu
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -471,7 +447,6 @@ function App() {
             <span>+</span>
             New Chat
           </div>
-          <button onClick={handleSwitch}>{isChat ? "Chat" : "Image"}</button>
           <header className="model-header">
             <p>
               Selected Model:{" "}
@@ -551,7 +526,7 @@ function App() {
         <span className="line"></span>
         <span className="line"></span>
       </button>
-      <div className={`Chat-box-section ${isChat ? "" : "inverted"}`}>
+      <div className={`Chat-box-section`}>
         <section className="chatbox">
           <button className={`scroll-to-latest ${isMenuMaxWidth ? "" : "visible"}`} onClick={scrollToBottom}>
             Scroll to Latest

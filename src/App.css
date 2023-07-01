@@ -101,6 +101,14 @@
 }
 }
 
+.Theme Switch{
+  padding: 12px;
+  border: 1px solid white;
+  border-radius: 5px;
+  text-align: left;
+  transition: ease 0.25s all;
+}
+
 .side-menu-button{
   padding: 12px;
   border: 1px solid white;
@@ -286,15 +294,12 @@ background-color: rgba(0, 0, 0, 0.041); /* Change this to your desired transpare
   flex-direction: column;
   justify-content: space-between;
   flex:1;
-  background-image: linear-gradient(to bottom,  #ffffff 0%, #757575 30%, #202020 90%, #000000 100%  );
+  background-image: linear-gradient(to bottom, #ffffff 0%, #757575 16.66%, #202020 33.33%, #000000 50%, #202020 66.66%, #757575 73.33%, #ffffff 100%);
   position: relative;
+  background-size: 100% 400%;
   overflow-y: auto;
-  animation: movingGradient 1s linear infinite alternate;
-}
-
-.inverted {
-  background-image: linear-gradient(to bottom, #000000 0%, #202020 70%, #757575 150%, #ffffff 180%);
-  transition: background-image 1s ease-in-out;
+  animation: movingGradient linear 50s infinite ;
+  animation-fill-mode: forwards;
 }
 
 .chat-log{
@@ -570,13 +575,12 @@ background-color: rgba(0, 0, 0, 0.041); /* Change this to your desired transpare
   }
 }
 
-@keyframes movingGradient {
-  from {
-    background-position: 0 0;
-  }
 
-  to {
-    background-position: 80% 80%;
+@keyframes movingGradient {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 100%;
   }
 }
-
