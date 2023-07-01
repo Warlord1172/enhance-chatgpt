@@ -67,7 +67,7 @@ body {
     border-radius: 50%;
 }
 
-main-loading-text {
+.main-loading-text {
     font-size: 16px;
     font-weight: bold;
     background: linear-gradient(to right, #000000 0%, #202020 33%, #757575 66%, #ffffff 99%);
