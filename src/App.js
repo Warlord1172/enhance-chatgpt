@@ -356,7 +356,7 @@ function App() {
     setShowOpenAIModal(false);
   };
   // App loading 
-  const [apploading, setapploading] = useState(false);
+  const [apploading, setapploading] = useState(true);
   useEffect(() => {
     const loadingTimeout = setTimeout(() => {
       setapploading(false);
