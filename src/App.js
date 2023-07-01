@@ -43,11 +43,16 @@ function App() {
   const [tempTemperature, setTempTemperature] = useState(temperature); // temporary temperature state
   const [isLoading, setIsLoading] = useState(false); // Loading state
   const [openAIKey, setOpenAIKey] = useState(""); // Add a new state variable to store the input value
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // hamburger menu
 
   // Generate a new session ID when the component first mounts
   useEffect(() => {
     setSessionId(uuidv4());
   }, []);
+  // hamburger menu
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
   // key handling
   // Update the input value in state whenever it changes
   const handleOpenAIKeyChange = (event) => {
@@ -287,7 +292,13 @@ function App() {
       setErrorMessage(`Sorry, an error occurred: ${error.message}`);
     }
   }
-
+  // chat log functions
+  const scrollToBottom = () => {
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior: "smooth",
+    });
+  };
   // Function to resize the window
   useEffect(() => {
     const setWindowSize = () => {
@@ -309,6 +320,22 @@ function App() {
     };
 
     setWindowZoom();
+  }, []);
+  // Add a state variable to track the menu width
+  const [isMenuMaxWidth, setIsMenuMaxWidth] = useState(false);
+
+  // Add a useEffect hook to check the menu width on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMenuMaxWidth(window.innerWidth <= 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Check the menu width on initial load
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
   // effect for temperature
   useEffect(() => {
@@ -466,7 +493,17 @@ function App() {
           //<GoogleSignInButton />
         }
       </aside>
+      {/* Hamburger menu button */}
+      <button className="hamburger" onClick={toggleMenu}>
+        <span className="line"></span>
+        <span className="line"></span>
+        <span className="line"></span>
+      </button>
+      <div className={`Chat-box-section`}>
       <section className="chatbox">
+        <button className={`scroll-to-latest ${isMenuMaxWidth ? "" : "visible"}`} onClick={scrollToBottom}>
+            Scroll to Latest
+          </button>
         <div className="chat-log">
           {chatLog.map((message, index) => {
             if (message.codeBlocks) {
@@ -498,6 +535,7 @@ function App() {
           </p>
         </div>
       </section>
+      </div>
     </div>
   );
 }
@@ -550,6 +588,25 @@ const ChatMessage = ({ message }) => {
           </div>
           <div className="message">
             <ReactMarkdown>{message.message}</ReactMarkdown>
+            {message.imageUrls && message.imageUrls.length > 0 && (
+              <div className="image-section">
+                {message.imageUrls.map((imageUrl, index) => (
+                  <img
+                    src={imageUrl}
+                    key={index}
+                    alt={`drawing ${index + 1}`}
+                  />
+                ))}{message.imageUrls.length === 0 && (
+                  <div className="loading-spinner">
+                    {" "}
+                    <img
+                      src="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif"
+                      alt="loading spinner"
+                    />{" "}
+                  </div>
+                )}
+              </div>
+            )}
             <div className="Table">
               {tables.map((table, index) => (
                 <div key={index}>{table}</div>

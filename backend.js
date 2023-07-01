@@ -466,7 +466,8 @@ if (conversationHistory) {
         let finalResponse = {
           message: "",
           codeBlocks: [],
-          tables: []
+          tables: [],
+          imageUrls: [], // Initialize imageUrls to an empty array
         };
         // If there is a code block
         if (responseMessage.includes("```")) {
@@ -527,6 +528,7 @@ if (conversationHistory) {
             message: responseMessage,
             codeBlocks: [], // initialize codeBlocks to an empty array
             tables: [],
+            imageUrls: [], // Initialize imageUrls to an empty array
           };
         }
         // Check if the message contains a table
@@ -551,8 +553,17 @@ if (conversationHistory) {
           finalResponse = {
             message: responseMessage,
             codeBlocks: finalResponse.codeBlocks || [], // keep the existing value or initialize to an empty array
+            imageUrls: [], // Initialize imageUrls to an empty array
           };
         }
+        // Check if the message contains image references
+        const imageRegex = /https?:\/\/.*\.(?:png|jpg|jpeg|gif)/g;
+        let match;
+        while ((match = imageRegex.exec(finalResponse.message)) !== null) {
+          const imageUrl = match[0];
+          finalResponse.imageUrls.push(imageUrl);
+        }
+        console.log(`identified image: ${finalResponse.imageUrls}`);
         // If there is a message, add it to the conversation history
         // Create the base assistant message
         let assistantMessage = {
@@ -597,6 +608,7 @@ if (conversationHistory) {
           message: finalResponse.message,
           codeBlocks: finalResponse.codeBlocks,
           tables: finalResponse.tables,
+          imageUrls: finalResponse.imageUrls,
       });
       }
     });
