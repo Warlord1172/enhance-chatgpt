@@ -295,7 +295,6 @@ background-color: rgba(0, 0, 0, 0.041); /* Change this to your desired transpare
   position: relative;
   background-size: 100% 400%;
   overflow-y: auto;
-  height: 400px;
   animation: movingGradient linear 50s infinite ;
   animation-fill-mode: forwards;
 }.chat-input-textarea {
