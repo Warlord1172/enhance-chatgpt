@@ -93,7 +93,7 @@ function App() {
   const [chatLog, setChatLog] = useState([
     {
       user: "assistant",
-      message: "How can i help you today?",
+      message: "How can i help you today? to make an image, copy/paste this command: say [IMGI(https://image.pollinations.ai/prompt/{description}) with the description __ ]",
     },
   ]);
   // Default chat threads
@@ -104,7 +104,7 @@ function App() {
       chatLog: [
         {
           user: "assistant",
-          message: "How can i help you today?",
+          message: "How can i help you today? to make an image, copy/paste this command: say [IMGI(https://image.pollinations.ai/prompt/{description}) with the description __ ]",
         },
       ],
     },
@@ -141,7 +141,7 @@ function App() {
         chatLog: [
           {
             user: "assistant",
-            message: "How can I help you today?",
+            message: "How can i help you today? to make an image, copy/paste this command: say [IMGI(https://image.pollinations.ai/prompt/{description}) with the description __ ]",
           },
         ],
       },
@@ -296,11 +296,16 @@ function App() {
   }
   // chat log functions
   const scrollToBottom = () => {
-    window.scrollTo({
-      top: document.body.scrollHeight,
-      behavior: "smooth",
-    });
+    console.log("scrollToBottom function called");
+    const chatBoxSection = document.querySelector('.Chat-box-section');
+    if (chatBoxSection) {
+      chatBoxSection.scrollTo({
+        top: chatBoxSection.scrollHeight,
+        behavior: "smooth",
+      });
+    }
   };
+
   // Function to resize the window
   useEffect(() => {
     const setWindowSize = () => {

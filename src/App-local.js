@@ -301,10 +301,14 @@ function App() {
   // chat log functions
 
   const scrollToBottom = () => {
-    window.scrollTo({
-      top: document.body.scrollHeight,
-      behavior: "smooth",
-    });
+    console.log("scrollToBottom function called");
+    const chatBoxSection = document.querySelector('.Chat-box-section');
+    if (chatBoxSection) {
+      chatBoxSection.scrollTo({
+        top: chatBoxSection.scrollHeight,
+        behavior: "smooth",
+      });
+    }
   };
 
   // Function to resize the window

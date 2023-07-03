@@ -556,13 +556,18 @@ if (conversationHistory) {
             imageUrls: [], // Initialize imageUrls to an empty array
           };
         }
-        // Check if the message contains image references
-        const imageRegex = /https?:\/\/.*\.(?:png|jpg|jpeg|gif)/g;
+        // Check if the message contains image references// Extract image URLs from the response message
+        const imageRegex = /IMGI\((https:\/\/image\.pollinations\.ai\/prompt\/[^)]+)\)/g;
         let match;
-        while ((match = imageRegex.exec(finalResponse.message)) !== null) {
-          const imageUrl = match[0];
-          finalResponse.imageUrls.push(imageUrl);
+        const imageUrls = [];
+        while ((match = imageRegex.exec(responseMessage)) !== null) {
+          const imageUrl = match[1];
+          console.log('Match:', match); // Log the match result
+          console.log('Extracted Image URL:', imageUrl); // Log the extracted image URL
+          imageUrls.push(imageUrl);
         }
+        console.log('All Extracted Image URLs:', imageUrls); // Log all extracted image URLs
+        finalResponse.imageUrls = imageUrls;
         console.log(`identified image: ${finalResponse.imageUrls}`);
         // If there is a message, add it to the conversation history
         // Create the base assistant message
