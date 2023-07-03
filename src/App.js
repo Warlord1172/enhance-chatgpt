@@ -534,8 +534,9 @@ function App() {
               return <ChatMessage key={index} message={message} />;
             }
           })}
-        </div>
-        <div className="chat-input-holder">
+        </div>  
+      </section>
+      <div className="chat-input-holder">
           <form onSubmit={handleSubmit}>
             <ResizableInput
               value={input}
@@ -550,7 +551,6 @@ function App() {
             places, or facts. User discretion is advised.
           </p>
         </div>
-      </section>
       </div>
     </div>}
     </div>
