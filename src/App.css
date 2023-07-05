@@ -265,6 +265,7 @@
   background-color: transparent;
   border: none;
   cursor: pointer;
+  transition: transform 0.3s ease;
 }
 
 .line {
@@ -280,11 +281,40 @@
 }
 
 .hamburger.open .line:nth-child(2) {
-  opacity: 0;
+  opacity: 100;
 }
 
 .hamburger.open .line:nth-child(3) {
   transform: rotate(-45deg) translate(4px, -4px);
+}
+
+
+.hamburger.is-open:hover .line:nth-child(1) {
+  transform: rotate(-20deg) translate(2px, 2px);
+}
+
+.hamburger.is-open:hover .line:nth-child(2) {
+  transform:  translate( 3px, 0px);
+  opacity: 100;
+}
+
+.hamburger.is-open:hover .line:nth-child(3) {
+  transform: rotate(20deg) translate(2px, -2px);
+  
+}
+
+.hamburger:hover .line:nth-child(1) {
+  transform: rotate(20deg) translate(4px, 2px);
+}
+
+.hamburger:hover .line:nth-child(2) {
+  transform:  translate( -3px, 0px);
+  opacity: 100;
+}
+
+.hamburger:hover .line:nth-child(3) {
+  transform: rotate(-20deg) translate(4px, -2px);
+  
 }
 
 /* Chat Box CSS */
@@ -480,7 +510,11 @@
     padding-left: 20px;
     padding-right: 20px;
     margin: 10px;
+    font-size: 14px; 
     font-family: Arial, sans-serif;
+  }
+  .chat-message-center {
+    max-width: 100%;
   }
 }
 

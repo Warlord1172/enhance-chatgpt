@@ -44,14 +44,27 @@ function App() {
   const [isLoading, setIsLoading] = useState(false); // Loading state
   const [openAIKey, setOpenAIKey] = useState(""); // Add a new state variable to store the input value
   const [isMenuOpen, setIsMenuOpen] = useState(false); // hamburger menu
-
+  const [isGuest,setGuest] = useState(false);
   // Generate a new session ID when the component first mounts
   useEffect(() => {
     setSessionId(uuidv4());
   }, []);
   // hamburger menu
   const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
+    const hamburger = document.querySelector('.hamburger');
+    if(!isGuest){
+      setIsMenuOpen(!isMenuOpen);
+      if(!isMenuOpen){
+        hamburger.classList.add('is-open');
+      }else{
+        hamburger.classList.remove('is-open');
+      }
+    }
+    else{
+      
+      setShowError(true);
+      setErrorMessage("Guest has limited features, please insert an OpenAI key to access these features.");
+    }
   };
 
   // key handling
@@ -59,41 +72,39 @@ function App() {
   const handleOpenAIKeyChange = (event) => {
     setOpenAIKey(event.target.value);
   };
-  // The submit handler now uses the value from state
   const handleOpenAIKeySubmit = () => {
     console.log("OpenAI key submitted:", openAIKey);
-
-    fetch(`/API/save-key`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ key: openAIKey }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to save the key");
-        }
-        if (openAIKey === null) {
-          setShowError(true);
-          setErrorMessage(
-            `An error has occurred: No OpenAI key was found, Please refresh the Window`
-          );
-        }
-        setShowError(false);
-        setOpenAIKeyFound(true); // Update the state variable to true
-        setShowOpenAIModal(false); // Close the modal after submission
+    if (openAIKey !== '') {
+      fetch(`/API/save-key`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ key: openAIKey }),
       })
-      .catch((error) => {
-        console.error("Error saving the key:", error);
-      });
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Failed to save the key");
+          }
+          setShowError(false);
+          setOpenAIKeyFound(true);
+          setShowOpenAIModal(false);
+        })
+        .catch((error) => {
+          console.error("Error saving the key:", error);
+        });
+    } else {
+      setShowError(true);
+      setErrorMessage("An error has occurred: No OpenAI key was found. Please refresh the window.");
+    }
   };
   // Default chat log
   const [chatLog, setChatLog] = useState([
     {
       user: "assistant",
-      message: "How can i help you today? to make an image, copy/paste this command: say [IMGI(https://image.pollinations.ai/prompt/{description}) with the description __ ]",
+      message: "How can I help you today?",
     },
+    
   ]);
   // Default chat threads
   const [chatThreads, setChatThreads] = useState([
@@ -103,7 +114,17 @@ function App() {
       chatLog: [
         {
           user: "assistant",
-          message: "How can i help you today? to make an image, copy/paste this command: say [IMGI(https://image.pollinations.ai/prompt/{description}) with the description __ ]",
+          message: "How can I help you today?",
+        },
+        {
+          user: "assistant",
+          message:
+            "To make an image, copy/paste this command: 'say [IMGI(https://image.pollinations.ai/prompt/{description}) with the description __ ]'",
+        },
+        {
+          user: "assistant",
+          message:
+            "Note: replace __ with the actual description you would like. if it does not work, use a different language model or change its behavior and try again.",
         },
       ],
     },
@@ -142,7 +163,15 @@ function App() {
         chatLog: [
           {
             user: "assistant",
-            message: "How can I help you today?",
+            message: "How can I help you today?"
+          },
+          {
+            user: "assistant",
+            message: "To make an image, copy/paste this command: 'say [IMGI(https://image.pollinations.ai/prompt/{description}) with the description __ ]'"
+          },{
+            user: "assistant",
+            message:
+              "Note: replace __ with the actual description you would like. if it does not work, use a different language model or change its behavior and try again.",
           },
           {
             user: "user",
@@ -184,16 +213,16 @@ function App() {
         console.error("Error fetching models:", error);
       }
     } else {
+      setShowError(true);
       console.error("No OpenAI key has been provided");
+      setErrorMessage("No OpenAI key has been provided");
     }
   }
   // Runs when error message changes
   useEffect(() => {
     if (errorMessage) {
       setShowError(true);
-      setErrorMessage(
-        `An error has occurred: The AI just got up and left this server. Please reload the Window or change the language model for the AI.`
-      );
+      
     } else {
       setShowError(false);
     }
@@ -294,7 +323,8 @@ function App() {
       setUpdatedSystemMessage(false);
     } catch (error) {
       console.error("An error occurred:", error); // Log any errors
-      setErrorMessage(`Sorry, an error occurred: ${error.message}`);
+      setShowError(true);
+      setErrorMessage(`Sorry, an error occurred: ${error.message}, an Invalid OpenAI key was inserted. Please refresh Window.`);
     }
   }
 
@@ -378,200 +408,225 @@ function App() {
   // Render the application
   return (
     <div className="app-loading-container">
-    {apploading ? <Loading /> :
-    <div className="App">
-      {/* Other parts of your application */}
-      {/* Modal for introduction and login options */}
-      <Modal show={showModal} onHide={handleCloseModal} backdrop="static">
-        <Modal.Header closeButton>
-          <Modal.Title>Welcome to the ChatGPT Playground!</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>
-            <center>
-              The ChatGPT Playground is an interactive AI tool, allowing users
-              to delve into detailed dialogues across a myriad of topics. It's
-              not just for entertainment, but also a resource for education,
-              brainstorming, and problem-solving. Have fun!
-            </center>
-          </p>
-        </Modal.Body>
-        <Modal.Footer>
-          {
-            //<GoogleSignInButton />
-          }
-          <Button variant="secondary" onClick={handleCloseModal}>
-            Continue
-          </Button>
-        </Modal.Footer>
-      </Modal>
-      <Modal
-        show={showOpenAIModal}
-        onHide={handleCloseOpenAIModal}
-        backdrop="static"
-      >
-        <Modal.Title>Enter OpenAI Key</Modal.Title>
-        <Modal.Body>
-          <p>Please enter your OpenAI key:</p>
-          <input
-            type="text"
-            onChange={handleOpenAIKeyChange} // Update this
-          />
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            variant="primary"
-            onClick={handleOpenAIKeySubmit} // Update this
+      {apploading ? (
+        <Loading />
+      ) : (
+        <div className="App">
+          {/* Other parts of your application */}
+          {/* Modal for introduction and login options */}
+          <Modal show={showModal} onHide={handleCloseModal} backdrop="static">
+            <Modal.Header closeButton>
+              <Modal.Title>Welcome to the ChatGPT Playground!</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <p>
+                <center>
+                  The ChatGPT Playground is an interactive AI tool, allowing
+                  users to delve into detailed dialogues across a myriad of
+                  topics. It's not just for entertainment, but also a resource
+                  for education, brainstorming, and problem-solving. Have fun!
+                </center>
+              </p>
+            </Modal.Body>
+            <Modal.Footer>
+              {
+                //<GoogleSignInButton />
+              }
+              <Button variant="secondary" onClick={handleCloseModal}>
+                Continue
+              </Button>
+            </Modal.Footer>
+          </Modal>
+          <Modal
+            show={showOpenAIModal}
+            onHide={handleCloseOpenAIModal}
+            backdrop="static"
           >
-            Submit
-          </Button>
-        </Modal.Footer>
-      </Modal>
-      {/* Loading popup */}
-      {isLoading && (
-        <div className="loading-popup">
-          <div className="loading-animation"></div>
-          <p className="loading-text">Generating message and updating log...</p>
-        </div>
-      )}
-      <Alert
-        className="Alert-Notif"
-        variant="danger"
-        show={showError}
-        onClose={() => setShowError(false)}
-        dismissible
-      >
-        <Alert.Heading>Error</Alert.Heading>
-        <p>{errorMessage}</p>
-      </Alert>
-
-      {/* Side menu */}
-      {isMenuOpen && (
-        <aside className="sidemenu">
-          <div className="side-menu-button" onClick={clearChat}>
-            <span>+</span>
-            New Chat
-          </div>
-          <header className="model-header">
-            <p>
-              Selected Model:{" "}
-              <span style={{ color: "green" }}>{currentModel}</span>
-            </p>
-          </header>
-          <div className="models">
-            {Models.length > 0 ? (
-              <select
-                className="Model-list"
-                onChange={(e) => {
-                  console.log("setting to..", e.target.value);
-                  setCurrentModel(e.target.value);
+            <Modal.Title>Enter OpenAI Key</Modal.Title>
+            <Modal.Body>
+              <p>
+                Get your OpenAI Key here:{" "}
+                <a href="https://platform.openai.com/account/api-keys">
+                  https://platform.openai.com/account/api-keys
+                </a>
+              </p>
+              <p>Please enter your OpenAI key:</p>
+              <input
+                type="text"
+                onChange={handleOpenAIKeyChange} // Update this
+              />
+            </Modal.Body>
+            <Modal.Footer>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setGuest(true);
+                  setOpenAIKey("69"); // Autofill the input form with the default value
+                  handleOpenAIKeySubmit(); // Call handleOpenAIKeySubmit()
                 }}
               >
-                {Models.map((model) => (
-                  <option
-                    key={model.id}
-                    value={model.id}
-                    disabled={!model.ready}
-                  >
-                    {model.id}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <p>Loading models...</p>
-            )}
-          </div>
-          <div className="system-message-settings">
-            <p>System Message Settings</p>
-            <div>
-              <label>Content: </label>
-              <textarea
-                placeholder={systemMessage}
-                onChange={(e) => setSystemMessage(e.target.value)}
-              />
+                Continue as Guest
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleOpenAIKeySubmit} // Update this
+              >
+                Submit
+              </Button>
+            </Modal.Footer>
+          </Modal>
+          {/* Loading popup */}
+          {isLoading && (
+            <div className="loading-popup">
+              <div className="loading-animation"></div>
+              <p className="loading-text">
+                Generating message and updating log...
+              </p>
             </div>
-            <NumberSlider
-              minValue={0}
-              maxValue={1}
-              initialValue={tempTemperature}
-              onChange={setTempTemperature}
-            />
-            <button
-              onClick={() => {
-                handletempSubmit();
-                console.log(systemMessage);
-                setUpdatedSystemMessage(true);
-                setSubmitConfirm("Changes have been submitted");
-                console.log(`temperature set to: ${temperature}`);
-              }}
-              className="System-Submit-Button"
-            >
-              Update System Message
-            </button>
+          )}
+          <Alert
+            className="Alert-Notif"
+            variant="danger"
+            show={showError}
+            onClose={() => setShowError(false)}
+            dismissible
+          >
+            <Alert.Heading>Error</Alert.Heading>
+            <p>{errorMessage}</p>
+          </Alert>
 
-            <div className="confirm-msg">
-              {updatedSystemMessage && submitConfirm}
+          {/* Side menu */}
+          {isMenuOpen && (
+            <aside className="sidemenu">
+              <div className="side-menu-button" onClick={clearChat}>
+                <span>+</span>
+                New Chat
+              </div>
+              <header className="model-header">
+                <p>
+                  Selected Model:{" "}
+                  <span style={{ color: "green" }}>{currentModel}</span>
+                </p>
+              </header>
+              <div className="models">
+                {Models.length > 0 ? (
+                  <select
+                    className="Model-list"
+                    onChange={(e) => {
+                      console.log("setting to..", e.target.value);
+                      setCurrentModel(e.target.value);
+                    }}
+                  >
+                    {Models.map((model) => (
+                      <option
+                        key={model.id}
+                        value={model.id}
+                        disabled={!model.ready}
+                      >
+                        {model.id}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <p>Loading models...</p>
+                )}
+              </div>
+              <div className="system-message-settings">
+                <p>System Message Settings</p>
+                <div>
+                  <label>Content: </label>
+                  <textarea
+                    placeholder={systemMessage}
+                    onChange={(e) => setSystemMessage(e.target.value)}
+                  />
+                </div>
+                <NumberSlider
+                  minValue={0}
+                  maxValue={1}
+                  initialValue={tempTemperature}
+                  onChange={setTempTemperature}
+                />
+                <button
+                  onClick={() => {
+                    handletempSubmit();
+                    console.log(systemMessage);
+                    setUpdatedSystemMessage(true);
+                    setSubmitConfirm("Changes have been submitted");
+                    console.log(`temperature set to: ${temperature}`);
+                  }}
+                  className="System-Submit-Button"
+                >
+                  Update System Message
+                </button>
+
+                <div className="confirm-msg">
+                  {updatedSystemMessage && submitConfirm}
+                </div>
+              </div>
+              <ChatThreadList
+                threads={chatThreads}
+                activeThreadId={currentThreadId}
+                onSelectThread={(id) => setCurrentThreadId(id)}
+                onRemoveThread={removeThread}
+                onHoverThread={downloadChat}
+              />
+              {
+                //<GoogleSignInButton />
+              }
+            </aside>
+          )}
+          {/* Hamburger menu button */}
+          <button className="hamburger" onClick={toggleMenu}>
+            <span className="line"></span>
+            <span className="line"></span>
+            <span className="line"></span>
+          </button>
+          <div className={`Chat-box-section`}>
+            <h1 className="Developer-mode-tag">Developer mode</h1>
+            <section className="chatbox">
+              <button
+                className={`scroll-to-latest ${
+                  isMenuMaxWidth ? "" : "visible"
+                }`}
+                onClick={scrollToBottom}
+              >
+                Scroll to Latest
+              </button>
+              <div className="chat-log">
+                {chatLog.map((message, index) => {
+                  if (message.codeBlocks) {
+                    return (
+                      <CodeBlock
+                        key={index}
+                        code={message.codeBlocks.code}
+                        language={message.codeBlocks.language}
+                      />
+                    );
+                  } else {
+                    return <ChatMessage key={index} message={message} />;
+                  }
+                })}
+              </div>
+            </section>
+            <div className="chat-input-holder">
+              <form onSubmit={handleSubmit}>
+                <ResizableInput
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  className="chat-input-textarea"
+                  placeholder="Insert Text Here..."
+                  handleSubmit={(value) => handleSubmit(null, value)}
+                />
+              </form>
+              <p>
+                This project may produce inaccurate information about people,
+                places, or facts. User discretion is advised.
+              </p>
             </div>
           </div>
-          <ChatThreadList
-            threads={chatThreads}
-            activeThreadId={currentThreadId}
-            onSelectThread={(id) => setCurrentThreadId(id)}
-            onRemoveThread={removeThread}
-            onHoverThread={downloadChat}
-          />
-          {
-            //<GoogleSignInButton />
-          }
-        </aside>
+        </div>
       )}
-      {/* Hamburger menu button */}
-      <button className="hamburger" onClick={toggleMenu}>
-        <span className="line"></span>
-        <span className="line"></span>
-        <span className="line"></span>
-      </button>
-      <div className={`Chat-box-section`}>
-        <h1 className="Developer-mode-tag">Developer mode</h1>
-        <section className="chatbox">
-          <button className={`scroll-to-latest ${isMenuMaxWidth ? "" : "visible"}`} onClick={scrollToBottom}>
-            Scroll to Latest
-          </button>
-          <div className="chat-log">
-            {chatLog.map((message, index) => {
-              if (message.codeBlocks) {
-                return (
-                  <CodeBlock
-                    key={index}
-                    code={message.codeBlocks.code}
-                    language={message.codeBlocks.language}
-                  />
-                );
-              } else {
-                return <ChatMessage key={index} message={message} />;
-              }
-            })}
-          </div>
-        </section>
-        <div className="chat-input-holder">
-            <form onSubmit={handleSubmit}>
-              <ResizableInput
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                className="chat-input-textarea"
-                placeholder="Insert Text Here..."
-                handleSubmit={(value) => handleSubmit(null, value)}
-              />
-            </form>
-            <p>
-              This project may produce inaccurate information about people,
-              places, or facts. User discretion is advised.
-            </p>
-          </div>
-      </div>
     </div>
-    }
-  </div>
   );
 };
 const ChatMessage = ({ message }) => {
