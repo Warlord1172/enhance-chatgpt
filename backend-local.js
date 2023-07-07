@@ -133,7 +133,7 @@ app.use(cors({ origin: 'http://localhost:3080' }));
 
 // Cors handling
 app.use((err, req, res, next) => {
-  if (err instanceof cors.CorsError) {
+  if (typeof err === 'object' && err instanceof cors.CorsError) {
     console.log(err);
     res.status(500).json({ message: 'CORS error occurred' });
   } else {
@@ -225,11 +225,6 @@ app.get('/API/models', async (req, res) => {
 
 
 
-// The "catchall" handler: for any request that doesn't
-// match one above, send back React's index.html file.
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname+'/build/index.html'));
-});
 
 console.log('Middleware configured');
 // api key handling
@@ -264,6 +259,24 @@ const estimateTokensInText = (text) => {
   return Math.floor(text.length / 4);
 };
 console.log('Estimate Tokens function defined');
+
+app.post("/API/get-model-token-limits", (req, res) => {
+  // get current model
+  const model = req.body.currentModel;
+  // Calculate the safe tokens for completion based on your logic
+  const maxTokensForModel = modelTokenLimits[model];
+  const TOKEN_BUFFER = 10; // Adjust the token buffer value as needed
+  const safeTokensForCompletion = Math.floor(maxTokensForModel * 0.5) - TOKEN_BUFFER;
+
+  // Create the response object with the modelTokenLimits and safeTokensForCompletion
+  const response = {
+    model,
+    safeTokensForCompletion,
+  };
+
+  // Send the response to the frontend
+  res.json(response);
+});
 
 app.post("/API/chat", async (req, res) => {
   console.log("Received a POST request at /chat");
@@ -643,6 +656,11 @@ app.get('/API/textContent', (req, res) => {
   const textContent = fs.readFileSync('src/dev_mode.txt', 'utf8');
   console.log(`Text content: ${textContent}`)
   res.send(textContent);
+});
+// The "catchall" handler: for any request that doesn't
+// match one above, send back React's index.html file.
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname+'/build/index.html'));
 });
 
 app.listen(port, () => {

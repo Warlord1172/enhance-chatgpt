@@ -356,6 +356,9 @@
   bottom: 0;
 }
 
+.calculated-message {
+  text-align: center;
+}
 .chat-log {
   flex-grow: 1;
   padding: 1em;

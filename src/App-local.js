@@ -29,7 +29,9 @@ function App() {
   const [openAIKeyFound, setOpenAIKeyFound] = useState(false);
   const [showModal, setShowModal] = useState(true);
   const [showOpenAIModal, setShowOpenAIModal] = useState(false);
-  const [systemMessage, setSystemMessage] = useState("You are a helpful assistant."); // Default System message
+  const [systemMessage, setSystemMessage] = useState(
+    "You are a helpful assistant."
+  ); // Default System message
   const [conversationHistory, setConversationHistory] = useState([]); // Conversation History
   const [currentThreadId, setCurrentThreadId] = useState(0); // Current thread ID
   const [errorMessage, setErrorMessage] = useState(""); // Error message
@@ -44,26 +46,28 @@ function App() {
   const [isLoading, setIsLoading] = useState(false); // Loading state
   const [openAIKey, setOpenAIKey] = useState(""); // Add a new state variable to store the input value
   const [isMenuOpen, setIsMenuOpen] = useState(false); // hamburger menu
-  const [isGuest,setGuest] = useState(false);
+  const [isGuest, setGuest] = useState(false);
+  const [modelTokenLimits, setModelTokenLimits] = useState(null); // Model Token Limit
+  const [isMenuMaxWidth, setIsMenuMaxWidth] = useState(false);// menu width
   // Generate a new session ID when the component first mounts
   useEffect(() => {
     setSessionId(uuidv4());
   }, []);
   // hamburger menu
   const toggleMenu = () => {
-    const hamburger = document.querySelector('.hamburger');
-    if(!isGuest){
+    const hamburger = document.querySelector(".hamburger");
+    if (!isGuest) {
       setIsMenuOpen(!isMenuOpen);
-      if(!isMenuOpen){
-        hamburger.classList.add('is-open');
-      }else{
-        hamburger.classList.remove('is-open');
+      if (!isMenuOpen) {
+        hamburger.classList.add("is-open");
+      } else {
+        hamburger.classList.remove("is-open");
       }
-    }
-    else{
-      
+    } else {
       setShowError(true);
-      setErrorMessage("Guest has limited features, please insert an OpenAI key to access these features.");
+      setErrorMessage(
+        "Guest has limited features, please insert an OpenAI key to access these features."
+      );
     }
   };
 
@@ -74,7 +78,7 @@ function App() {
   };
   const handleOpenAIKeySubmit = () => {
     console.log("OpenAI key submitted:", openAIKey);
-    if (openAIKey !== '') {
+    if (openAIKey !== "") {
       fetch(`/API/save-key`, {
         method: "POST",
         headers: {
@@ -95,16 +99,40 @@ function App() {
         });
     } else {
       setShowError(true);
-      setErrorMessage("An error has occurred: No OpenAI key was found. Please refresh the window.");
+      setErrorMessage(
+        "An error has occurred: No OpenAI key was found. Please refresh the window."
+      );
     }
   };
+  // handle guest login
+  const handleGuestSubmit = () => {
+    console.log("handling guest sign in");
+    setGuest(true);
+    fetch(`/API/save-key`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ key: "69" }),
+    }) // Autofill the input form with the default value
+    .then((response) => {
+          if (!response.ok) {
+            throw new Error("Failed to save the key");
+          }
+          setShowError(false);
+          setOpenAIKeyFound(true);
+          setShowOpenAIModal(false);
+        })
+        .catch((error) => {
+          console.error("Error saving the key:", error);
+        });
+  }
   // Default chat log
   const [chatLog, setChatLog] = useState([
     {
       user: "assistant",
       message: "How can I help you today?",
     },
-    
   ]);
   // Default chat threads
   const [chatThreads, setChatThreads] = useState([
@@ -163,12 +191,14 @@ function App() {
         chatLog: [
           {
             user: "assistant",
-            message: "How can I help you today?"
+            message: "How can I help you today?",
           },
           {
             user: "assistant",
-            message: "To make an image, copy/paste this command: 'say [IMGI(https://image.pollinations.ai/prompt/{description}) with the description __ ]'"
-          },{
+            message:
+              "To make an image, copy/paste this command: 'say [IMGI(https://image.pollinations.ai/prompt/{description}) with the description __ ]'",
+          },
+          {
             user: "assistant",
             message:
               "Note: replace __ with the actual description you would like. if it does not work, use a different language model or change its behavior and try again.",
@@ -209,6 +239,31 @@ function App() {
           setModels(formattedModels);
         }
         console.log("Models state updated:", Models);
+  
+        // Get the token limit for the current model
+        const currentModelData = data.availableModels.find(
+          (model) => model.id === currentModel
+        );
+        if (currentModelData) {
+          setModelTokenLimits(currentModelData.safeTokensForCompletion);
+          console.log(`Max token Limit: ${modelTokenLimits}`);
+        }
+  
+        // Fetch the model token limits
+        const tokenLimitsResponse = await fetch("/API/get-model-token-limits", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ currentModel }),
+        });
+        if (!tokenLimitsResponse.ok) {
+          throw new Error("Failed to fetch model token limits");
+        }
+        const tokenLimitsData = await tokenLimitsResponse.json();
+        console.log("Received token limits from the backend:", tokenLimitsData);
+        // Update the model token limits state variable
+        setModelTokenLimits(tokenLimitsData.safeTokensForCompletion);
       } catch (error) {
         console.error("Error fetching models:", error);
       }
@@ -222,7 +277,6 @@ function App() {
   useEffect(() => {
     if (errorMessage) {
       setShowError(true);
-      
     } else {
       setShowError(false);
     }
@@ -232,7 +286,10 @@ function App() {
   useEffect(() => {
     console.log("Models state changed:", Models);
   }, [Models]);
-
+  // Runs when current model changes
+  useEffect(() => {
+    console.log("Current model changed:", currentModel);
+  }, [currentModel]);
   // Runs when system role changes
   useEffect(() => {
     setUpdatedSystemMessage(false);
@@ -324,7 +381,9 @@ function App() {
     } catch (error) {
       console.error("An error occurred:", error); // Log any errors
       setShowError(true);
-      setErrorMessage(`Sorry, an error occurred: ${error.message}, an Invalid OpenAI key was inserted. Please refresh Window.`);
+      setErrorMessage(
+        `${error.message}, The AI have Collapsed. Please refresh Window.`
+      );
     }
   }
 
@@ -332,7 +391,7 @@ function App() {
 
   const scrollToBottom = () => {
     console.log("scrollToBottom function called");
-    const chatBoxSection = document.querySelector('.Chat-box-section');
+    const chatBoxSection = document.querySelector(".Chat-box-section");
     if (chatBoxSection) {
       chatBoxSection.scrollTo({
         top: chatBoxSection.scrollHeight,
@@ -364,10 +423,7 @@ function App() {
 
     setWindowZoom();
   }, []);
-
-  // Add a state variable to track the menu width
-  const [isMenuMaxWidth, setIsMenuMaxWidth] = useState(false);
-
+  
   // Add a useEffect hook to check the menu width on window resize
   useEffect(() => {
     const handleResize = () => {
@@ -396,7 +452,7 @@ function App() {
   const handleCloseOpenAIModal = () => {
     setShowOpenAIModal(false);
   };
-  // App loading 
+  // App loading
   const [apploading, setapploading] = useState(true);
   useEffect(() => {
     const loadingTimeout = setTimeout(() => {
@@ -405,6 +461,31 @@ function App() {
 
     return () => clearTimeout(loadingTimeout);
   }, []);
+  // function to calculate message limit
+  const calculateMessageLimit = (message) => {
+    // Check if the message is empty or consists of whitespace only
+    const isEmptyMessage = message.trim() === "";
+    if (isEmptyMessage) {
+      // Update the placeholder element for empty message
+      const placeholderElement = document.getElementById("calculated-message");
+      placeholderElement.textContent = "Message is empty";
+      placeholderElement.style.color = "white";
+      return; // Exit the function if message is empty
+    }
+    // Check if the message exceeds the token limit
+    const messageTokens = message.trim().split(" ").length;
+    const isExceedingLimit = messageTokens > modelTokenLimits;
+    // Update the placeholder text based on the message length
+    const placeholderText = isExceedingLimit
+      ? "Message is too long, shorten it"
+      : "Ready to Submit";
+    // Update the placeholder color based on the message length
+    const placeholderColor = isExceedingLimit ? "red" : "green";
+    // Update the placeholder element
+    const placeholderElement = document.getElementById("calculated-message");
+    placeholderElement.textContent = placeholderText;
+    placeholderElement.style.color = placeholderColor;
+  };
   // Render the application
   return (
     <div className="app-loading-container">
@@ -459,11 +540,7 @@ function App() {
             <Modal.Footer>
               <Button
                 variant="secondary"
-                onClick={() => {
-                  setGuest(true);
-                  setOpenAIKey("69"); // Autofill the input form with the default value
-                  handleOpenAIKeySubmit(); // Call handleOpenAIKeySubmit()
-                }}
+                onClick={handleGuestSubmit}
               >
                 Continue as Guest
               </Button>
@@ -612,11 +689,16 @@ function App() {
               <form onSubmit={handleSubmit}>
                 <ResizableInput
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
+                  onChange={(e) => {
+                    setInput(e.target.value);
+                    calculateMessageLimit(e.target.value); // Call calculateMessageLimit function
+                  }}
                   className="chat-input-textarea"
                   placeholder="Insert Text Here..."
                   handleSubmit={(value) => handleSubmit(null, value)}
-                />
+                /><p className="calculated-message"id="calculated-message">
+                <span style={{ color: "white" }}>Start Typing</span>
+              </p>
               </form>
               <p>
                 This project may produce inaccurate information about people,
