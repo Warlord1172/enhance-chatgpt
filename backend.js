@@ -133,13 +133,14 @@ app.use(cors({ origin: 'https://chatgpt-playground.onrender.com' }));
 
 // Cors handling
 app.use((err, req, res, next) => {
-  if (err instanceof cors.CorsError) {
+  if (typeof err === 'object' && err instanceof cors.CorsError) {
     console.log(err);
     res.status(500).json({ message: 'CORS error occurred' });
   } else {
     next(err);
   }
 });
+
 
 
 // Serve static files from the React app
@@ -264,6 +265,24 @@ const estimateTokensInText = (text) => {
   return Math.floor(text.length / 4);
 };
 console.log('Estimate Tokens function defined');
+
+app.post("/api/get-model-token-limits", (req, res) => {
+  // get current model
+  const model = req.body.currentModel;
+  // Calculate the safe tokens for completion based on your logic
+  const maxTokensForModel = modelTokenLimits[model];
+  const TOKEN_BUFFER = 10; // Adjust the token buffer value as needed
+  const safeTokensForCompletion = Math.floor(maxTokensForModel * 0.5) - TOKEN_BUFFER;
+
+  // Create the response object with the modelTokenLimits and safeTokensForCompletion
+  const response = {
+    model,
+    safeTokensForCompletion,
+  };
+
+  // Send the response to the frontend
+  res.json(response);
+});
 
 app.post("/api/chat", async (req, res) => {
   console.log("Received a POST request at /chat");
