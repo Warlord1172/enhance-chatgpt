@@ -388,7 +388,6 @@ function App() {
   }
 
   // chat log functions
-
   const scrollToBottom = () => {
     console.log("scrollToBottom function called");
     const chatBoxSection = document.querySelector(".Chat-box-section");

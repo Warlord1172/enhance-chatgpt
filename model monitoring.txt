@@ -1,0 +1,64 @@
+const express = require('express');
+const https = require('https');
+const cheerio = require('cheerio');
+
+const app = express();
+const port = 3000;
+
+app.get('/scrape', (req, res) => {
+  const options = {
+    hostname: 'platform.openai.com',
+    path: '/docs/models/',
+    method: 'GET'
+  };
+
+  const request = https.request(options, (response) => {
+    let html = '';
+
+    response.on('data', (chunk) => {
+      html += chunk;
+    });
+
+    response.on('end', () => {
+      const $ = cheerio.load(html);
+
+      // Find the table containing the training data
+      const trainingDataTable = $('.hub-reference-section:contains("Training Data") table');
+
+      // Extract the relevant information from the table
+      const trainingData = [];
+
+      trainingDataTable.find('tr').each((index, element) => {
+        const rowData = $(element).find('td').map((i, el) => $(el).text()).get();
+        trainingData.push(rowData);
+      });
+
+      res.json({ trainingData });
+    });
+  });
+
+  request.on('error', (error) => {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  });
+
+  request.end();
+});
+
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
+
+
+/*
+
+// TODO: Here is the idea of this model monitoring program
+
+- Make a web scraper for backend capable of monitoring model deprecation dates
+- Make a date grabber where it compares the today's date in a specific format with the deprecated model date format
+- update the modelTokenLimits list with the models that are available and the ones that are not available if the date of deprecation is past todays date
+- also use web scrapping to grab tokens for each model that is available
+- make sure that this project reduces the cpu usage limit and memory usage by loading previous messages with chunk loaders
+- prevent console log overflow by commenting out frontend console logs
+
+*/
