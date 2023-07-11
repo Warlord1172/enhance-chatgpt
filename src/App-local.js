@@ -302,8 +302,17 @@ function App() {
     setIsLoading(true);
     // Use the inputValue argument if it's provided, otherwise use input from the state
     const finalInput = inputValue || input;
+    // Check if the finalInput exceeds the message limit
+    const isExceedingLimit = calculateMessageLimit(finalInput);
+    if (isExceedingLimit) {
+      setShowError(true);
+      setErrorMessage("Message limit exceeded. Please modify your message before proceeding.");
+      setIsLoading(false);
+      return; // do not continue
+    }
     let chatLogNew = [...chatLog, { user: "me", message: finalInput }];
     console.log("input:", input); // Log the input value
+
     setInput("");
     const messages = chatLogNew.map((entry) => ({
       role: entry.user === "me" ? "user" : "assistant",
@@ -460,31 +469,33 @@ function App() {
 
     return () => clearTimeout(loadingTimeout);
   }, []);
-  // function to calculate message limit
+  // message limit function
   const calculateMessageLimit = (message) => {
-    // Check if the message is empty or consists of whitespace only
-    const isEmptyMessage = message.trim() === "";
-    if (isEmptyMessage) {
-      // Update the placeholder element for empty message
-      const placeholderElement = document.getElementById("calculated-message");
-      placeholderElement.textContent = "Message is empty";
-      placeholderElement.style.color = "white";
-      return; // Exit the function if message is empty
-    }
-    // Check if the message exceeds the token limit
-    const messageTokens = message.trim().split(" ").length;
-    const isExceedingLimit = messageTokens > modelTokenLimits;
-    // Update the placeholder text based on the message length
-    const placeholderText = isExceedingLimit
-      ? "Message is too long, shorten it"
-      : "Ready to Submit";
-    // Update the placeholder color based on the message length
-    const placeholderColor = isExceedingLimit ? "red" : "green";
-    // Update the placeholder element
+  // Check if the message is empty or consists of whitespace only
+  const isEmptyMessage = message.trim() === "";
+  if (isEmptyMessage) {
+    // Update the placeholder element for empty message
     const placeholderElement = document.getElementById("calculated-message");
-    placeholderElement.textContent = placeholderText;
-    placeholderElement.style.color = placeholderColor;
-  };
+    placeholderElement.textContent = "Message is empty";
+    placeholderElement.style.color = "white";
+    return false; // Return false if message is empty
+  }
+  // Check if the message exceeds the token limit
+  const messageTokens = message.trim().split(" ").length;
+  const isExceedingLimit = messageTokens > modelTokenLimits;
+  // Update the placeholder text based on the message length
+  const placeholderText = isExceedingLimit
+    ? "Message is too long, shorten it"
+    : "Ready to Submit";
+  // Update the placeholder color based on the message length
+  const placeholderColor = isExceedingLimit ? "red" : "green";
+  // Update the placeholder element
+  const placeholderElement = document.getElementById("calculated-message");
+  placeholderElement.textContent = placeholderText;
+  placeholderElement.style.color = placeholderColor;
+
+  return isExceedingLimit; // Return the value of isExceedingLimit
+};
   // Render the application
   return (
     <div className="app-loading-container">
