@@ -41,10 +41,10 @@ const UserIcon = ({
     </svg>
   );
   const Avatar = ({ isChatGPT = false }) => {
-    console.log(`Rendering Avatar with isChatGPT=${isChatGPT}`);
+    //console.log(`Rendering Avatar with isChatGPT=${isChatGPT}`);
   
     const IconComponent = isChatGPT ? chatgpticon : (isChatGPT === false ? UserIcon : null);
-    console.log('IconComponent:', IconComponent);
+    //console.log('IconComponent:', IconComponent);
   
     return (
       <div
