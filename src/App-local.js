@@ -3,7 +3,9 @@ import CodeBlock from "./codeblock";
 import NumberSlider from "./temperature";
 import "./App.css";
 import "./normal.css";
-import "./loading.css"
+import "./loading.css";
+import './homepage.css';
+import HomePage from "./homepage";
 import Loading from "./loadinganimation";
 import { Modal, Button } from "react-bootstrap";
 import Avatar from "./chatgptAvatar";
@@ -49,6 +51,7 @@ function App() {
   const [isGuest, setGuest] = useState(false);
   const [modelTokenLimits, setModelTokenLimits] = useState(null); // Model Token Limit
   const [isMenuMaxWidth, setIsMenuMaxWidth] = useState(false);// menu width
+  const [showHomepage, setShowHomepage] = useState(false); //homepage
   // Generate a new session ID when the component first mounts
   useEffect(() => {
     setSessionId(uuidv4());
@@ -182,12 +185,13 @@ function App() {
   };
   // Function to clear chat
   function clearChat() {
+    const newThreadId = chatThreads.length > 0 ? chatThreads[chatThreads.length - 1].id + 1 : 0;
     setSessionId(uuidv4()); // generate a new session ID
     setChatThreads([
       ...chatThreads,
       {
-        id: chatThreads.length,
-        title: `Chat Room ${chatThreads.length + 1}`,
+        id: newThreadId,
+        title: `Chat Room ${newThreadId + 1}`,
         chatLog: [
           {
             user: "assistant",
@@ -211,12 +215,37 @@ function App() {
         ],
       },
     ]);
+    setShowHomepage(false);
   }
   // Function to remove a chat thread
   function removeThread(threadId) {
-    setChatThreads((prevThreads) =>
-      prevThreads.filter((thread) => thread.id !== threadId)
-    );
+    let newThreads = chatThreads.filter((thread) => thread.id !== threadId);
+    let newCurrentThreadId = currentThreadId;
+  
+    // If the active chat room is removed
+    if (threadId === currentThreadId) {
+      const currentIndex = chatThreads.findIndex((thread) => thread.id === threadId);
+  
+      // If there are remaining chat rooms
+      if (newThreads.length > 0) {
+        // If the removed chat room was the last one, select the previous chat room
+        if (currentIndex === newThreads.length) {
+          newCurrentThreadId = newThreads[currentIndex - 1].id;
+        }
+        // If the removed chat room was not the last one, select the next chat room
+        else {
+          newCurrentThreadId = newThreads[currentIndex].id;
+        }
+      }
+      // If there are no remaining chat rooms, set the current thread ID to 0 and show the homepage
+      else {
+        newCurrentThreadId = 0;
+        setShowHomepage(true);
+      }
+    }
+  
+    setChatThreads(newThreads);
+    setCurrentThreadId(newCurrentThreadId);
   }
   // Function to get AI model engines from the backend
   async function getEngines() {
@@ -668,6 +697,9 @@ function App() {
             <span className="line"></span>
             <span className="line"></span>
           </button>
+          {showHomepage ? (
+            <HomePage />
+          ) : (
           <div className={`Chat-box-section`}>
             <h1 className="Developer-mode-tag">Developer mode</h1>
             <section className="chatbox">
@@ -716,6 +748,7 @@ function App() {
               </p>
             </div>
           </div>
+          )}
         </div>
       )}
     </div>

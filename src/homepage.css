@@ -1,0 +1,28 @@
+.homepage {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex: 1;
+    background-image: linear-gradient(to bottom, #ffffff 0%, #757575 16.66%, #202020 33.33%, #000000 50%, #202020 66.66%, #757575 73.33%, #ffffff 100%);
+    position: relative;
+    background-size: 100% 400%;
+    overflow-y: auto;
+    animation: movingGradient linear 50s infinite;
+    animation-fill-mode: forwards;
+  }
+  
+  @media (min-width: 768px) {
+    .homepage {
+      display: -webkit-inline-box;
+    }
+  }
+  
+  .box {
+    width: 90%; /* take up 90% of the container's width */
+    max-width: 35rem; /* but don't be wider than 35rem */
+    padding: 1rem;
+    margin: 1rem;
+    background-color: #333;
+    border-radius: 5px;
+    text-align: center;
+  }
