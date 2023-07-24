@@ -351,7 +351,7 @@ function App() {
     }
     try {
       const response = await fetch(
-        `https://chatgpt-playground.onrender.com/api/chat`,
+        `https://chatgpt-enhanced-tro1.onrender.com/api/chat`,
         {
           method: "POST",
           headers: {
