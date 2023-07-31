@@ -82,7 +82,7 @@ function App() {
   const handleOpenAIKeySubmit = () => {
     //console.log("OpenAI key submitted:", openAIKey);
     if (openAIKey !== '') {
-      fetch(`/API/save-key`, {
+      fetch(`/api/save-key`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -109,7 +109,7 @@ function App() {
   const handleGuestSubmit = () => {
     //console.log("handling guest sign in");
     setGuest(true);
-    fetch(`/API/save-key`, {
+    fetch(`/api/save-key`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -270,7 +270,7 @@ function App() {
         }
   
         // Fetch the model token limits
-        const tokenLimitsResponse = await fetch("/API/get-model-token-limits", {
+        const tokenLimitsResponse = await fetch("/api/get-model-token-limits", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
