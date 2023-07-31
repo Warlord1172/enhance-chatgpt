@@ -4,7 +4,7 @@ module.exports = function(app) {
     app.use(
     '/api',
     createProxyMiddleware({
-        target: 'https://chatgpt-enhanced-tro1.onrender.com:10080',
+        target: 'https://chatgpt-unleashed.onrender.com:10080',
         changeOrigin: true,
     })
     );

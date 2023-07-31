@@ -132,7 +132,7 @@ const addMessageToConversationHistory = (message, safeTokensForHistory) => {
 app.use(cors());
 app.use(express.json());
 
-app.use(cors({ origin: 'https://chatgpt-enhanced-tro1.onrender.com' }));
+app.use(cors({ origin: 'https://chatgpt-unleashed.onrender.com' }));
 
 // Cors handling
 app.use((err, req, res, next) => {
@@ -653,7 +653,7 @@ if (conversationHistory) {
 });
 
 app.listen(port, () => {
-  console.log(`Example app listening at https://chatgpt-enhanced-tro1.onrender.com:${port}`);
+  console.log(`Example app listening at https://chatgpt-unleashed.onrender.com:${port}`);
 });
 
 
