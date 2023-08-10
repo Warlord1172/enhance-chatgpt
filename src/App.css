@@ -457,6 +457,34 @@
 }
 
 /* Avatar and chat message styles */
+
+.Button-Holder{
+  align-items: end;
+}
+
+.Edit-Button{
+  background-color: #0000008e;
+  padding: 12px;
+  color: #ffffff;
+  border: 1px solid rgb(0, 0, 0);
+  border-radius: 5px;
+  text-align: center;
+  transition: ease 0.25s all;
+  margin: 1rem;
+}
+
+.Switch-Messages{
+  background-color: #0000008e;
+  padding: 12px;
+  color: #ffffff;
+  border: 1px solid rgb(0, 0, 0);
+  border-radius: 5px;
+  text-align: center;
+  transition: ease 0.25s all;
+  margin: 1em;
+}
+
+
 .chat-message.chatgpt {
   background-color: #444654;
   border-radius: 5px;

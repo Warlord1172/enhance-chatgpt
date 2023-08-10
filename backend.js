@@ -137,11 +137,11 @@ app.use(cors({ origin: 'https://chatgpt-unleashed.onrender.com' }));
 // Cors handling
 app.use((err, req, res, next) => {
   if (typeof err === 'object' && err instanceof cors.CorsError) {
-    console.log(err);
-    res.status(500).json({ message: 'CORS error occurred' });
-  } else {
-    next(err);
+    console.log(err); // Log the error message
+    // Optionally, you can choose not to send any response
+    // res.status(500).json({ message: 'CORS error occurred' });
   }
+  next(err);
 });
 
 

@@ -523,6 +523,9 @@ function App() {
 
   return isExceedingLimit; // Return the value of isExceedingLimit
 };
+
+
+
   // Render the application
   return (
     <div className="app-loading-container">
@@ -752,33 +755,84 @@ function App() {
     </div>
   );
 };
-const ChatMessage = ({ message }) => {
+
+function ChatMessage({ message }) {
   const md = new MarkdownIt();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedText, setEditedText] = useState(message.message);
+  const [showIndex, setShowIndex] = useState(true);
 
   const extractTables = (markdownString) => {
     const htmlString = md.render(markdownString);
     const htmlElements = parse(htmlString);
     return htmlElements.filter((element) => element.type === "table");
   };
+
   const isChatGPT = message.user === "assistant"; // Determine if the message is from ChatGPT
-  
+
+  const handleEdit = () => {
+    setShowIndex(!showIndex);
+    setIsEditing(true);
+    setEditedText(message.message);
+  };
+
+  const handleSwitch = () => {
+    setIsEditing(false);
+  };
+
+  const handleTextareaKeyDown = (e) => {
+    if (e.keyCode === 13 && !e.shiftKey) {
+      e.preventDefault();
+      handleSwitch();
+      // Replace the original message with the edited text
+      // You can update this logic according to your requirements
+      // For example, you may want to call a function to update the message in the chat log
+      console.log("Replace message with edited text:", editedText);
+    }
+  };
+
   if (message.codeBlocks) {
     return (
-      <div className={`chat-message ${isChatGPT && "chatgpt"}`}>
-        <div className="chat-message-center">
-          <div className={`avatar ${isChatGPT && "chatgpt"}`}>
-            {isChatGPT ? (
-              <Avatar isChatGPT={true} />
+      <div className="Button-Holder">
+        {!isChatGPT && (
+          <div>
+            {isEditing ? (
+              <div>
+                <textarea
+                  value={editedText}
+                  onChange={(e) => setEditedText(e.target.value)}
+                  onKeyDown={handleTextareaKeyDown}
+                />
+                <button onClick={handleSwitch} className="Switch-Messages">
+                  Cancel
+                </button>
+              </div>
             ) : (
-              <Avatar isChatGPT={false} />
+              <div>
+                <button onClick={handleEdit} className="Edit-Button">
+                  Edit
+                </button>
+              </div>
             )}
           </div>
-          <div className="message">
-            <ReactMarkdown>{message.message}</ReactMarkdown>
-            <CodeBlock
-              code={message.codeBlocks.code}
-              language={message.codeBlocks.language}
-            />
+        )}
+        <div className={`chat-message ${isChatGPT && "chatgpt"}`}>
+          <div className="chat-message-center">
+            <div className={`avatar ${isChatGPT && "chatgpt"}`}>
+              {isChatGPT ? (
+                <Avatar isChatGPT={true} />
+              ) : (
+                <Avatar isChatGPT={false} />
+              )}
+            </div>
+            <div className="message">
+              {showIndex && <span className="message-index">{message.index}</span>}
+              <ReactMarkdown>{message.message}</ReactMarkdown>
+              <CodeBlock
+                code={message.codeBlocks.code}
+                language={message.codeBlocks.language}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -787,46 +841,71 @@ const ChatMessage = ({ message }) => {
     const markdownString = message.message;
     const tables = extractTables(markdownString);
     return (
-      <div className={`chat-message ${isChatGPT && "chatgpt"}`}>
-        <div className="chat-message-center">
-          <div className={`avatar ${isChatGPT && "chatgpt"}`}>
-            {isChatGPT ? (
-              <Avatar isChatGPT={true} />
+      <div className="Button-Holder">
+        {!isChatGPT && (
+          <div>
+            {isEditing ? (
+              <div>
+                <textarea
+                  value={editedText}
+                  onChange={(e) => setEditedText(e.target.value)}
+                  onKeyDown={handleTextareaKeyDown}
+                />
+                <button onClick={handleSwitch} className="Switch-Messages">
+                  Cancel
+                </button>
+              </div>
             ) : (
-              <Avatar isChatGPT={false} />
-            )}
-          </div>
-          <div className="message">
-            <ReactMarkdown>{message.message}</ReactMarkdown>
-            {message.imageUrls && message.imageUrls.length > 0 && (
-              <div className="image-section">
-                {message.imageUrls.map((imageUrl, index) => (
-                  <img
-                    src={imageUrl}
-                    key={index}
-                    alt={`drawing ${index + 1}`}
-                  />
-                ))}
-                {message.imageUrls.length === 0 && (
-                  <div className="loading-spinner">
-                    {" "}
-                    <img
-                      src="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif"
-                      alt="loading spinner"
-                    />{" "}
-                  </div>
-                )}
+              <div>
+                <button onClick={handleEdit} className="Edit-Button">
+                  Edit
+                </button>
               </div>
             )}
-            <div className="Table">
-              {tables.map((table, index) => (
-                <div key={index}>{table}</div>
-              ))}
+          </div>
+        )}
+        <div className={`chat-message ${isChatGPT && "chatgpt"}`}>
+          <div className="chat-message-center">
+            <div className={`avatar ${isChatGPT && "chatgpt"}`}>
+              {isChatGPT ? (
+                <Avatar isChatGPT={true} />
+              ) : (
+                <Avatar isChatGPT={false} />
+              )}
+            </div>
+            <div className="message">
+              {showIndex && <span className="message-index">{message.index}</span>}
+              <ReactMarkdown>{message.message}</ReactMarkdown>
+              {message.imageUrls && message.imageUrls.length > 0 && (
+                <div className="image-section">
+                  {message.imageUrls.map((imageUrl, index) => (
+                    <img
+                      src={imageUrl}
+                      key={index}
+                      alt={`drawing ${index + 1}`}
+                    />
+                  ))}
+                  {message.imageUrls.length === 0 && (
+                    <div className="loading-spinner">
+                      {" "}
+                      <img
+                        src="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif"
+                        alt="loading spinner"
+                      />{" "}
+                    </div>
+                  )}
+                </div>
+              )}
+              <div className="Table">
+                {tables.map((table, index) => (
+                  <div key={index}>{table}</div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </div>
     );
   }
-};
+}
 export default App;

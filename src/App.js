@@ -77,8 +77,7 @@ function App() {
     setOpenAIKey(event.target.value);
   };
   // The submit handler now uses the value from state
-  const handleOpenAIKeySubmit = () => {
-    //console.log("OpenAI key submitted:", openAIKey);
+  const handleOpenAIKeySubmit = () => { 
     if (openAIKey !== '') {
       fetch(`/api/save-key`, {
         method: "POST",
@@ -105,7 +104,6 @@ function App() {
   };
   // handle guest login
   const handleGuestSubmit = () => {
-    //console.log("handling guest sign in");
     setGuest(true);
     fetch(`/api/save-key`, {
       method: "POST",
@@ -240,14 +238,12 @@ function App() {
   // Function to get AI model engines from the backend
   async function getEngines() {
     if (openAIKeyFound) {
-      //console.log("getEngines called");
       try {
         const response = await fetch(`/api/models`);
         if (!response.ok) {
           throw new Error("Failed to fetch models");
         }
         const data = await response.json();
-        //console.log("Received data from the backend:", data);
         if (!data.availableModels || data.availableModels.length === 0) {
           setModels([{ id: "No models available", ready: false }]);
         } else {
@@ -257,14 +253,12 @@ function App() {
           }));
           setModels(formattedModels);
         }
-        //console.log("Models state updated:", Models);
         // Get the token limit for the current model
         const currentModelData = data.availableModels.find(
           (model) => model.id === currentModel
         );
         if (currentModelData) {
           setModelTokenLimits(currentModelData.safeTokensForCompletion);
-          //console.log(`Max token Limit: ${modelTokenLimits}`);
         }
   
         // Fetch the model token limits
@@ -279,15 +273,12 @@ function App() {
           throw new Error("Failed to fetch model token limits");
         }
         const tokenLimitsData = await tokenLimitsResponse.json();
-        //console.log("Received token limits from the backend:", tokenLimitsData);
         // Update the model token limits state variable
         setModelTokenLimits(tokenLimitsData.safeTokensForCompletion);
       } catch (error) {
-        //console.error("Error fetching models:", error);
       }
     } else {
       setShowError(true);
-      //console.error("No OpenAI key has been provided");
       setErrorMessage("No OpenAI key has been provided");
     }
   }
@@ -303,11 +294,9 @@ function App() {
 
   // Runs when models state changes
   useEffect(() => {
-    //console.log("Models state changed:", Models);
   }, [Models]);
   // Runs when current model changes
   useEffect(() => {
-    //console.log("Current model changed:", currentModel);
   }, [currentModel]);
   // Runs when system role changes
   useEffect(() => {
@@ -330,13 +319,11 @@ function App() {
       return; // do not continue
     }
     let chatLogNew = [...chatLog, { user: "me", message: finalInput }];
-    //console.log("input:", input); // Log the input value
     setInput("");
     const messages = chatLogNew.map((entry) => ({
       role: entry.user === "me" ? "user" : "assistant",
       content: entry.message,
     }));
-    //console.log("messages:", messages); // Log the prepared messages array
     setConversationHistory((prevHistory) => [
       ...prevHistory,
       {
@@ -372,7 +359,6 @@ function App() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      //console.log("Raw response:", data); // Log the raw response data
       if (data.message) {
         chatLogNew = [
           ...chatLogNew,
@@ -391,9 +377,6 @@ function App() {
             { user: "assistant", codeBlocks: { language, code } },
           ];
         });
-        //console.log("chatLogNew with code block:", chatLogNew);
-      } else {
-        //console.log("chatLogNew without code block:", chatLogNew);
       }
       setChatLog(chatLogNew);
       setChatThreads(
@@ -418,7 +401,6 @@ function App() {
   }
   // chat log functions
   const scrollToBottom = () => {
-    //console.log("scrollToBottom function called");
     const chatBoxSection = document.querySelector('.Chat-box-section');
     if (chatBoxSection) {
       chatBoxSection.scrollTo({
@@ -465,7 +447,6 @@ function App() {
   }, []);
   // effect for temperature
   useEffect(() => {
-    //console.log("Temperature changed: ", temperature);
   }, [temperature]);
   const handletempSubmit = () => {
     setTemperature(tempTemperature); // update actual temperature state
@@ -615,7 +596,6 @@ function App() {
             <select
               className="Model-list"
               onChange={(e) => {
-                //console.log("setting to..", e.target.value);
                 setCurrentModel(e.target.value);
               }}
             >
@@ -647,10 +627,8 @@ function App() {
           <button
             onClick={() => {
               handletempSubmit();
-              //console.log(systemMessage);
               setUpdatedSystemMessage(true);
               setSubmitConfirm("Changes have been submitted");
-              //console.log(`temperature set to: ${temperature}`);
             }}
             className="System-Submit-Button"
           >
