@@ -31,9 +31,7 @@ function App() {
   const [openAIKeyFound, setOpenAIKeyFound] = useState(false);
   const [showModal, setShowModal] = useState(true);
   const [showOpenAIModal, setShowOpenAIModal] = useState(false);
-  const [systemMessage, setSystemMessage] = useState(
-    "You are a helpful assistant."
-  ); // Default System message
+  const [systemMessage, setSystemMessage] = useState("You are a helpful assistant."); // Default System message
   const [conversationHistory, setConversationHistory] = useState([]); // Conversation History
   const [currentThreadId, setCurrentThreadId] = useState(0); // Current thread ID
   const [errorMessage, setErrorMessage] = useState(""); // Error message
