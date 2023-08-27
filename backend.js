@@ -46,7 +46,6 @@ const modelTokenLimits = {
   "code-cushman-002": 2047,
   "code-cushman-001": 2047,
 };
-
 const Codelanguage = {
   Python: ["Python", "py"],
   Javascript: ["JavaScript", "js"],

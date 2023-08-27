@@ -10,7 +10,7 @@ import Loading from "./loadinganimation";
 import { Modal, Button } from "react-bootstrap";
 import Avatar from "./chatgptAvatar";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
-import { useState, useEffect, useReducer} from "react"; // React's built-in hooks
+import { useState, useEffect} from "react"; // React's built-in hooks
 import Alert from "react-bootstrap/Alert"; // Bootstrap Alert for error messages
 import ChatThreadList from "./ChatThreadList";
 import ResizableInput from "./ResizableTextArea";
@@ -19,6 +19,7 @@ import MarkdownIt from "markdown-it";
 import parse from "html-react-parser";
 import fetch from "node-fetch";
 import { v4 as uuidv4 } from "uuid";
+import SystemMessage from "./message";
 //import axios from 'axios';
 // Main application component
 function App() {
@@ -31,7 +32,8 @@ function App() {
   const [openAIKeyFound, setOpenAIKeyFound] = useState(false);
   const [showModal, setShowModal] = useState(true);
   const [showOpenAIModal, setShowOpenAIModal] = useState(false);
-  const [systemMessage, setSystemMessage] = useState("You are a helpful assistant."); // Default System message
+  const [systemMessage, setSystemMessage] = useState(SystemMessage); // Default System message
+  const [conversationHistory, setConversationHistory] = useState([]); // Conversation History
   const [currentThreadId, setCurrentThreadId] = useState(0); // Current thread ID
   const [errorMessage, setErrorMessage] = useState(""); // Error message
   const [showError, setShowError] = useState(false); // Flag for showing error
@@ -47,19 +49,8 @@ function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false); // hamburger menu
   const [isGuest, setGuest] = useState(false);
   const [modelTokenLimits, setModelTokenLimits] = useState(null); // Model Token Limit
-  const [isMenuMaxWidth, setIsMenuMaxWidth] = useState(false); // menu width
+  const [isMenuMaxWidth, setIsMenuMaxWidth] = useState(false);// menu width
   const [showHomepage, setShowHomepage] = useState(false); //homepage
-  
-  // Define the initial state for chat log and conversation history
-  const initialState = {
-    chatLog: [
-      {
-        user: "assistant",
-        message: "How can I help you today?",
-      },
-    ],
-    conversationHistory: [],
-  };
   // Generate a new session ID when the component first mounts
   useEffect(() => {
     setSessionId(uuidv4());
@@ -126,18 +117,25 @@ function App() {
       },
       body: JSON.stringify({ key: "69" }),
     }) // Autofill the input form with the default value
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to save the key");
-        }
-        setShowError(false);
-        setOpenAIKeyFound(true);
-        setShowOpenAIModal(false);
-      })
-      .catch((error) => {
-        console.error("Error saving the key:", error);
-      });
-  }; 
+    .then((response) => {
+          if (!response.ok) {
+            throw new Error("Failed to save the key");
+          }
+          setShowError(false);
+          setOpenAIKeyFound(true);
+          setShowOpenAIModal(false);
+        })
+        .catch((error) => {
+          console.error("Error saving the key:", error);
+        });
+  }
+  // Default chat log
+  const [chatLog, setChatLog] = useState([
+    {
+      user: "assistant",
+      message: "How can I help you today?",
+    },
+  ]);
   // Default chat threads
   const [chatThreads, setChatThreads] = useState([
     {
@@ -162,19 +160,14 @@ function App() {
     },
   ]);
   // Runs whenever current thread ID or chat threads change
-useEffect(() => {
-  const currentThread = chatThreads.find(
-    (thread) => thread.id === currentThreadId
-  );
-  if (currentThread) {
-    dispatch({
-      type: "UPDATE_MESSAGE",
-      payload: {
-        updatedMessage: currentThread.chatLog,
-      },
-    });
-  }
-}, [currentThreadId, chatThreads]);
+  useEffect(() => {
+    const currentThread = chatThreads.find(
+      (thread) => thread.id === currentThreadId
+    );
+    if (currentThread) {
+      setChatLog(currentThread.chatLog);
+    }
+  }, [currentThreadId, chatThreads]);
 
   const downloadChat = (threadId) => {
     const thread = chatThreads.find((thread) => thread.id === threadId);
@@ -191,8 +184,7 @@ useEffect(() => {
   };
   // Function to clear chat
   function clearChat() {
-    const newThreadId =
-      chatThreads.length > 0 ? chatThreads[chatThreads.length - 1].id + 1 : 0;
+    const newThreadId = chatThreads.length > 0 ? chatThreads[chatThreads.length - 1].id + 1 : 0;
     setSessionId(uuidv4()); // generate a new session ID
     setChatThreads([
       ...chatThreads,
@@ -226,10 +218,8 @@ useEffect(() => {
 
     // If the active chat room is removed
     if (threadId === currentThreadId) {
-      const currentIndex = chatThreads.findIndex(
-        (thread) => thread.id === threadId
-      );
-
+      const currentIndex = chatThreads.findIndex((thread) => thread.id === threadId);
+  
       // If there are remaining chat rooms
       if (newThreads.length > 0) {
         // If the removed chat room was the last one, select the previous chat room
@@ -339,9 +329,7 @@ useEffect(() => {
     const isExceedingLimit = calculateMessageLimit(finalInput);
     if (isExceedingLimit) {
       setShowError(true);
-      setErrorMessage(
-        "Message limit exceeded. Please modify your message before proceeding."
-      );
+      setErrorMessage("Message limit exceeded. Please modify your message before proceeding.");
       setIsLoading(false);
       return; // do not continue
     }
@@ -354,19 +342,15 @@ useEffect(() => {
       content: entry.message,
     }));
     console.log("messages:", messages); // Log the prepared messages array
-    dispatch({
-      type: "UPDATE_MESSAGE",
-      payload: {
-        updatedMessage: { user: "user", message: input },
+    setConversationHistory((prevHistory) => [
+      ...prevHistory,
+      {
+        role: "user",
+        content: input,
       },
-    });
+    ]);
     if (conversationHistory.length > 5) {
-      dispatch({
-        type: "REFRESH_UI",
-        payload: {
-          editedMessageIndex: conversationHistory.length - 6,
-        },
-      });
+      setConversationHistory((prevHistory) => prevHistory.slice(1));
     }
     try {
       const response = await fetch(`/API/chat`, {
@@ -413,18 +397,16 @@ useEffect(() => {
       } else {
         console.log("chatLogNew without code block:", chatLogNew);
       }
-      dispatch({
-        type: "UPDATE_MESSAGE",
-        payload: {
-          updatedMessage: { user: "assistant", message: data.message },
-        },
-      });
-      dispatch({
-        type: "UPDATE_MESSAGE",
-        payload: {
-          updatedMessage: { user: "assistant", codeBlocks: data.codeBlocks },
-        },
-      });
+      setChatLog(chatLogNew);
+      setChatThreads(
+        chatThreads.map((thread) => {
+          if (thread.id !== currentThreadId) return thread;
+          return {
+            ...thread,
+            chatLog: chatLogNew,
+          };
+        })
+      );
       // Set the loading state to false after receiving the response
       setIsLoading(false);
       setUpdatedSystemMessage(false);
@@ -511,82 +493,63 @@ useEffect(() => {
   }, []);
   // message limit function
   const calculateMessageLimit = (message) => {
-    // Check if the message is empty or consists of whitespace only
-    const isEmptyMessage = message.trim() === "";
-    if (isEmptyMessage) {
-      // Update the placeholder element for empty message
-      const placeholderElement = document.getElementById("calculated-message");
-      placeholderElement.textContent = "Message is empty";
-      placeholderElement.style.color = "white";
-      return false; // Return false if message is empty
-    }
-    // Check if the message exceeds the token limit
-    const messageTokens = message.trim().split(" ").length;
-    const isExceedingLimit = messageTokens > modelTokenLimits;
-    // Update the placeholder text based on the message length
-    const placeholderText = isExceedingLimit
-      ? "Message is too long, shorten it"
-      : "Ready to Submit";
-    // Update the placeholder color based on the message length
-    const placeholderColor = isExceedingLimit ? "red" : "green";
-    // Update the placeholder element
+  // Check if the message is empty or consists of whitespace only
+  const isEmptyMessage = message.trim() === "";
+  if (isEmptyMessage) {
+    // Update the placeholder element for empty message
     const placeholderElement = document.getElementById("calculated-message");
-    placeholderElement.textContent = placeholderText;
-    placeholderElement.style.color = placeholderColor;
+    placeholderElement.textContent = "Message is empty";
+    placeholderElement.style.color = "white";
+    return false; // Return false if message is empty
+  }
+  // Check if the message exceeds the token limit
+  const messageTokens = message.trim().split(" ").length;
+  const isExceedingLimit = messageTokens > modelTokenLimits;
+  // Update the placeholder text based on the message length
+  const placeholderText = isExceedingLimit
+    ? "Message is too long, shorten it"
+    : "Ready to Submit";
+  // Update the placeholder color based on the message length
+  const placeholderColor = isExceedingLimit ? "red" : "green";
+  // Update the placeholder element
+  const placeholderElement = document.getElementById("calculated-message");
+  placeholderElement.textContent = placeholderText;
+  placeholderElement.style.color = placeholderColor;
 
-    return isExceedingLimit; // Return the value of isExceedingLimit
-  };
+  return isExceedingLimit; // Return the value of isExceedingLimit
+};
 
   // update chat logs
-  // Function to update a specific message in the chat log
   const updateMessage = (updatedMessage) => {
-    dispatch({
-      type: "UPDATE_MESSAGE",
-      payload: {
-        updatedMessage,
-      },
+    const updatedChatLog = chatLog.map((message) => {
+      if (message.index === updatedMessage.index) {
+        return {
+          ...message,
+          message: updatedMessage.message,
+        };
+      }
+      return message;
     });
+    setChatLog(updatedChatLog);
+
+    // Update the conversation history if needed
+    const updatedConversationHistory = conversationHistory.map((message) => {
+      if (message.index === updatedMessage.index) {
+        return {
+          ...message,
+          message: updatedMessage.message,
+        };
+      }
+      return message;
+    });
+    setConversationHistory(updatedConversationHistory);
   };
 
-  // Define the reducer function to handle state updates
-  const reducer = (state, action) => {
-    switch (action.type) {
-      case "UPDATE_MESSAGE":
-        // Find the index of the message to be updated
-        const messageIndex = state.chatLog.findIndex(
-          (message) => message.index === action.payload.index
-        );
-        // Update the message in the chat log
-        const updatedChatLog = [...state.chatLog];
-        updatedChatLog[messageIndex] = action.payload.updatedMessage;
-        return {
-          ...state,
-          chatLog: updatedChatLog,
-        };
-      case "REFRESH_UI":
-        // Clear the chat log and repopulate it with the conversation history
-        return {
-          ...state,
-          chatLog: [...state.conversationHistory],
-        };
-      default:
-        return state;
-    }
+  const refreshUI = () => {
+    setChatLog([]);
+    // Repopulate the chat log from conversation history or any other source
+    setChatLog(conversationHistory);
   };
-  // Use the useReducer hook to manage state
-  const [state, dispatch] = useReducer(reducer, initialState);
-  // Destructure the chat log and conversation history from state
-  const { chatLog, conversationHistory } = state;
-  // Function to refresh the UI by clearing the chat log after the edited message
-  const refreshUI = (editedMessageIndex) => {
-    dispatch({
-      type: "REFRESH_UI",
-      payload: {
-        editedMessageIndex,
-      },
-    });
-  };
-  
 
   // Render the application
   return (
@@ -640,7 +603,10 @@ useEffect(() => {
               />
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="secondary" onClick={handleGuestSubmit}>
+              <Button
+                variant="secondary"
+                onClick={handleGuestSubmit}
+              >
                 Continue as Guest
               </Button>
               <Button
@@ -760,62 +726,54 @@ useEffect(() => {
           {showHomepage ? (
             <HomePage />
           ) : (
-            <div className={`Chat-box-section`}>
-              <h1 className="Developer-mode-tag">Developer mode</h1>
-              <section className="chatbox">
-                <button
-                  className={`scroll-to-latest ${
-                    isMenuMaxWidth ? "" : "visible"
-                  }`}
-                  onClick={scrollToBottom}
-                >
-                  Scroll to Latest
-                </button>
-                <div className="chat-log">
-                  {chatLog.map((message, index) => {
-                    if (message.codeBlocks) {
-                      return (
-                        <CodeBlock
-                          key={index}
-                          code={message.codeBlocks.code}
-                          language={message.codeBlocks.language}
-                        />
-                      );
-                    } else {
-                      return (
-                        <ChatMessage
-                          key={index}
-                          message={message}
-                          updateMessage={updateMessage}
-                          refreshUI={refreshUI}
-                        />
-                      );
-                    }
-                  })}
-                </div>
-              </section>
-              <div className="chat-input-holder">
-                <form onSubmit={handleSubmit}>
-                  <ResizableInput
-                    value={input}
-                    onChange={(e) => {
-                      setInput(e.target.value);
-                      calculateMessageLimit(e.target.value); // Call calculateMessageLimit function
-                    }}
-                    className="chat-input-textarea"
-                    placeholder="Insert Text Here..."
-                    handleSubmit={(value) => handleSubmit(null, value)}
-                  />
-                  <p className="calculated-message" id="calculated-message">
-                    <span style={{ color: "white" }}>Start Typing</span>
-                  </p>
-                </form>
-                <p>
-                  This project may produce inaccurate information about people,
-                  places, or facts. User discretion is advised.
-                </p>
+          <div className={`Chat-box-section`}>
+            <h1 className="Developer-mode-tag">Developer mode</h1>
+            <section className="chatbox">
+              <button
+                className={`scroll-to-latest ${
+                  isMenuMaxWidth ? "" : "visible"
+                }`}
+                onClick={scrollToBottom}
+              >
+                Scroll to Latest
+              </button>
+              <div className="chat-log">
+                {chatLog.map((message, index) => {
+                  if (message.codeBlocks) {
+                    return (
+                      <CodeBlock
+                        key={index}
+                        code={message.codeBlocks.code}
+                        language={message.codeBlocks.language}
+                      />
+                    );
+                  } else {
+                    return <ChatMessage key={index} message={message} updateMessage={updateMessage} refreshUI={refreshUI} />;
+                  }
+                })}
               </div>
+            </section>
+            <div className="chat-input-holder">
+              <form onSubmit={handleSubmit}>
+                <ResizableInput
+                  value={input}
+                  onChange={(e) => {
+                    setInput(e.target.value);
+                    calculateMessageLimit(e.target.value); // Call calculateMessageLimit function
+                  }}
+                  className="chat-input-textarea"
+                  placeholder="Insert Text Here..."
+                  handleSubmit={(value) => handleSubmit(null, value)}
+                /><p className="calculated-message"id="calculated-message">
+                <span style={{ color: "white" }}>Start Typing</span>
+              </p>
+              </form>
+              <p>
+                This project may produce inaccurate information about people,
+                places, or facts. User discretion is advised.
+              </p>
             </div>
+          </div>
           )}
         </div>
       )}
@@ -829,14 +787,20 @@ function ChatMessage({ message , updateMessage , refreshUI }) {
   const [editedText, setEditedText] = useState(message.message);
   const [showIndex, setShowIndex] = useState(true);
   const extractTables = (markdownString) => {
+    if (typeof markdownString !== "string") {
+      return []; // Return an empty array if the input is not a string
+    }
+  
     const htmlString = md.render(markdownString);
     const htmlElements = parse(htmlString);
+  
     return htmlElements.filter((element) => element.type === "table");
   };
 
   const isChatGPT = message.user === "assistant"; // Determine if the message is from ChatGPT
 
   const handleEdit = () => {
+    
     console.log("setting to edit text");
     setShowIndex(!showIndex);
     setIsEditing(true);
