@@ -177,8 +177,9 @@ function App() {
         .join("\n");
       const element = document.createElement("a");
       const file = new Blob([conversation], { type: "text/plain" });
+      const title = window.prompt("Enter a title for the chat file:");
       element.href = URL.createObjectURL(file);
-      element.download = `chat_${threadId}.txt`;
+      element.download = `${title}.txt`;
       element.click();
     }
   };
@@ -733,8 +734,7 @@ function App() {
                 className={`scroll-to-latest ${
                   isMenuMaxWidth ? "" : "visible"
                 }`}
-                onClick={scrollToBottom}
-              >
+                onClick={scrollToBottom}>
                 Scroll to Latest
               </button>
               <div className="chat-log">
