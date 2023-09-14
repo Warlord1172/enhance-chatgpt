@@ -1,14 +1,14 @@
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 module.exports = function(app) {
-    /* app.use(
+    app.use(
     '/api',
     createProxyMiddleware({
         target: 'https://chatgpt-unleashed.onrender.com:10080',
         changeOrigin: true,
     })
     );
-*/
+    /*
     app.use(
         '/API',
         createProxyMiddleware({
@@ -16,4 +16,5 @@ module.exports = function(app) {
         changeOrigin: true,
     })
     ) 
+    */
 };
