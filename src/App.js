@@ -550,7 +550,10 @@ function App() {
             <Modal.Footer>
               <Button
                 variant="secondary"
-                onClick={setErrorMessage("This feature is unavailable at this time. Please check back later.")}
+                onClick={() => {
+                  setShowError(true);
+                  setErrorMessage("This feature is unavailable at this time. Please check back later.");
+                }}
               >
                 Continue as Guest
               </Button>
