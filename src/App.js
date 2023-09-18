@@ -19,7 +19,7 @@ import parse from 'html-react-parser';
 import fetch from "node-fetch";
 import { v4 as uuidv4 } from "uuid";
 import Loading from "./loadinganimation";
-//import fs from 'fs';
+import fs from 'fs';
 //import axios from 'axios';
 // Main application component
 function App() {
@@ -550,10 +550,7 @@ function App() {
             <Modal.Footer>
               <Button
                 variant="secondary"
-                onClick={() => {
-                  setShowError(true);
-                  setErrorMessage("This feature is unavailable at this time. Please check back later.");
-                }}
+                onClick={handleGuestSubmit}
               >
                 Continue as Guest
               </Button>
