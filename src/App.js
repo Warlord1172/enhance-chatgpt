@@ -550,7 +550,7 @@ function App() {
             <Modal.Footer>
               <Button
                 variant="secondary"
-                onClick={handleGuestSubmit}
+                onClick={setErrorMessage("This feature is unavailable at this time. Please check back later.")}
               >
                 Continue as Guest
               </Button>
