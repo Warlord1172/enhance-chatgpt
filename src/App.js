@@ -8,7 +8,7 @@ import './homepage.css';
 import HomePage from "./homepage";
 import { Modal, Button } from "react-bootstrap";
 import Avatar from './chatgptAvatar';
-
+import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import { useState, useEffect } from "react"; // React's built-in hooks
 import Alert from "react-bootstrap/Alert"; // Bootstrap Alert for error messages
 import ChatThreadList from "./ChatThreadList";
@@ -19,7 +19,7 @@ import parse from 'html-react-parser';
 import fetch from "node-fetch";
 import { v4 as uuidv4 } from "uuid";
 import Loading from "./loadinganimation";
-
+//import fs from 'fs';
 //import axios from 'axios';
 // Main application component
 function App() {
