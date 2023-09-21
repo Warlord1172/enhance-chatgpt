@@ -147,8 +147,6 @@ app.use((err, req, res, next) => {
 
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, 'build')));
-
-
 const getModels = (Key) => {
   return new Promise((resolve, reject) => {
     const options = {
@@ -168,15 +166,12 @@ const getModels = (Key) => {
       });
       response.on("end", () => {
         try {
-          // A list of available models
-          const availableModels = ["gpt-3.5-turbo-0301","gpt-3.5-turbo",   "gpt-3.5-turbo-16k-0613","gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k","gpt-4","gpt-4-0613","gpt-4-0314","gpt-4-32k","gpt-4-32k-0613"];
           const parsedData = JSON.parse(data);
           const engines = parsedData.data;
-          const deprecatedModelsList = engines.filter(engine => !availableModels.includes(engine.id));
-          resolve({
-            availableModels: availableModels,
-            deprecatedModels: deprecatedModelsList,
-          });
+          const availableModels = engines
+            .filter((engine) => engine.status === "available")
+            .map((engine) => engine.id);
+          resolve(availableModels);
         } catch (err) {
           reject(err);
         }
@@ -190,14 +185,78 @@ const getModels = (Key) => {
   });
 };
 
-// define the caching duration (1 hour in this example)
 const cacheDuration = 60 * 60 * 1000; // milliseconds
 let lastFetchTime = null;
 let storedModels = null;
 
-// parse application/x-www-form-urlencoded
+const fetchAndCacheModels = (apiKey) => {
+  console.log("Fetching models from OpenAI API...");
+
+  getModels(apiKey)
+    .then((models) => {
+      storedModels = models;
+      lastFetchTime = Date.now();
+      console.log("Models fetched successfully:", storedModels);
+    })
+    .catch((error) => {
+      console.error("Failed to fetch models:", error);
+    });
+};
+
+const loadModelsFromCache = (apiKey) => {
+  if (fs.existsSync("modelsCache.json")) {
+    const cacheData = fs.readFileSync("modelsCache.json", "utf8");
+
+    try {
+      const parsedData = JSON.parse(cacheData);
+
+      if (
+        parsedData &&
+        parsedData.models &&
+        parsedData.timestamp &&
+        Date.now() - parsedData.timestamp < cacheDuration
+      ) {
+        console.log("Loading models from cache...");
+        storedModels = parsedData.models;
+        lastFetchTime = parsedData.timestamp;
+        console.log("Models loaded from cache:", storedModels);
+      } else {
+        fetchAndCacheModels(apiKey);
+      }
+    } catch (error) {
+      console.error("Error parsing cache data:", error);
+      fetchAndCacheModels(apiKey);
+    }
+  } else {
+    fetchAndCacheModels(apiKey);
+  }
+};
+
+const saveModelsToCache = (apiKey) => {
+  const cacheData = {
+    models: storedModels,
+    timestamp: lastFetchTime,
+  };
+
+  const jsonData = JSON.stringify(cacheData);
+
+  fs.writeFileSync("modelsCache.json", jsonData, "utf8");
+
+  console.log("Models saved to cache:", storedModels);
+};
+
+loadModelsFromCache();
+
+setInterval((apiKey) => {
+  fetchAndCacheModels(apiKey);
+}, cacheDuration);
+
+process.on("SIGINT", () => {
+  saveModelsToCache();
+  process.exit();
+});
+
 app.use(express.urlencoded({ extended: false }));
-// parse application/json
 app.use(express.json());
 
 app.get('/API/models', async (req, res) => {
@@ -207,26 +266,19 @@ app.get('/API/models', async (req, res) => {
   }
   const apiKey = sessionData[sessionId].key;
   const now = Date.now();
-  // If the last fetch time is undefined or the cache is expired, fetch the models
   if (!lastFetchTime || (now - lastFetchTime) >= cacheDuration) {
     console.log("Fetching models from OpenAI API...");
     try {
       const models = await getModels(apiKey);
       storedModels = models;
       lastFetchTime = now;
-      //console.log("Models fetched successfully:", storedModels);
     } catch (error) {
-      //console.error("Failed to fetch models:", error);
       return res.status(500).json({ error: "Failed to fetch models" });
     }
   }
 
-  // Return the cached models
-  //console.log("Returning cached models:", storedModels);
   res.json(storedModels);
 });
-
-
 
 
 console.log('Middleware configured');
