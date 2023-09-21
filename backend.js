@@ -169,12 +169,16 @@ const getModels = (Key) => {
       });
       response.on("end", () => {
         try {
-          const parsedData = JSON.parse(data);
-          const engines = parsedData.data;
-          const availableModels = engines
-            .filter((engine) => engine.status === "available")
-            .map((engine) => engine.id);
-          resolve(availableModels);
+          try {
+            // A list of available models
+            const availableModels = ["gpt-3.5-turbo-0301","gpt-3.5-turbo",   "gpt-3.5-turbo-16k-0613","gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k","gpt-4","gpt-4-0613","gpt-4-0314"];
+            const parsedData = JSON.parse(data);
+            const engines = parsedData.data;
+            const deprecatedModelsList = engines.filter(engine => !availableModels.includes(engine.id));
+            resolve({
+              availableModels: availableModels,
+              deprecatedModels: deprecatedModelsList,
+            });
         } catch (err) {
           reject(err);
         }
