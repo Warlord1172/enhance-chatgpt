@@ -543,7 +543,7 @@ function App() {
               </p>
               <p>Please enter your OpenAI key:</p>
               <input
-                type="text"
+                type="Password"
                 onChange={handleOpenAIKeyChange} // Update this
               />
             </Modal.Body>
