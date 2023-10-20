@@ -393,11 +393,16 @@ function App() {
       setIsLoading(false);
       setUpdatedSystemMessage(false);
     } catch (error) {
-      //console.error("An error occurred:", error); // Log any errors
-      setShowError(true);
-      setErrorMessage(
-        `${error.message}, The AI have Collapsed. Please refresh Window.`
-      );
+      if (error.message === "500") {
+        setShowError(true);
+        setErrorMessage("Internal Server Error. Please try again later.");
+      } else {
+        setShowError(true);
+        setErrorMessage(
+          `${error.message}, The AI have Collapsed. Please refresh Window.`
+        );
+      }
+      setInput(finalInput); // Set the inputValue back into the textbox
     }
   }
   // chat log functions
