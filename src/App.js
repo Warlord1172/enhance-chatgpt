@@ -19,6 +19,7 @@ import parse from 'html-react-parser';
 import fetch from "node-fetch";
 import { v4 as uuidv4 } from "uuid";
 import Loading from "./loadinganimation";
+import OpenAIStatusTracker from './ServerStatus';
 //import fs from 'fs';
 //import axios from 'axios';
 // Main application component
@@ -659,6 +660,7 @@ function App() {
         {
           //<GoogleSignInButton />
         }
+         <OpenAIStatusTracker />
       </aside>
       )}
       {/* Hamburger menu button */}

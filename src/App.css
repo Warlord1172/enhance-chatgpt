@@ -108,6 +108,48 @@
   background-color: #202123;
 }
 
+/* Server status */
+
+.openai-status-tracker {
+  margin-top: auto;
+  background-color: lightgrey;
+  border-radius: 8px;
+  padding: 10px;
+  display: inline-block;
+}
+
+.openai-status-tracker .status {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.openai-status-tracker .server-performance {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-left: 5px;
+}
+
+.openai-status-tracker .operational {
+  color: green;
+}
+
+.openai-status-tracker .down {
+  color: red;
+}
+
+.openai-status-tracker .performance-low {
+  background-color: red;
+}
+
+.openai-status-tracker .performance-medium {
+  background-color: yellow;
+}
+
+.openai-status-tracker .performance-high {
+  background-color: green;
+}
 /* Adjust styles for smaller screens */
 @media (max-width: 768px) {
   .sidemenu {
