@@ -393,9 +393,13 @@ function App() {
       setIsLoading(false);
       setUpdatedSystemMessage(false);
     } catch (error) {
-      if (error.message === "500") {
+      const statusCode = error.message.match(/\d+/); // Extract status code from error message
+      if (statusCode === "500") {
         setShowError(true);
         setErrorMessage("Internal Server Error. Please try again later.");
+      } else if (statusCode === "400") {
+        setShowError(true);
+        setErrorMessage("Bad Request. Please check your input.");
       } else {
         setShowError(true);
         setErrorMessage(
