@@ -132,11 +132,11 @@
 }
 
 .openai-status-tracker .operational {
-  color: green;
+  background-color: green;
 }
 
 .openai-status-tracker .down {
-  color: red;
+  background-color: red;
 }
 
 .openai-status-tracker .performance-low {
