@@ -112,7 +112,7 @@
 
 .openai-status-tracker {
   margin-top: auto;
-  background-color: lightgrey;
+  background-color: #3d3d3c;
   border-radius: 8px;
   padding: 10px;
   display: inline-block;
