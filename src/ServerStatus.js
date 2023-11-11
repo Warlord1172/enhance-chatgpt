@@ -40,8 +40,27 @@ function OpenAIStatusTracker() {
     return () => clearInterval(interval); // Cleanup on unmount
   }, []);
 
+  const getStatusColor = () => {
+    switch (apiStatus) {
+      case "Operational":
+        return "operational";
+      case "Down":
+        return "down";
+      case "Low":
+        return "performance-low";
+      case "Medium":
+        return "performance-medium";
+      case "High":
+        return "performance-high";
+      default:
+        return "";
+    }
+  };
+
+  const statusColor = getStatusColor();
+
   return (
-    <div className="openai-status-tracker">
+    <div className={`openai-status-tracker ${statusColor}`}>
       <h2>OpenAI API Status</h2>
       <p>Name: {apiName}</p>
       <p>Status: {apiStatus}</p>
