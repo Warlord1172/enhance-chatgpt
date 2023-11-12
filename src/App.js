@@ -20,6 +20,7 @@ import fetch from "node-fetch";
 import { v4 as uuidv4 } from "uuid";
 import Loading from "./loadinganimation";
 import OpenAIStatusTracker from "./ServerStatus";
+import WindowClosePrompt from './windowcloseprompt';
 //import fs from 'fs';
 //import axios from 'axios';
 // Main application component
@@ -52,6 +53,7 @@ function App() {
   const [modelTokenLimits, setModelTokenLimits] = useState(null); // Model Token Limit
   const [isMenuMaxWidth, setIsMenuMaxWidth] = useState(false);// menu width
   const [showHomepage, setShowHomepage] = useState(false); //homepage
+  const [showWindowClosePrompt, setShowWindowClosePrompt] = useState(true); // close prompt
   // Generate a new session ID when the component first mounts
   useEffect(() => {
     setSessionId(uuidv4());
@@ -718,6 +720,12 @@ function App() {
       )}
     </div>
     }
+    {showWindowClosePrompt && (
+      <WindowClosePrompt
+        message="Do you want to save the conversation?"
+        onConfirm={downloadChat}
+      />
+    )}
     </div>
     );
 };
