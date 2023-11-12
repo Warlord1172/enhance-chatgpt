@@ -5,24 +5,24 @@ const WindowClosePrompt = ({ message, onConfirm }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    const handleBeforeUnload = (event) => {
-      event.preventDefault();
-      event.returnValue = "";
-      setIsOpen(true);
-    };
+  //   const handleBeforeUnload = (event) => {
+  //     event.preventDefault();
+  //     event.returnValue = "";
+  //     setIsOpen(true);
+  //   };
 
-    const handleWindowClose = () => {
-      setIsOpen(true);
-    };
+  //   const handleWindowClose = () => {
+  //     setIsOpen(true);
+  //   };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    window.addEventListener("unload", handleWindowClose);
+  //   window.addEventListener("beforeunload", handleBeforeUnload);
+  //   window.addEventListener("unload", handleWindowClose);
 
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      window.removeEventListener("unload", handleWindowClose);
-    };
-  }, []);
+  //   return () => {
+  //     window.removeEventListener("beforeunload", handleBeforeUnload);
+  //     window.removeEventListener("unload", handleWindowClose);
+  //   };
+  // }, []);
 
   const handleConfirm = () => {
     setIsOpen(false);
