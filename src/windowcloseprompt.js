@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Modal } from "react-bootstrap";
 
 const WindowClosePrompt = ({ message, onConfirm }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   const handleConfirm = () => {
     setIsOpen(false);
@@ -11,35 +11,18 @@ const WindowClosePrompt = ({ message, onConfirm }) => {
 
   const handleClose = () => {
     setIsOpen(false);
+    window.close(); // Force close the window
   };
 
-  useEffect(() => {
-    const handleBeforeUnload = (event) => {
-      event.preventDefault();
-      event.returnValue = message;
-      setIsOpen(true);
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [message, onConfirm]);
-
-  if (isOpen) {
-    return (
-      <Modal show={isOpen} onHide={() => {}} backdrop="static">
-        <Modal.Body>{message}</Modal.Body>
-        <Modal.Footer>
-          <button onClick={handleConfirm}>Yes</button>
-          <button onClick={handleClose}>No</button>
-        </Modal.Footer>
-      </Modal>
-    );
-  }
-
-  return null;
+  return (
+    <Modal show={isOpen} onHide={handleClose} backdrop="static">
+      <Modal.Body>{message}</Modal.Body>
+      <Modal.Footer>
+        <button onClick={handleConfirm}>Yes</button>
+        <button onClick={handleClose}>No</button>
+      </Modal.Footer>
+    </Modal>
+  );
 };
 
 export default WindowClosePrompt;
