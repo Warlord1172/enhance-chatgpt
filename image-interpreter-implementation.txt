@@ -1,0 +1,87 @@
+const express = require('express');
+const app = express();
+const openai = require('openai');
+const fs = require('fs');
+
+const port = 3000; // Replace with your desired port number
+
+// Create an instance of the OpenAI class
+const openaiInstance = new openai.OpenAI({
+  apiKey: 'YOUR_API_KEY', // Replace with your OpenAI API key
+});
+
+app.use(express.json()); // Parse JSON requests
+
+// Define your routes here
+app.post('/create-image', async (req, res) => {
+  try {
+    const imageUrl = await createImage();
+    res.status(200).json({ imageUrl });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'An error occurred' });
+  }
+});
+
+app.post('/edit-image', async (req, res) => {
+  try {
+    const imageUrl = await editImage();
+    res.status(200).json({ imageUrl });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'An error occurred' });
+  }
+});
+
+app.post('/generate-variation', async (req, res) => {
+  try {
+    const imageUrl = await generateVariation();
+    res.status(200).json({ imageUrl });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'An error occurred' });
+  }
+});
+
+// Create an image using DALL·E 3
+const createImage = async () => {
+  const response = await openaiInstance.images.createImage({
+    model: 'dall-e-3',
+    prompt: 'a white siamese cat',
+    n: 1,
+    size: '1024x1024',
+  });
+  const imageUrl = response.data.data[0].url;
+  return imageUrl;
+};
+
+// Edit an image using DALL·E 2
+const editImage = async () => {
+  const response = await openaiInstance.images.createImageEdit(
+    fs.createReadStream('sunlit_lounge.png'), // Replace with the path to your image file
+    fs.createReadStream('mask.png'), // Replace with the path to your mask file
+    'dall-e-2',
+    'A sunlit indoor lounge area with a pool containing a flamingo',
+    1,
+    '1024x1024'
+  );
+  const imageUrl = response.data.data[0].url;
+  return imageUrl;
+};
+
+// Generate a variation of an image using DALL·E 2
+const generateVariation = async () => {
+  const response = await openaiInstance.images.createImageVariation(
+    fs.createReadStream('corgi_and_cat_paw.png'), // Replace with the path to your image file
+    'dall-e-2',
+    1,
+    '1024x1024'
+  );
+  const imageUrl = response.data.data[0].url;
+  return imageUrl;
+};
+
+// Start the server
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});

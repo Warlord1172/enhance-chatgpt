@@ -105,6 +105,7 @@
 .sidemenu {
   width: 240px;
   padding: 10px;
+  height: 100%;
   background-color: #202123;
 }
 
@@ -120,7 +121,7 @@
 
 .openai-status-tracker .status {
   font-weight: bold;
-  font-size: 16px;
+  font-size: 6px;
 }
 
 .openai-status-tracker .server-performance {

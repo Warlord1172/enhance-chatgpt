@@ -6,20 +6,23 @@ import "./normal.css";
 import "./loading.css";
 import './homepage.css';
 import HomePage from "./homepage";
-import Loading from "./loadinganimation";
 import { Modal, Button } from "react-bootstrap";
-import Avatar from "./chatgptAvatar";
-import { ReactMarkdown } from "react-markdown/lib/react-markdown";
-import { useState, useEffect} from "react"; // React's built-in hooks
+import Avatar from './chatgptAvatar';
+import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
+import { useState, useEffect } from "react"; // React's built-in hooks
 import Alert from "react-bootstrap/Alert"; // Bootstrap Alert for error messages
 import ChatThreadList from "./ChatThreadList";
 import ResizableInput from "./ResizableTextArea";
 //import TableComponent from "./tablecomponent";
-import MarkdownIt from "markdown-it";
-import parse from "html-react-parser";
+import MarkdownIt from 'markdown-it';
+import parse from 'html-react-parser';
 import fetch from "node-fetch";
 import { v4 as uuidv4 } from "uuid";
+import Loading from "./loadinganimation";
+import OpenAIStatusTracker from "./ServerStatus";
+import WindowClosePrompt from './windowcloseprompt';
 import SystemMessage from "./message";
+//import fs from 'fs';
 //import axios from 'axios';
 // Main application component
 function App() {
@@ -47,32 +50,32 @@ function App() {
   const [isLoading, setIsLoading] = useState(false); // Loading state
   const [openAIKey, setOpenAIKey] = useState(""); // Add a new state variable to store the input value
   const [isMenuOpen, setIsMenuOpen] = useState(false); // hamburger menu
-  const [isGuest, setGuest] = useState(false);
+  const [isGuest,setGuest] = useState(false);
   const [modelTokenLimits, setModelTokenLimits] = useState(null); // Model Token Limit
   const [isMenuMaxWidth, setIsMenuMaxWidth] = useState(false);// menu width
   const [showHomepage, setShowHomepage] = useState(false); //homepage
+  const [showWindowClosePrompt] = useState(true); // close prompt
   // Generate a new session ID when the component first mounts
   useEffect(() => {
     setSessionId(uuidv4());
   }, []);
   // hamburger menu
   const toggleMenu = () => {
-    const hamburger = document.querySelector(".hamburger");
-    if (!isGuest) {
+    const hamburger = document.querySelector('.hamburger');
+    if(!isGuest){
       setIsMenuOpen(!isMenuOpen);
-      if (!isMenuOpen) {
-        hamburger.classList.add("is-open");
-      } else {
-        hamburger.classList.remove("is-open");
+      if(!isMenuOpen){
+        hamburger.classList.add('is-open');
+      }else{
+        hamburger.classList.remove('is-open');
       }
-    } else {
+    }
+    else{
+      
       setShowError(true);
-      setErrorMessage(
-        "Guest has limited features, please insert an OpenAI key to access these features."
-      );
+      setErrorMessage("Guest has limited features, please insert an OpenAI key to access these features.");
     }
   };
-
   // key handling
   // Update the input value in state whenever it changes
   const handleOpenAIKeyChange = (event) => {
@@ -129,12 +132,13 @@ function App() {
           console.error("Error saving the key:", error);
         });
   }
-  // Default chat log
+   // Default chat log
   const [chatLog, setChatLog] = useState([
     {
       user: "assistant",
       message: "How can I help you today?",
     },
+    
   ]);
   // Default chat threads
   const [chatThreads, setChatThreads] = useState([
@@ -168,7 +172,7 @@ function App() {
       setChatLog(currentThread.chatLog);
     }
   }, [currentThreadId, chatThreads]);
-
+  
   const downloadChat = (threadId) => {
     const thread = chatThreads.find((thread) => thread.id === threadId);
     if (thread) {
@@ -216,7 +220,7 @@ function App() {
   function removeThread(threadId) {
     let newThreads = chatThreads.filter((thread) => thread.id !== threadId);
     let newCurrentThreadId = currentThreadId;
-
+  
     // If the active chat room is removed
     if (threadId === currentThreadId) {
       const currentIndex = chatThreads.findIndex((thread) => thread.id === threadId);
@@ -238,21 +242,19 @@ function App() {
         setShowHomepage(true);
       }
     }
-
+  
     setChatThreads(newThreads);
     setCurrentThreadId(newCurrentThreadId);
   }
   // Function to get AI model engines from the backend
   async function getEngines() {
     if (openAIKeyFound) {
-      console.log("getEngines called");
       try {
         const response = await fetch(`/API/models`);
         if (!response.ok) {
           throw new Error("Failed to fetch models");
         }
         const data = await response.json();
-        console.log("Received data from the backend:", data);
         if (!data.availableModels || data.availableModels.length === 0) {
           setModels([{ id: "No models available", ready: false }]);
         } else {
@@ -262,8 +264,6 @@ function App() {
           }));
           setModels(formattedModels);
         }
-        console.log("Models state updated:", Models);
-
         // Get the token limit for the current model
         const currentModelData = data.availableModels.find(
           (model) => model.id === currentModel
@@ -272,7 +272,7 @@ function App() {
           setModelTokenLimits(currentModelData.safeTokensForCompletion);
           console.log(`Max token Limit: ${modelTokenLimits}`);
         }
-
+  
         // Fetch the model token limits
         const tokenLimitsResponse = await fetch("/API/get-model-token-limits", {
           method: "POST",
@@ -301,6 +301,7 @@ function App() {
   useEffect(() => {
     if (errorMessage) {
       setShowError(true);
+      
     } else {
       setShowError(false);
     }
@@ -375,7 +376,6 @@ function App() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      console.log("Raw response:", data); // Log the raw response data
       if (data.message) {
         chatLogNew = [
           ...chatLogNew,
@@ -394,9 +394,6 @@ function App() {
             { user: "assistant", codeBlocks: { language, code } },
           ];
         });
-        console.log("chatLogNew with code block:", chatLogNew);
-      } else {
-        console.log("chatLogNew without code block:", chatLogNew);
       }
       setChatLog(chatLogNew);
       setChatThreads(
@@ -412,11 +409,20 @@ function App() {
       setIsLoading(false);
       setUpdatedSystemMessage(false);
     } catch (error) {
-      console.error("An error occurred:", error); // Log any errors
-      setShowError(true);
-      setErrorMessage(
-        `${error.message}, The AI have Collapsed. Please refresh Window.`
-      );
+      const statusCode = error.message.match(/\d+/); // Extract status code from error message
+      if (statusCode === "500") {
+        setShowError(true);
+        setErrorMessage("Internal Server Error. Please try again later.");
+      } else if (statusCode === "400") {
+        setShowError(true);
+        setErrorMessage("Bad Request. Please check your input.");
+      } else {
+        setShowError(true);
+        setErrorMessage(
+          `${error.message}, The AI have Collapsed. Please refresh Window.`
+        );
+      }
+      setInput(finalInput); // Set the inputValue back into the textbox
     }
   }
   // chat log functions
@@ -446,7 +452,6 @@ function App() {
       window.removeEventListener("resize", setWindowSize);
     };
   }, []);
-
   useEffect(() => {
     const setWindowZoom = () => {
       document.documentElement.style.zoom = "80%";
@@ -454,7 +459,6 @@ function App() {
 
     setWindowZoom();
   }, []);
-
   // Add a useEffect hook to check the menu width on window resize
   useEffect(() => {
     const handleResize = () => {
@@ -480,10 +484,11 @@ function App() {
     setShowModal(false);
     setShowOpenAIModal(true);
   };
+
   const handleCloseOpenAIModal = () => {
     setShowOpenAIModal(false);
   };
-  // App loading
+  // App loading 
   const [apploading, setapploading] = useState(true);
   useEffect(() => {
     const loadingTimeout = setTimeout(() => {
@@ -492,6 +497,7 @@ function App() {
 
     return () => clearTimeout(loadingTimeout);
   }, []);
+  // function to calculate message limit
   // message limit function
   const calculateMessageLimit = (message) => {
   // Check if the message is empty or consists of whitespace only
@@ -554,42 +560,40 @@ function App() {
 
   // Render the application
   return (
-    <div className="app-loading-container">
-      {apploading ? (
-        <Loading />
-      ) : (
-        <div className="App">
-          {/* Other parts of your application */}
-          {/* Modal for introduction and login options */}
-          <Modal show={showModal} onHide={handleCloseModal} backdrop="static">
-            <Modal.Header closeButton>
-              <Modal.Title>Welcome to the ChatGPT Playground!</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <p>
-                <center>
-                  The ChatGPT Playground is an interactive AI tool, allowing
-                  users to delve into detailed dialogues across a myriad of
-                  topics. It's not just for entertainment, but also a resource
-                  for education, brainstorming, and problem-solving. Have fun!
-                </center>
-              </p>
-            </Modal.Body>
-            <Modal.Footer>
-              {
-                //<GoogleSignInButton />
-              }
-              <Button variant="secondary" onClick={handleCloseModal}>
-                Continue
-              </Button>
-            </Modal.Footer>
-          </Modal>
-          <Modal
-            show={showOpenAIModal}
-            onHide={handleCloseOpenAIModal}
-            backdrop="static"
-          >
-            <Modal.Title>Enter OpenAI Key</Modal.Title>
+  <div className="app-loading-container">
+    {apploading ? <Loading /> :
+    <div className="App">
+      {/* Other parts of your application */}
+      {/* Modal for introduction and login options */}
+      <Modal show={showModal} onHide={handleCloseModal} backdrop="static">
+        <Modal.Header closeButton>
+          <Modal.Title>Welcome to the ChatGPT Playground!</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>
+            <center>
+              The ChatGPT Playground is an interactive AI tool, allowing users
+              to delve into detailed dialogues across a myriad of topics. It's
+              not just for entertainment, but also a resource for education,
+              brainstorming, and problem-solving. Have fun!
+            </center>
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          {
+            //<GoogleSignInButton />
+          }
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Continue
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      <Modal
+        show={showOpenAIModal}
+        onHide={handleCloseOpenAIModal}
+        backdrop="static"
+      >
+        <Modal.Title>Enter OpenAI Key</Modal.Title>
             <Modal.Body>
               <p>
                 Get your OpenAI Key here:{" "}
@@ -702,29 +706,30 @@ function App() {
                   Update System Message
                 </button>
 
-                <div className="confirm-msg">
-                  {updatedSystemMessage && submitConfirm}
-                </div>
-              </div>
-              <ChatThreadList
-                threads={chatThreads}
-                activeThreadId={currentThreadId}
-                onSelectThread={(id) => setCurrentThreadId(id)}
-                onRemoveThread={removeThread}
-                onHoverThread={downloadChat}
-              />
-              {
-                //<GoogleSignInButton />
-              }
-            </aside>
-          )}
-          {/* Hamburger menu button */}
-          <button className="hamburger" onClick={toggleMenu}>
-            <span className="line"></span>
-            <span className="line"></span>
-            <span className="line"></span>
-          </button>
-          {showHomepage ? (
+          <div className="confirm-msg">
+            {updatedSystemMessage && submitConfirm}
+          </div>
+        </div>
+        <ChatThreadList
+          threads={chatThreads}
+          activeThreadId={currentThreadId}
+          onSelectThread={(id) => setCurrentThreadId(id)}
+          onRemoveThread={removeThread}
+          onHoverThread={downloadChat}
+        />
+        {
+          //<GoogleSignInButton />
+        }
+         <OpenAIStatusTracker />
+      </aside>
+      )}
+      {/* Hamburger menu button */}
+      <button className="hamburger" onClick={toggleMenu}>
+        <span className="line"></span>
+        <span className="line"></span>
+        <span className="line"></span>
+      </button>
+      {showHomepage ? (
             <HomePage />
           ) : (
           <div className={`Chat-box-section`}>
@@ -767,107 +772,54 @@ function App() {
                 /><p className="calculated-message"id="calculated-message">
                 <span style={{ color: "white" }}>Start Typing</span>
               </p>
-              </form>
-              <p>
-                This project may produce inaccurate information about people,
-                places, or facts. User discretion is advised.
-              </p>
-            </div>
-          </div>
-          )}
-        </div>
+          </form>
+          <p>
+            This project may produce inaccurate information about people,
+            places, or facts. User discretion is advised.
+          </p>
+        </div>  
+      </div>
       )}
     </div>
-  );
-};
-
-function ChatMessage({ message , updateMessage , refreshUI }) {
-  const md = new MarkdownIt();
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedText, setEditedText] = useState(message.message);
-  const [showIndex, setShowIndex] = useState(true);
-  const extractTables = (markdownString) => {
-    if (typeof markdownString !== "string") {
-      return []; // Return an empty array if the input is not a string
     }
-  
+    {showWindowClosePrompt && (
+      <WindowClosePrompt
+        message="Do you want to save the conversation?"
+        onConfirm={downloadChat}
+      />
+    )}
+    </div>
+    );
+};
+const ChatMessage = ({ message }) => {
+  const md = new MarkdownIt();
+
+  const extractTables = (markdownString) => {
     const htmlString = md.render(markdownString);
     const htmlElements = parse(htmlString);
-  
+
     return htmlElements.filter((element) => element.type === "table");
   };
 
   const isChatGPT = message.user === "assistant"; // Determine if the message is from ChatGPT
 
-  const handleEdit = () => {
-    
-    console.log("setting to edit text");
-    setShowIndex(!showIndex);
-    setIsEditing(true);
-    setEditedText(message.message);
-  };
-  const handleTextareaKeyDown = (e) => {
-    if (e.keyCode === 13 && !e.shiftKey) {
-      e.preventDefault();
-      // Replace the original message with the edited text
-      const updatedMessage = {
-        ...message,
-        message: editedText,
-      };
-      // Call a function to update the message in the chat log
-      updateMessage(updatedMessage);
-      // Reset the editing state
-      setIsEditing(false);
-      // Clear the edited text
-      setEditedText("");
-      // Trigger a refresh of the UI to make sure the AI responds to the edited message
-      refreshUI();
-      console.log("Replace message with edited text:", editedText);
-    }
-  };
-
   if (message.codeBlocks) {
     return (
-      <div className="Button-Holder">
-        {!isChatGPT && (
-          <div>
-            {isEditing ? (
-              <div>
-                <textarea
-                  value={editedText}
-                  onChange={(e) => setEditedText(e.target.value)}
-                  onKeyDown={handleTextareaKeyDown}
-                />
-                <button onClick={() => setIsEditing(false)} className="Switch-Messages">
-                  Cancel
-                </button>
-              </div>
+      <div className={`chat-message ${isChatGPT && "chatgpt"}`}>
+        <div className="chat-message-center">
+          <div className={`avatar ${isChatGPT && "chatgpt"}`}>
+            {isChatGPT ? (
+              <Avatar isChatGPT={true} />
             ) : (
-              <div>
-                <button onClick={handleEdit} className="Edit-Button">
-                  Edit
-                </button>
-              </div>
+              <Avatar isChatGPT={false} />
             )}
           </div>
-        )}
-        <div className={`chat-message ${isChatGPT && "chatgpt"}`}>
-          <div className="chat-message-center">
-            <div className={`avatar ${isChatGPT && "chatgpt"}`}>
-              {isChatGPT ? (
-                <Avatar isChatGPT={true} />
-              ) : (
-                <Avatar isChatGPT={false} />
-              )}
-            </div>
-            <div className="message">
-              {showIndex && <span className="message-index">{message.index}</span>}
-              <ReactMarkdown>{message.message}</ReactMarkdown>
-              <CodeBlock
-                code={message.codeBlocks.code}
-                language={message.codeBlocks.language}
-              />
-            </div>
+          <div className="message">
+            <ReactMarkdown>{message.message}</ReactMarkdown>
+            <CodeBlock
+              code={message.codeBlocks.code}
+              language={message.codeBlocks.language}
+            />
           </div>
         </div>
       </div>
@@ -875,72 +827,48 @@ function ChatMessage({ message , updateMessage , refreshUI }) {
   } else {
     const markdownString = message.message;
     const tables = extractTables(markdownString);
+
     return (
-      <div className="Button-Holder">
-        {!isChatGPT && (
-          <div>
-            {isEditing ? (
-              <div>
-                <textarea
-                  value={editedText}
-                  onChange={(e) => setEditedText(e.target.value)}
-                  onKeyDown={handleTextareaKeyDown}
-                />
-                <button onClick={() => setIsEditing(false)} className="Switch-Messages">
-                  Cancel
-                </button>
-              </div>
+      <div className={`chat-message ${isChatGPT && "chatgpt"}`}>
+        <div className="chat-message-center">
+          <div className={`avatar ${isChatGPT && "chatgpt"}`}>
+            {isChatGPT ? (
+              <Avatar isChatGPT={true} />
             ) : (
-              <div>
-                <button onClick={handleEdit} className="Edit-Button">
-                  Edit
-                </button>
-              </div>
+              <Avatar isChatGPT={false} />
             )}
           </div>
-        )}
-        <div className={`chat-message ${isChatGPT && "chatgpt"}`}>
-          <div className="chat-message-center">
-            <div className={`avatar ${isChatGPT && "chatgpt"}`}>
-              {isChatGPT ? (
-                <Avatar isChatGPT={true} />
-              ) : (
-                <Avatar isChatGPT={false} />
-              )}
-            </div>
-            <div className="message">
-              {showIndex && <span className="message-index">{message.index}</span>}
-              <ReactMarkdown>{message.message}</ReactMarkdown>
-              {message.imageUrls && message.imageUrls.length > 0 && (
-                <div className="image-section">
-                  {message.imageUrls.map((imageUrl, index) => (
+          <div className="message">
+            <ReactMarkdown>{message.message}</ReactMarkdown>
+            {message.imageUrls && message.imageUrls.length > 0 && (
+              <div className="image-section">
+                {message.imageUrls.map((imageUrl, index) => (
+                  <img
+                    src={imageUrl}
+                    key={index}
+                    alt={`drawing ${index + 1}`}
+                  />
+                ))}{message.imageUrls.length === 0 && (
+                  <div className="loading-spinner">
+                    {" "}
                     <img
-                      src={imageUrl}
-                      key={index}
-                      alt={`drawing ${index + 1}`}
-                    />
-                  ))}
-                  {message.imageUrls.length === 0 && (
-                    <div className="loading-spinner">
-                      {" "}
-                      <img
-                        src="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif"
-                        alt="loading spinner"
-                      />{" "}
-                    </div>
-                  )}
-                </div>
-              )}
-              <div className="Table">
-                {tables.map((table, index) => (
-                  <div key={index}>{table}</div>
-                ))}
+                      src="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif"
+                      alt="loading spinner"
+                    />{" "}
+                  </div>
+                )}
               </div>
+            )}
+            <div className="Table">
+              {tables.map((table, index) => (
+                <div key={index}>{table}</div>
+              ))}
             </div>
           </div>
         </div>
       </div>
     );
   }
-}
+};
 export default App;
+

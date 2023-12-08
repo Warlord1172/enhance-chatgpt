@@ -1,0 +1,60 @@
+const openai = require('openai');
+
+// Create an Assistant
+const createAssistant = async () => {
+  const assistant = await openai.assistants.create({
+    name: "Math Tutor",
+    instructions: "You are a personal math tutor. Write and run code to answer math questions.",
+    tools: [{ type: "code_interpreter" }],
+    model: "gpt-4-1106-preview"
+  });
+  
+  return assistant;
+}
+
+// Create a Thread
+const createThread = async () => {
+  const thread = await openai.threads.create();
+  return thread;
+}
+
+// Add a Message to the Thread
+const addMessageToThread = async (threadId, content) => {
+  const message = await openai.threads.messages.create(
+    threadId,
+    {
+      role: "user",
+      content: content
+    }
+  );
+  return message;
+}
+
+// Run the Assistant
+const runAssistant = async (threadId, assistantId, instructions) => {
+  const run = await openai.threads.runs.create(
+    threadId,
+    {
+      assistant_id: assistantId,
+      instructions: instructions
+    }
+  );
+  return run;
+}
+
+// Check the Run status
+const checkRunStatus = async (threadId, runId) => {
+  const runStatus = await openai.threads.runs.retrieve(
+    threadId,
+    runId
+  );
+  return runStatus;
+}
+
+// Display the Assistant's Response
+const getAssistantResponse = async (threadId) => {
+  const messages = await openai.threads.messages.list(
+    threadId
+  );
+  return messages;
+}

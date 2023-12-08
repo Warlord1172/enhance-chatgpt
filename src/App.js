@@ -53,7 +53,7 @@ function App() {
   const [modelTokenLimits, setModelTokenLimits] = useState(null); // Model Token Limit
   const [isMenuMaxWidth, setIsMenuMaxWidth] = useState(false);// menu width
   const [showHomepage, setShowHomepage] = useState(false); //homepage
-  const [showWindowClosePrompt, setShowWindowClosePrompt] = useState(true); // close prompt
+  const [showWindowClosePrompt] = useState(true); // close prompt
   // Generate a new session ID when the component first mounts
   useEffect(() => {
     setSessionId(uuidv4());

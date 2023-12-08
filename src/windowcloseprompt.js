@@ -29,13 +29,13 @@ const WindowClosePrompt = ({ message, onConfirm }) => {
 
   if (isOpen) {
     return (
-      <Modal show={isOpen} onHide={() => {}} backdrop="static">
+     <Modal show={isOpen} onHide={() => {}} backdrop="static">
         <Modal.Body>{message}</Modal.Body>
         <Modal.Footer>
           <button onClick={handleConfirm}>Yes</button>
           <button onClick={handleClose}>No</button>
         </Modal.Footer>
-      </Modal>
+      </Modal> 
     );
   }
 

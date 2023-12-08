@@ -5,6 +5,7 @@ const cors = require("cors");
 const https = require("https");
 const app = express();
 const path = require('path');
+const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 // Set the PORT environment variable to a custom value
 const port = 3080;
@@ -25,6 +26,8 @@ const modelTokenLimits = {
   "gpt-3.5-turbo": 4096,
   "gpt-3.5-turbo-0301": 4096,
   "gpt-3.5-turbo-0613":4096,
+  "gpt-3.5-turbo-1106":4096, //returns 16384 apparently
+  "gpt-4-1106-preview":4096, // returns 128000 apparently
   "gpt-4-32k": 32768,
   "gpt-4-32k-0613":32768,
   "gpt-3.5-turbo-16k":16384,
@@ -46,7 +49,6 @@ const modelTokenLimits = {
   "code-cushman-002": 2047,
   "code-cushman-001": 2047,
 };
-
 const Codelanguage = {
   Python: ["Python", "py"],
   Javascript: ["JavaScript", "js"],
@@ -145,8 +147,11 @@ app.use((err, req, res, next) => {
 });
 
 
+
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, 'build')));
+
+
 const getModels = (Key) => {
   return new Promise((resolve, reject) => {
     const options = {
@@ -166,12 +171,15 @@ const getModels = (Key) => {
       });
       response.on("end", () => {
         try {
-          const parsedData = JSON.parse(data);
-          const engines = parsedData.data;
-          const availableModels = engines
-            .filter((engine) => engine.status === "available")
-            .map((engine) => engine.id);
-          resolve(availableModels);
+            // A list of available models
+            const availableModels = ["gpt-3.5-turbo-0301","gpt-3.5-turbo","gpt-3.5-turbo-0613","gpt-3.5-turbo-1106","gpt-3.5-turbo-16k-0613", "gpt-3.5-turbo-16k","gpt-4","gpt-4-0613","gpt-4-0314","gpt-4-1106-preview"];
+            const parsedData = JSON.parse(data);
+            const engines = parsedData.data;
+            const deprecatedModelsList = engines.filter(engine => !availableModels.includes(engine.id));
+            resolve({
+              availableModels: availableModels,
+              deprecatedModels: deprecatedModelsList,
+            });
         } catch (err) {
           reject(err);
         }
@@ -280,6 +288,11 @@ app.get('/API/models', async (req, res) => {
   res.json(storedModels);
 });
 
+// The "catchall" handler: for any request that doesn't
+// match one above, send back React's index.html file.
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname+'/build/index.html'));
+});
 
 console.log('Middleware configured');
 // api key handling
@@ -288,7 +301,7 @@ app.post("/API/save-key", (req, res) => {
   const sessionId = req.cookies.sessionId;  // Get session ID from the cookie
   sessionData[sessionId] = {
       key: key
-    };
+    }; 
     if (key === '69') {
       console.log("Activated Guest Controls");
       sessionData[sessionId].key = "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";
@@ -516,7 +529,6 @@ if (conversationHistory) {
         console.error("Invalid API response", parsedResponse);
         // Handle the error
       }
-      
       if (parsedResponse.error) {
         console.error(parsedResponse.error);
         if (
@@ -622,7 +634,7 @@ if (conversationHistory) {
 
             return { headers, rows };
           });
-
+          
           finalResponse.tables = parsedTables;
         } else {
           // No table detected in the response
@@ -705,7 +717,7 @@ if (conversationHistory) {
   apiRequest.end();
 });
 
-const fs = require('fs');
+// Start the server
 
 app.get('/API/textContent', (req, res) => {
   const textContent = fs.readFileSync('src/dev_mode.txt', 'utf8');

@@ -61,7 +61,7 @@ function OpenAIStatusTracker() {
 
   return (
     <div className={`openai-status-tracker ${statusColor}`}>
-      <h2>OpenAI API Status</h2>
+      <p>OpenAI API Status</p>
       <p>Name: {apiName}</p>
       <p>Status: {apiStatus}</p>
       <p>Uptime: {apiUptime}%</p>
