@@ -564,40 +564,54 @@ function App() {
 
   // Render the application
   return (
-  <div className="app-loading-container">
-    {apploading ? <Loading /> :
+<div className="app-loading-container">
+  {apploading ? (
+    <Loading />
+  ) : (
     <div className="App">
-      {/* Other parts of your application */}
-      {/* Modal for introduction and login options */}
-      <Modal show={showModal} onHide={handleCloseModal} backdrop="static">
-        <Modal.Header closeButton>
-          <Modal.Title>Welcome to the ChatGPT Playground!</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>
-            <center>
-              The ChatGPT Playground is an interactive AI tool, allowing users
-              to delve into detailed dialogues across a myriad of topics. It's
-              not just for entertainment, but also a resource for education,
-              brainstorming, and problem-solving. Have fun!
-            </center>
-          </p>
-        </Modal.Body>
-        <Modal.Footer>
-          {
-            //<GoogleSignInButton />
-          }
-          <Button variant="secondary" onClick={handleCloseModal}>
-            Continue
-          </Button>
-        </Modal.Footer>
-      </Modal>
-      <Modal
-        show={showOpenAIModal}
-        onHide={handleCloseOpenAIModal}
-        backdrop="static"
-      >
-        <Modal.Title>Enter OpenAI Key</Modal.Title>
+      <div className="top-bar">
+        <Router>
+          {/* Buttons for navigation */}
+          <Link to="/IPC">
+            <button>Go to IPC</button>
+          </Link>
+          <Link to="/APC">
+            <button>Go to APC</button>
+          </Link>
+          <Routes>
+            <Route path="/IPC" element={<IPC />} />
+            <Route path="/APC" element={<APC />} />
+          </Routes>
+          {/* Modal for introduction and login options */}
+          <Modal show={showModal} onHide={handleCloseModal} backdrop="static">
+            <Modal.Header closeButton>
+              <Modal.Title>Welcome to the ChatGPT Playground!</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <p>
+                <center>
+                  The ChatGPT Playground is an interactive AI tool, allowing
+                  users to delve into detailed dialogues across a myriad of
+                  topics. It's not just for entertainment, but also a resource
+                  for education, brainstorming, and problem-solving. Have fun!
+                </center>
+              </p>
+            </Modal.Body>
+            <Modal.Footer>
+              {
+                //<GoogleSignInButton />
+              }
+              <Button variant="secondary" onClick={handleCloseModal}>
+                Continue
+              </Button>
+            </Modal.Footer>
+          </Modal>
+          <Modal
+            show={showOpenAIModal}
+            onHide={handleCloseOpenAIModal}
+            backdrop="static"
+          >
+            <Modal.Title>Enter OpenAI Key</Modal.Title>
             <Modal.Body>
               <p>
                 Get your OpenAI Key here:{" "}
@@ -612,10 +626,7 @@ function App() {
               />
             </Modal.Body>
             <Modal.Footer>
-              <Button
-                variant="secondary"
-                onClick={handleGuestSubmit}
-              >
+              <Button variant="secondary" onClick={handleGuestSubmit}>
                 Continue as Guest
               </Button>
               <Button
@@ -710,97 +721,101 @@ function App() {
                   Update System Message
                 </button>
 
-          <div className="confirm-msg">
-            {updatedSystemMessage && submitConfirm}
-          </div>
-        </div>
-        <ChatThreadList
-          threads={chatThreads}
-          activeThreadId={currentThreadId}
-          onSelectThread={(id) => setCurrentThreadId(id)}
-          onRemoveThread={removeThread}
-          onHoverThread={downloadChat}
-        />
-        {
-          //<GoogleSignInButton />
-        }
-         <OpenAIStatusTracker />
-         <Routes><Route path="/IPC">
-            <IPC />
-          </Route>
-          <Route path="/APC">
-            <APC />
-          </Route></Routes>
-         
-      </aside>
-      )}
-      {/* Hamburger menu button */}
-      <button className="hamburger" onClick={toggleMenu}>
-        <span className="line"></span>
-        <span className="line"></span>
-        <span className="line"></span>
-      </button>
-      {showHomepage ? (
+                <div className="confirm-msg">
+                  {updatedSystemMessage && submitConfirm}
+                </div>
+              </div>
+              <ChatThreadList
+                threads={chatThreads}
+                activeThreadId={currentThreadId}
+                onSelectThread={(id) => setCurrentThreadId(id)}
+                onRemoveThread={removeThread}
+                onHoverThread={downloadChat}
+              />
+              {
+                //<GoogleSignInButton />
+              }
+              <OpenAIStatusTracker />
+            </aside>
+          )}
+          {/* Hamburger menu button */}
+          <button className="hamburger" onClick={toggleMenu}>
+            <span className="line"></span>
+            <span className="line"></span>
+            <span className="line"></span>
+          </button>
+          {showHomepage ? (
             <HomePage />
           ) : (
-          <div className={`Chat-box-section`}>
-            <h1 className="Developer-mode-tag">Developer mode</h1>
-            <section className="chatbox">
-              <button
-                className={`scroll-to-latest ${
-                  isMenuMaxWidth ? "" : "visible"
-                }`}
-                onClick={scrollToBottom}>
-                Scroll to Latest
-              </button>
-              <div className="chat-log">
-                {chatLog.map((message, index) => {
-                  if (message.codeBlocks) {
-                    return (
-                      <CodeBlock
-                        key={index}
-                        code={message.codeBlocks.code}
-                        language={message.codeBlocks.language}
-                      />
-                    );
-                  } else {
-                    return <ChatMessage key={index} message={message} updateMessage={updateMessage} refreshUI={refreshUI} />;
-                  }
-                })}
+            <div className={`Chat-box-section`}>
+              <h1 className="Developer-mode-tag">Developer mode</h1>
+              <section className="chatbox">
+                <button
+                  className={`scroll-to-latest ${
+                    isMenuMaxWidth ? "" : "visible"
+                  }`}
+                  onClick={scrollToBottom}
+                >
+                  Scroll to Latest
+                </button>
+                <div className="chat-log">
+                  {chatLog.map((message, index) => {
+                    if (message.codeBlocks) {
+                      return (
+                        <CodeBlock
+                          key={index}
+                          code={message.codeBlocks.code}
+                          language={message.codeBlocks.language}
+                        />
+                      );
+                    } else {
+                      return (
+                        <ChatMessage
+                          key={index}
+                          message={message}
+                          updateMessage={updateMessage}
+                          refreshUI={refreshUI}
+                        />
+                      );
+                    }
+                  })}
+                </div>
+              </section>
+              <div className="chat-input-holder">
+                <form onSubmit={handleSubmit}>
+                  <ResizableInput
+                    value={input}
+                    onChange={(e) => {
+                      setInput(e.target.value);
+                      calculateMessageLimit(e.target.value); // Call calculateMessageLimit function
+                    }}
+                    className="chat-input-textarea"
+                    placeholder="Insert Text Here..."
+                    handleSubmit={(value) => handleSubmit(null, value)}
+                  />
+                  <p className="calculated-message" id="calculated-message">
+                    <span style={{ color: "white" }}>Start Typing</span>
+                  </p>
+                </form>
+                <p>
+                  This project may produce inaccurate information about people,
+                  places, or facts. User discretion is advised.
+                </p>
               </div>
-            </section>
-            <div className="chat-input-holder">
-              <form onSubmit={handleSubmit}>
-                <ResizableInput
-                  value={input}
-                  onChange={(e) => {
-                    setInput(e.target.value);
-                    calculateMessageLimit(e.target.value); // Call calculateMessageLimit function
-                  }}
-                  className="chat-input-textarea"
-                  placeholder="Insert Text Here..."
-                  handleSubmit={(value) => handleSubmit(null, value)}
-                /><p className="calculated-message"id="calculated-message">
-                <span style={{ color: "white" }}>Start Typing</span>
-              </p>
-          </form>
-          <p>
-            This project may produce inaccurate information about people,
-            places, or facts. User discretion is advised.
-          </p>
-        </div>  
+            </div>
+          )}
+        </Router>
       </div>
-      )}
     </div>
-    }
-    {showWindowClosePrompt && (
-      <WindowClosePrompt
-        message="Do you want to save the conversation?"
-        onConfirm={downloadChat}
-      />
-    )}
-    </div>
-    );
+  )}
+  {showWindowClosePrompt && (
+    <WindowClosePrompt
+      message="Do you want to save the conversation?"
+      onConfirm={downloadChat}
+    />
+  )}
+</div>
+);
 };
 const ChatMessage = ({ message }) => {
   const md = new MarkdownIt();
@@ -876,9 +891,10 @@ const ChatMessage = ({ message }) => {
               ))}
             </div>
           </div>
-        </div>
+        </div>        
       </div>
     );
+    
   }
 };
 export default App;

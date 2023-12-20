@@ -1,9 +1,8 @@
 import logo from './logo.svg';
 import './App.css';
-import { Route } from "react-router-dom";
+
 function IPC() {
   return (
-    <Route>
     <div className="IPC">
       <header className="IPC-header">
         <img src={logo} className="IPC-logo" alt="logo" />
@@ -20,7 +19,6 @@ function IPC() {
         </a>
       </header>
     </div>
-    </Route>
   );
 }
 

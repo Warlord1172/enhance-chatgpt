@@ -1,9 +1,7 @@
 import logo from './logo.svg';
 import './App.css';
-import { Route } from "react-router-dom";
 function APC() {
   return (
-    <Route>
     <div className="APC">
       <header className="APC-header">
         <img src={logo} className="APC-logo" alt="logo" />
@@ -19,7 +17,7 @@ function APC() {
           Learn React
         </a>
       </header>
-    </div></Route>
+    </div>
   );
 }
 
