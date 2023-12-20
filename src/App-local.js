@@ -22,6 +22,10 @@ import Loading from "./loadinganimation";
 import OpenAIStatusTracker from "./ServerStatus";
 import WindowClosePrompt from './windowcloseprompt';
 import SystemMessage from "./message";
+
+import { BrowserRouter as Router,Routes, Route, Link } from 'react-router-dom';
+import IPC from "./Image-processor-chatgpt/src/App";
+import APC from "./assistant-processor-chatgpt/src/App";
 //import fs from 'fs';
 //import axios from 'axios';
 // Main application component
@@ -721,6 +725,13 @@ function App() {
           //<GoogleSignInButton />
         }
          <OpenAIStatusTracker />
+         <Routes><Route path="/IPC">
+            <IPC />
+          </Route>
+          <Route path="/APC">
+            <APC />
+          </Route></Routes>
+         
       </aside>
       )}
       {/* Hamburger menu button */}

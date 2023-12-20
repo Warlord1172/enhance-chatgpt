@@ -152,8 +152,11 @@ app.use((err, req, res, next) => {
 app.use(express.static(path.join(__dirname, 'build')));
 
 
-const getModels = (Key) => {
+const getModels = (apiKey) => {
   return new Promise((resolve, reject) => {
+    if (!apiKey) {
+      reject("API key not provided");
+    }
     const options = {
       hostname: "api.openai.com",
       port: 443,
@@ -161,7 +164,7 @@ const getModels = (Key) => {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${Key}`,
+        Authorization: `Bearer ${apiKey}`,
       },
     };
     const request = https.request(options, (response) => {
@@ -171,15 +174,15 @@ const getModels = (Key) => {
       });
       response.on("end", () => {
         try {
-            // A list of available models
-            const availableModels = ["gpt-3.5-turbo-0301","gpt-3.5-turbo","gpt-3.5-turbo-0613","gpt-3.5-turbo-1106","gpt-3.5-turbo-16k-0613", "gpt-3.5-turbo-16k","gpt-4","gpt-4-0613","gpt-4-0314","gpt-4-1106-preview"];
-            const parsedData = JSON.parse(data);
-            const engines = parsedData.data;
-            const deprecatedModelsList = engines.filter(engine => !availableModels.includes(engine.id));
-            resolve({
-              availableModels: availableModels,
-              deprecatedModels: deprecatedModelsList,
-            });
+          // A list of available models
+          const availableModels = ["gpt-3.5-turbo-0301", "gpt-3.5-turbo", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k-0613", "gpt-3.5-turbo-16k", "gpt-4", "gpt-4-0613", "gpt-4-0314", "gpt-4-1106-preview"];
+          const parsedData = JSON.parse(data);
+          const engines = parsedData.data;
+          const deprecatedModelsList = engines.filter(engine => !availableModels.includes(engine.id));
+          resolve({
+            availableModels: availableModels,
+            deprecatedModels: deprecatedModelsList,
+          });
         } catch (err) {
           reject(err);
         }
