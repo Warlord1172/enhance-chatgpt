@@ -1,8 +1,8 @@
 
-
 # ChatGPT Playground
 
 The **ChatGPT Playground** is an interactive AI tool that allows users to have interactive dialogues with an AI assistant. It provides a user-friendly interface for users to enter their messages and receive responses from the AI assistant powered by the GPT-3.5 Turbo model.
+
 ## How it Works
 
 AI with customizable language models works by using machine learning algorithms to analyze large amounts of text data. This analysis allows the AI to learn the patterns and structure of language, enabling it to generate text that is indistinguishable from human-written text.
@@ -18,13 +18,14 @@ The AI can be customized in several ways, including:
 - **Chatbot Personalization**: You can personalize the chatbot by setting what you would like for it to be. This includes giving it a name, and customizing its responses to specific questions or topics.
 
 #
+
 ## Features
 
 The ChatGPT Playground offers the following features:
 
 1. **AI Models**: Users can select from a list of available AI models to power the assistant. The available models are fetched from the backend API.
 
-2. **System Message Settings**: Users can customize the system message displayed by the assistant. They can update the content of the system message and set the temperature for generating responses.   
+2. **System Message Settings**: Users can customize the system message displayed by the assistant. They can update the content of the system message and set the temperature for generating responses.
 
 3. **Chat Threads**: Users can create multiple chat threads and switch between them. Each chat thread maintains its own conversation history.
 
@@ -86,7 +87,6 @@ AI with customizable language models has a wide range of applications, including
 - **Legal Analysis**: AI can be used to analyze legal documents and provide recommendations for legal strategies.
 
 - **Marketing**: Chatbots can be used to provide personalized marketing experiences for customers.
-
 
 ## Conclusion
 

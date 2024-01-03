@@ -22,10 +22,7 @@ import Loading from "./loadinganimation";
 import OpenAIStatusTracker from "./ServerStatus";
 import WindowClosePrompt from './windowcloseprompt';
 import SystemMessage from "./message";
-
-import { BrowserRouter as Router,Routes, Route, Link } from 'react-router-dom';
-import IPC from "./Image-processor-chatgpt/src/App";
-import APC from "./assistant-processor-chatgpt/src/App";
+import IPC from "./IPC.js";
 //import fs from 'fs';
 //import axios from 'axios';
 // Main application component
@@ -35,6 +32,7 @@ function App() {
     getEngines();
   });
   // Various state variables
+  const [selectedComponent, setSelectedComponent] = useState(null); // component selection
   const [sessionId, setSessionId] = useState(null);
   const [openAIKeyFound, setOpenAIKeyFound] = useState(false);
   const [showModal, setShowModal] = useState(true);
@@ -136,7 +134,7 @@ function App() {
           console.error("Error saving the key:", error);
         });
   }
-   // Default chat log
+  // Default chat log
   const [chatLog, setChatLog] = useState([
     {
       user: "assistant",
@@ -562,26 +560,20 @@ function App() {
     setChatLog(conversationHistory);
   };
 
+  const handleComponentSelection = (component) => {
+    setapploading(true); // Set apploading to true to show the loading screen
+    setSelectedComponent(component);
+    setTimeout(() => {
+      setapploading(false); // Set apploading to false after a timeout to transition back to the main component
+    }, 1000);
+  };
   // Render the application
   return (
 <div className="app-loading-container">
   {apploading ? (
     <Loading />
-  ) : (
+  ) : selectedComponent === 'Chat' ? (
     <div className="App">
-      <div className="top-bar">
-        <Router>
-          {/* Buttons for navigation */}
-          <Link to="/IPC">
-            <button>Go to IPC</button>
-          </Link>
-          <Link to="/APC">
-            <button>Go to APC</button>
-          </Link>
-          <Routes>
-            <Route path="/IPC" element={<IPC />} />
-            <Route path="/APC" element={<APC />} />
-          </Routes>
           {/* Modal for introduction and login options */}
           <Modal show={showModal} onHide={handleCloseModal} backdrop="static">
             <Modal.Header closeButton>
@@ -804,8 +796,16 @@ function App() {
               </div>
             </div>
           )}
-        </Router>
-      </div>
+
+    </div>
+  ) : selectedComponent === 'IPC' ? (
+    // eslint-disable-next-line react/jsx-no-undef
+    <IPC/>
+  ) : (
+    <div>
+      {/* Render the window allowing the user to choose between the two options */}
+      <button onClick={() => handleComponentSelection('Chat')}>Chat</button>
+      <button onClick={() => handleComponentSelection('IPC')}>IPC</button>
     </div>
   )}
   {showWindowClosePrompt && (

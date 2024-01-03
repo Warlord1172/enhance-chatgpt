@@ -663,7 +663,7 @@ function App() {
         {
           //<GoogleSignInButton />
         }
-         <OpenAIStatusTracker />
+        <OpenAIStatusTracker />
       </aside>
       )}
       {/* Hamburger menu button */}
