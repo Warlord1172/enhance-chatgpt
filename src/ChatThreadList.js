@@ -11,14 +11,14 @@ function ChatThreadList({ threads, activeThreadId, onSelectThread, onRemoveThrea
   };
 
   const handleDownloadChat = (threadId) => {
-    const thread = threads.find((thread) => thread.id === threadId);
+    const thread = threads.find((thread) => thread.id === threadId );
     if (thread) {
       // Extract the conversation from the thread and initiate the download
       const conversation = thread.chatLog.map((message) => `${message.user}: ${message.message}`).join('\n');
       const element = document.createElement('a');
       const file = new Blob([conversation], { type: 'text/plain' });
       element.href = URL.createObjectURL(file);
-      element.download = `chat_${threadId}.txt`;
+      element.download = `chat_${threadId + 1}.txt`;
       element.click();
     }
   };

@@ -23,6 +23,8 @@ import OpenAIStatusTracker from "./ServerStatus";
 import WindowClosePrompt from './windowcloseprompt';
 import SystemMessage from "./message";
 import IPC from "./IPC.js";
+import { FormControl, InputLabel, Select, MenuItem } from "@material-ui/core";
+
 //import fs from 'fs';
 //import axios from 'axios';
 // Main application component
@@ -663,28 +665,27 @@ function App() {
                 </p>
               </header>
               <div className="models">
-                {Models.length > 0 ? (
-                  <select
-                    className="Model-list"
-                    onChange={(e) => {
-                      console.log("setting to..", e.target.value);
-                      setCurrentModel(e.target.value);
-                    }}
-                  >
-                    {Models.map((model) => (
-                      <option
-                        key={model.id}
-                        value={model.id}
-                        disabled={!model.ready}
+                  {Models.length > 0 ? (
+                      <FormControl className="Model-list" style={{ backgroundColor: '#f5f5f5', borderRadius: '5px'}}>
+                      <InputLabel>Select Model</InputLabel>
+                      <Select
+                        value={currentModel}
+                        onChange={(e) => {
+                          console.log('setting to..', e.target.value);
+                          setCurrentModel(e.target.value);
+                        }}
                       >
-                        {model.id}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <p>Loading models...</p>
-                )}
-              </div>
+                        {Models.map((model) => (
+                          <MenuItem key={model.id} value={model.id} disabled={!model.ready}>
+                            {model.id}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  ) : (
+                    <p>Loading models...</p>
+                  )}
+                </div>
               <div className="system-message-settings">
                 <p>System Message Settings</p>
                 <div>
@@ -716,7 +717,14 @@ function App() {
                 <div className="confirm-msg">
                   {updatedSystemMessage && submitConfirm}
                 </div>
+                <OpenAIStatusTracker />
               </div>
+              <div className='side-menu-button'onClick={() => handleComponentSelection('IPC')} style={{ textAlign: 'center' }}>
+              <span style={{ textAlign: 'center' }}>
+                Go to IPC
+              </span>
+              </div>
+
               <ChatThreadList
                 threads={chatThreads}
                 activeThreadId={currentThreadId}
@@ -727,7 +735,7 @@ function App() {
               {
                 //<GoogleSignInButton />
               }
-              <OpenAIStatusTracker />
+              
             </aside>
           )}
           {/* Hamburger menu button */}
