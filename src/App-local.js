@@ -153,17 +153,7 @@ function App() {
         {
           user: "assistant",
           message: "How can I help you today?",
-        },
-        {
-          user: "assistant",
-          message:
-            "To make an image, copy/paste this command: 'say [IMGI(https://image.pollinations.ai/prompt/{description}) with the description __ ]'",
-        },
-        {
-          user: "assistant",
-          message:
-            "Note: replace __ with the actual description you would like. if it does not work, use a different language model or change its behavior and try again.",
-        },
+        }, 
       ],
     },
   ]);
@@ -177,20 +167,6 @@ function App() {
     }
   }, [currentThreadId, chatThreads]);
   
-  const downloadChat = (threadId) => {
-    const thread = chatThreads.find((thread) => thread.id === threadId);
-    if (thread) {
-      const conversation = thread.chatLog
-        .map((message) => `${message.user}: ${message.message}`)
-        .join("\n");
-      const element = document.createElement("a");
-      const file = new Blob([conversation], { type: "text/plain" });
-      const title = window.prompt("Enter a title for the chat file:");
-      element.href = URL.createObjectURL(file);
-      element.download = `${title}.txt`;
-      element.click();
-    }
-  };
   // Function to clear chat
   function clearChat() {
     const newThreadId = chatThreads.length > 0 ? chatThreads[chatThreads.length - 1].id + 1 : 0;
@@ -204,16 +180,6 @@ function App() {
           {
             user: "assistant",
             message: "How can I help you today?",
-          },
-          {
-            user: "assistant",
-            message:
-              "To make an image, copy/paste this command: 'say [IMGI(https://image.pollinations.ai/prompt/{description}) with the description __ ]'",
-          },
-          {
-            user: "assistant",
-            message:
-              "Note: replace __ with the actual description you would like. if it does not work, use a different language model or change its behavior and try again.",
           },
         ],
       },
@@ -563,10 +529,11 @@ function App() {
   };
 
   const handleComponentSelection = (component) => {
-    setapploading(true); // Set apploading to true to show the loading screen
+    console.log(`setting window to ${component}`);
+    setapploading(true);
     setSelectedComponent(component);
     setTimeout(() => {
-      setapploading(false); // Set apploading to false after a timeout to transition back to the main component
+      setapploading(false);
     }, 1000);
   };
   // Render the application
@@ -689,7 +656,7 @@ function App() {
               <div className="system-message-settings">
                 <p>System Message Settings</p>
                 <div>
-                  <label>Content: </label>
+                  <label>Instruction: </label>
                   <textarea
                     placeholder={systemMessage}
                     onChange={(e) => setSystemMessage(e.target.value)}
@@ -719,7 +686,7 @@ function App() {
                 </div>
                 <OpenAIStatusTracker />
               </div>
-              <div className='side-menu-button'onClick={() => handleComponentSelection('IPC')} style={{ textAlign: 'center' }}>
+              <div className='side-menu-button'onClick={() =>{ console.log("setting to IPC");handleComponentSelection('IPC');} } style={{ textAlign: 'center' }}>
               <span style={{ textAlign: 'center' }}>
                 Go to IPC
               </span>
@@ -730,7 +697,6 @@ function App() {
                 activeThreadId={currentThreadId}
                 onSelectThread={(id) => setCurrentThreadId(id)}
                 onRemoveThread={removeThread}
-                onHoverThread={downloadChat}
               />
               {
                 //<GoogleSignInButton />
@@ -809,17 +775,19 @@ function App() {
   ) : selectedComponent === 'IPC' ? (
     // eslint-disable-next-line react/jsx-no-undef
     <IPC/>
-  ) : (
+  ) : selectedComponent === null ? (
     <div>
       {/* Render the window allowing the user to choose between the two options */}
       <button onClick={() => handleComponentSelection('Chat')}>Chat</button>
       <button onClick={() => handleComponentSelection('IPC')}>IPC</button>
     </div>
+  ) : (
+    <div>
+    </div>
   )}
   {showWindowClosePrompt && (
     <WindowClosePrompt
-      message="Do you want to save the conversation?"
-      onConfirm={downloadChat}
+      message="Do you want to leave the conversation?"
     />
   )}
 </div>

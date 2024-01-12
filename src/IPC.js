@@ -3,19 +3,29 @@ import "./App.css";
 import "./normal.css";
 import "./loading.css";
 import "./homepage.css";
+import App from "./App-local";
 import HomePage from "./homepage";
 import { Modal, Button } from "react-bootstrap";
 import { useState, useEffect } from "react"; // React's built-in hooks
 import Alert from "react-bootstrap/Alert"; // Bootstrap Alert for error messages
 import ChatThreadList from "./ChatThreadList";
 //import TableComponent from "./tablecomponent";
+import parse from "html-react-parser";
 import fetch from "node-fetch";
+import Avatar from "./chatgptAvatar";
 import { v4 as uuidv4 } from "uuid";
 import OpenAIStatusTracker from "./ServerStatus";
 import SystemMessage from "./message";
 import NumberSlider from "./temperature";
+import Loading from "./loadinganimation";
+import WindowClosePrompt from "./windowcloseprompt";
+import ResizableInput from "./ResizableTextArea";
+import { ReactMarkdown } from "react-markdown/lib/react-markdown";
+import MarkdownIt from "markdown-it";
+import { FormControl, InputLabel, Select, MenuItem } from "@material-ui/core";
 function IPC() {
   // Various state variables
+  const [selectedComponent, setSelectedComponent] = useState(null); // component selection
   const [sessionId, setSessionId] = useState(null);
   const [openAIKeyFound, setOpenAIKeyFound] = useState(false);
   const [showModal, setShowModal] = useState(true);
@@ -406,190 +416,384 @@ function IPC() {
       setInput(finalInput); // Set the inputValue back into the textbox
     }
   }
+
+  // App loading
+  const [apploading, setapploading] = useState(true);
+  useEffect(() => {
+    const loadingTimeout = setTimeout(() => {
+      setapploading(false);
+    }, 3000); // Simulating a 3-second loading delay
+
+    return () => clearTimeout(loadingTimeout);
+  }, []);
+  // chat log functions
+  const scrollToBottom = () => {
+    console.log("scrollToBottom function called");
+    const chatBoxSection = document.querySelector(".Chat-box-section");
+    if (chatBoxSection) {
+      chatBoxSection.scrollTo({
+        top: chatBoxSection.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  // update chat logs
+  const updateMessage = (updatedMessage) => {
+    const updatedChatLog = chatLog.map((message) => {
+      if (message.index === updatedMessage.index) {
+        return {
+          ...message,
+          message: updatedMessage.message,
+        };
+      }
+      return message;
+    });
+    setChatLog(updatedChatLog);
+
+    // Update the conversation history if needed
+    const updatedConversationHistory = conversationHistory.map((message) => {
+      if (message.index === updatedMessage.index) {
+        return {
+          ...message,
+          message: updatedMessage.message,
+        };
+      }
+      return message;
+    });
+    setConversationHistory(updatedConversationHistory);
+  };
+
+  const refreshUI = () => {
+    setChatLog([]);
+    // Repopulate the chat log from conversation history or any other source
+    setChatLog(conversationHistory);
+  };
+
+  const handleComponentSelection = () => {
+    console.log("setting window to Chat");
+    setapploading(true);
+    setSelectedComponent("Chat");
+    setTimeout(() => {
+      setapploading(false);
+    }, 1000);
+  };
   return (
-    <div className="App">
-      {/* Modal for introduction and login options */}
-      <Modal show={showModal} onHide={handleCloseModal} backdrop="static">
-        <Modal.Header closeButton>
-          <Modal.Title>Welcome to the ChatGPT Playground!</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>
-            <center>
-              The ChatGPT Playground is an interactive AI tool, allowing users
-              to delve into detailed dialogues across a myriad of topics. It's
-              not just for entertainment, but also a resource for education,
-              brainstorming, and problem-solving. Have fun!
-            </center>
-          </p>
-        </Modal.Body>
-        <Modal.Footer>
-          {
-            //<GoogleSignInButton />
-          }
-          <Button variant="secondary" onClick={handleCloseModal}>
-            Continue
-          </Button>
-        </Modal.Footer>
-      </Modal>
-      <Modal
-        show={showOpenAIModal}
-        onHide={handleCloseOpenAIModal}
-        backdrop="static"
-      >
-        <Modal.Title>Enter OpenAI Key</Modal.Title>
-        <Modal.Body>
-          <p>
-            Get your OpenAI Key here:{" "}
-            <a href="https://platform.openai.com/account/api-keys">
-              https://platform.openai.com/account/api-keys
-            </a>
-          </p>
-          <p>Please enter your OpenAI key:</p>
-          <input
-            type="Password"
-            onChange={handleOpenAIKeyChange} // Update this
-          />
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleGuestSubmit}>
-            Continue as Guest
-          </Button>
-          <Button
-            variant="primary"
-            onClick={handleOpenAIKeySubmit} // Update this
+    <div className="app-loading-container">
+  {apploading ? (
+    <Loading />
+        ) : selectedComponent === "Chat" ? (
+          <App/>
+        ) : (
+        <div className="App">
+          {/* Modal for introduction and login options */}
+          <Modal show={showModal} onHide={handleCloseModal} backdrop="static">
+            <Modal.Header closeButton>
+              <Modal.Title>Welcome to the ChatGPT Playground!</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <p>
+                <center>
+                  The ChatGPT Playground is an interactive AI tool, allowing
+                  users to delve into detailed dialogues across a myriad of
+                  topics. It's not just for entertainment, but also a resource
+                  for education, brainstorming, and problem-solving. Have fun!
+                </center>
+              </p>
+            </Modal.Body>
+            <Modal.Footer>
+              {
+                //<GoogleSignInButton />
+              }
+              <Button variant="secondary" onClick={handleCloseModal}>
+                Continue
+              </Button>
+            </Modal.Footer>
+          </Modal>
+          <Modal
+            show={showOpenAIModal}
+            onHide={handleCloseOpenAIModal}
+            backdrop="static"
           >
-            Submit
-          </Button>
-        </Modal.Footer>
-      </Modal>
-      {/* Loading popup */}
-      {isLoading && (
-        <div className="loading-popup">
-          <div className="loading-animation"></div>
-          <p className="loading-text">Generating message and updating log...</p>
-        </div>
-      )}
-      <Alert
-        className="Alert-Notif"
-        variant="danger"
-        show={showError}
-        onClose={() => setShowError(false)}
-        dismissible
-      >
-        <Alert.Heading>Error</Alert.Heading>
-        <p>{errorMessage}</p>
-      </Alert>
-
-      {/* Side menu */}
-      {isMenuOpen && (
-        <aside className="sidemenu">
-          <div className="side-menu-button" onClick={clearChat}>
-            <span>+</span>
-            New Chat
-          </div>
-          <header className="model-header">
-            <p>
-              Selected Model:{" "}
-              <span style={{ color: "green" }}>{currentModel}</span>
-            </p>
-          </header>
-          <div className="models">
-            {Models.length > 0 ? (
-              <select
-                className="Model-list"
-                onChange={(e) => {
-                  console.log("setting to..", e.target.value);
-                  setCurrentModel(e.target.value);
-                }}
-              >
-                {Models.map((model) => (
-                  <option
-                    key={model.id}
-                    value={model.id}
-                    disabled={!model.ready}
-                  >
-                    {model.id}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <p>Loading models...</p>
-            )}
-          </div>
-          <div className="system-message-settings">
-            <p>System Message Settings</p>
-            <div>
-              <label>Content: </label>
-              <textarea
-                placeholder={systemMessage}
-                onChange={(e) => setSystemMessage(e.target.value)}
+            <Modal.Title>Enter OpenAI Key</Modal.Title>
+            <Modal.Body>
+              <p>
+                Get your OpenAI Key here:{" "}
+                <a href="https://platform.openai.com/account/api-keys">
+                  https://platform.openai.com/account/api-keys
+                </a>
+              </p>
+              <p>Please enter your OpenAI key:</p>
+              <input
+                type="Password"
+                onChange={handleOpenAIKeyChange} // Update this
               />
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleGuestSubmit}>
+                Continue as Guest
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleOpenAIKeySubmit} // Update this
+              >
+                Submit
+              </Button>
+            </Modal.Footer>
+          </Modal>
+          {/* Loading popup */}
+          {isLoading && (
+            <div className="loading-popup">
+              <div className="loading-animation"></div>
+              <p className="loading-text">
+                Generating message and updating log...
+              </p>
             </div>
-            <NumberSlider
-              minValue={0}
-              maxValue={1}
-              initialValue={tempTemperature}
-              onChange={setTempTemperature}
-            />
-            <button
-              onClick={() => {
-                handletempSubmit();
-                console.log(systemMessage);
-                setUpdatedSystemMessage(true);
-                setSubmitConfirm("Changes have been submitted");
-                console.log(`temperature set to: ${temperature}`);
-              }}
-              className="System-Submit-Button"
-            >
-              Update System Message
-            </button>
+          )}
+          <Alert
+            className="Alert-Notif"
+            variant="danger"
+            show={showError}
+            onClose={() => setShowError(false)}
+            dismissible
+          >
+            <Alert.Heading>Error</Alert.Heading>
+            <p>{errorMessage}</p>
+          </Alert>
+          {/* Side menu */}
+          {isMenuOpen && (
+            <aside className="sidemenu">
+              <div className="side-menu-button" onClick={clearChat}>
+                <span>+</span>
+                New Chat
+              </div>
+              <header className="model-header">
+                <p>
+                  Selected Model:{" "}
+                  <span style={{ color: "green" }}>{currentModel}</span>
+                </p>
+              </header>
+              <div className="models">
+                {Models.length > 0 ? (
+                  <FormControl
+                    className="Model-list"
+                    style={{ backgroundColor: "#f5f5f5", borderRadius: "5px" }}
+                  >
+                    <InputLabel>Select Model</InputLabel>
+                    <Select
+                      value={currentModel}
+                      onChange={(e) => {
+                        console.log("setting to..", e.target.value);
+                        setCurrentModel(e.target.value);
+                      }}
+                    >
+                      {Models.map((model) => (
+                        <MenuItem
+                          key={model.id}
+                          value={model.id}
+                          disabled={!model.ready}
+                        >
+                          {model.id}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                ) : (
+                  <p>Loading models...</p>
+                )}
+              </div>
+              <div className="system-message-settings">
+                <p>System Message Settings</p>
+                <div>
+                  <label>Content: </label>
+                  <textarea
+                    placeholder={systemMessage}
+                    onChange={(e) => setSystemMessage(e.target.value)}
+                  />
+                </div>
+                <NumberSlider
+                  minValue={0}
+                  maxValue={1}
+                  initialValue={tempTemperature}
+                  onChange={setTempTemperature}
+                />
+                <button
+                  onClick={() => {
+                    handletempSubmit();
+                    console.log(systemMessage);
+                    setUpdatedSystemMessage(true);
+                    setSubmitConfirm("Changes have been submitted");
+                    console.log(`temperature set to: ${temperature}`);
+                  }}
+                  className="System-Submit-Button"
+                >
+                  Update System Message
+                </button>
 
-            <div className="confirm-msg">
-              {updatedSystemMessage && submitConfirm}
-            </div>
-          </div>
-          <ChatThreadList
-            threads={chatThreads}
-            activeThreadId={currentThreadId}
-            onSelectThread={(id) => setCurrentThreadId(id)}
-            onRemoveThread={removeThread}
-            onHoverThread={downloadChat}
-          />
-          {
-            //<GoogleSignInButton />
-          }
-          <OpenAIStatusTracker />
-        </aside>
-      )}
-      {/* Hamburger menu button */}
-      <button className="hamburger" onClick={toggleMenu}>
-        <span className="line"></span>
-        <span className="line"></span>
-        <span className="line"></span>
-      </button>
-      {showHomepage ? (
-        <HomePage />
-      ) : (
-        <div className={`Chat-box-section`}>
-          {/* Developer mode tag */}
-          <section className="chatbox">
-            {/* Scroll to latest button */}
-            <div className="chat-log">{/* Chat messages */}</div>
-          </section>
-          <div className="chat-input-holder">
-            <form onSubmit={handleSubmit}>
-              {/* Resizable input component */}
-            </form>
-            <p>
-              This project may produce inaccurate information about people,
-              places, or facts. User discretion is advised.
-            </p>
-          </div>
-        </div>
-      )}
+                <div className="confirm-msg">
+                  {updatedSystemMessage && submitConfirm}
+                </div>
+              </div>
+              <OpenAIStatusTracker />
+              <div
+                className="side-menu-button"
+                onClick={() => handleComponentSelection("Chat")}
+                style={{ textAlign: "center" }}
+              >
+                <span style={{ textAlign: "center" }}>Go to Chat</span>
+              </div>
+              <ChatThreadList
+                threads={chatThreads}
+                activeThreadId={currentThreadId}
+                onSelectThread={(id) => setCurrentThreadId(id)}
+                onRemoveThread={removeThread}
+                onHoverThread={downloadChat}
+              />
+              {
+                //<GoogleSignInButton />
+              }
+            </aside>
+          )}
+          {/* Hamburger menu button */}
+          <button className="hamburger" onClick={toggleMenu}>
+            <span className="line"></span>
+            <span className="line"></span>
+            <span className="line"></span>
+          </button>
+          {showHomepage ? (
+            <HomePage />
+          ) : (
+            <div className={`Chat-box-section`}>
+              {/* Developer mode tag */}
+              <h1 className="Developer-mode-tag">Developer mode</h1>
+              <section className="chatbox">
+                <button
+                  className={`scroll-to-latest ${
+                    isMenuMaxWidth ? "" : "visible"
+                  }`}
+                  onClick={scrollToBottom}
+                >
+                  Scroll to Latest
+                </button>
+                {/* Scroll to latest button */}
+                <div className="chat-log">
+                  {chatLog.map((message, index) => {
+                    return (
+                      <ChatMessage
+                        key={index}
+                        message={message}
+                        updateMessage={updateMessage}
+                        refreshUI={refreshUI}
+                      />
+                    );
+                  })}
+                </div>
+              </section>
+              <div className="chat-input-holder">
+                <form onSubmit={handleSubmit}>
+                  <ResizableInput
+                    value={input}
+                    onChange={(e) => {
+                      setInput(e.target.value);
+                      calculateMessageLimit(e.target.value); // Call calculateMessageLimit function
+                    }}
+                    className="chat-input-textarea"
+                    placeholder="Insert Text Here..."
+                    handleSubmit={(value) => handleSubmit(null, value)}
+                  />
+                  <p className="calculated-message" id="calculated-message">
+                    <span style={{ color: "white" }}>Start Typing</span>
+                  </p>
+                </form>
+                <p>
+                  This project may produce inaccurate information about people,
+                  places, or facts. User discretion is advised.
+                </p>
+                </div>
+              </div>
+            )}
     </div>
-  );
-}
-
+        
+  )}{showWindowClosePrompt && (
+      <WindowClosePrompt message="Do you want to leave the conversation?" />
+    )}
+    </div>
+    );
+  };
+    const ChatMessage = ({ message }) => {
+      const md = new MarkdownIt();
+    
+      const extractTables = (markdownString) => {
+        const htmlString = md.render(markdownString);
+        const htmlElements = parse(htmlString);
+    
+        return htmlElements.filter((element) => element.type === "table");
+      };
+    
+      const isChatGPT = message.user === "assistant"; // Determine if the message is from ChatGPT
+    
+      if (message.codeBlocks) {
+        return (
+          <div className={`chat-message ${isChatGPT && "chatgpt"}`}>
+            <div className="chat-message-center">
+              <div className={`avatar ${isChatGPT && "chatgpt"}`}>
+                {isChatGPT ? (
+                  <Avatar isChatGPT={true} />
+                ) : (
+                  <Avatar isChatGPT={false} />
+                )}
+              </div>
+              <div className="message">
+                <ReactMarkdown>{message.message}</ReactMarkdown>
+              </div>
+            </div>
+          </div>
+        );
+      } else {
+        const markdownString = message.message;
+        const tables = extractTables(markdownString);
+    
+        return (
+          <div className={`chat-message ${isChatGPT && "chatgpt"}`}>
+            <div className="chat-message-center">
+              <div className={`avatar ${isChatGPT && "chatgpt"}`}>
+                {isChatGPT ? (
+                  <Avatar isChatGPT={true} />
+                ) : (
+                  <Avatar isChatGPT={false} />
+                )}
+              </div>
+              <div className="message">
+                <ReactMarkdown>{message.message}</ReactMarkdown>
+                {message.imageUrls && message.imageUrls.length > 0 && (
+                  <div className="image-section">
+                    {message.imageUrls.map((imageUrl, index) => (
+                      <img
+                        src={imageUrl}
+                        key={index}
+                        alt={`drawing ${index + 1}`}
+                      />
+                    ))}
+                    {message.imageUrls.length === 0 && (
+                      <div className="loading-spinner">
+                        {" "}
+                        <img
+                          src="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif"
+                          alt="loading spinner"
+                        />{" "}
+                      </div>
+                    )}
+                  </div>
+                )}
+                <div className="Table">
+                  {tables.map((table, index) => (
+                    <div key={index}>{table}</div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+    };
 export default IPC;

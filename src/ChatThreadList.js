@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import jsPDF from 'jspdf';
 
 // ChatThreadList component: displays a list of chat threads
 // It takes threads (array of thread data), activeThreadId (id of the currently active thread),
@@ -11,15 +12,34 @@ function ChatThreadList({ threads, activeThreadId, onSelectThread, onRemoveThrea
   };
 
   const handleDownloadChat = (threadId) => {
-    const thread = threads.find((thread) => thread.id === threadId );
+    const thread = threads.find((thread) => thread.id === threadId);
     if (thread) {
-      // Extract the conversation from the thread and initiate the download
-      const conversation = thread.chatLog.map((message) => `${message.user}: ${message.message}`).join('\n');
-      const element = document.createElement('a');
-      const file = new Blob([conversation], { type: 'text/plain' });
-      element.href = URL.createObjectURL(file);
-      element.download = `chat_${threadId + 1}.txt`;
-      element.click();
+      const conversation = thread.chatLog
+        .map((message) => `${message.user}: ${message.message}`)
+        .join("\n");
+
+      const format = window.prompt("Enter the file format (txt, pdf):");
+      const title = window.prompt("Enter a title for the chat file:");
+
+      if (format === "txt") {
+        const element = document.createElement("a");
+        const file = new Blob([conversation], { type: "text/plain" });
+        element.href = URL.createObjectURL(file);
+        element.download = `${title}.txt`;
+        element.click();
+      } else if (format === "pdf") {
+        const doc = new jsPDF();
+        doc.setFontSize(12); // Adjust the font size as needed
+        doc.text(conversation, 10, 10, { maxWidth: 190 });
+        const pdfBlob = doc.output("blob");
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        const link = document.createElement("a");
+        link.href = pdfUrl;
+        link.download = `${title}.pdf`;
+        link.click();
+      } else {
+        console.log("Invalid file format");
+      }
     }
   };
 
