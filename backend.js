@@ -302,10 +302,7 @@ app.post("/api/save-key", (req, res) => {
   sessionData[sessionId] = {
       key: key
     }; 
-    if (key === '69') {
-      console.log("Activated Guest Controls");
-      sessionData[sessionId].key = "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";
-    } else if (key === '179109') {
+    if (key === '179109') {
       console.log("Activated Admin Controls");
       sessionData[sessionId].key = "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";
     } else {

@@ -49,7 +49,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false); // Loading state
   const [openAIKey, setOpenAIKey] = useState(""); // Add a new state variable to store the input value
   const [isMenuOpen, setIsMenuOpen] = useState(false); // hamburger menu
-  const [isGuest,setGuest] = useState(false);
+  const [isGuest] = useState(false);
   const [modelTokenLimits, setModelTokenLimits] = useState(null); // Model Token Limit
   const [isMenuMaxWidth, setIsMenuMaxWidth] = useState(false);// menu width
   const [showHomepage, setShowHomepage] = useState(false); //homepage
@@ -68,11 +68,6 @@ function App() {
       }else{
         hamburger.classList.remove('is-open');
       }
-    }
-    else{
-      
-      setShowError(true);
-      setErrorMessage("Guest has limited features, please insert an OpenAI key to access these features.");
     }
   };
   // key handling
@@ -106,28 +101,6 @@ function App() {
       setErrorMessage("An error has occurred: No OpenAI key was found. Please refresh the window.");
     }
   };
-  // handle guest login
-  const handleGuestSubmit = () => {
-    setGuest(true);
-    fetch(`/api/save-key`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ key: "69" }),
-    }) // Autofill the input form with the default value
-    .then((response) => {
-          if (!response.ok) {
-            throw new Error("Failed to save the key");
-          }
-          setShowError(false);
-          setOpenAIKeyFound(true);
-          setShowOpenAIModal(false);
-        })
-        .catch((error) => {
-          //console.error("Error saving the key:", error);
-        });
-  }
    // Default chat log
   const [chatLog, setChatLog] = useState([
     {
@@ -560,12 +533,6 @@ function App() {
               />
             </Modal.Body>
             <Modal.Footer>
-              <Button
-                variant="secondary"
-                onClick={handleGuestSubmit}
-              >
-                Continue as Guest
-              </Button>
               <Button
                 variant="primary"
                 onClick={handleOpenAIKeySubmit} // Update this
