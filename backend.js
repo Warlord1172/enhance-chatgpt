@@ -306,7 +306,7 @@ app.post("/api/save-key", (req, res) => {
 
   if (key === '179109') {
     console.log("Activated Admin Controls");
-    const adminKey = fs.readFileSync('key.txt', 'utf8');
+    const adminKey = process.env.ADMIN_KEY || fs.readFileSync('key.txt', 'utf8');
     sessionData[sessionId].key = adminKey;
   } else {
     sessionData[sessionId].key = key;
