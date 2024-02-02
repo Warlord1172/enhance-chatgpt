@@ -303,24 +303,23 @@ app.post("/API/save-key", (req, res) => {
   const { key } = req.body;
   const sessionId = req.cookies.sessionId;  // Get session ID from the cookie
   sessionData[sessionId] = {
-      key: key
-    }; 
-    if (key === '69') {
-      console.log("Activated Guest Controls");
-      sessionData[sessionId].key = "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";
-    } else if (key === '179109') {
-      console.log("Activated Admin Controls");
-      sessionData[sessionId].key = "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";
-    } else {
-      sessionData[sessionId].key = key;
-    }
+    key: key
+  }; 
+
+  if (key === '179109') {
+    console.log("Activated Admin Controls");
+    const adminKey = fs.readFileSync('key.txt', 'utf8');
+    sessionData[sessionId].key = adminKey;
+  } else {
+    sessionData[sessionId].key = key;
+  }
+
   // Save the key to your backend
   console.log("Received key:", sessionData[sessionId].key);
   res.cookie('sessionId', sessionId, { httpOnly: true });
   // Handle saving the key to your backend, e.g., store it in a database
   res.sendStatus(200); // Send a success response
 });
-
 // Function to estimate tokens in text
 const estimateTokensInText = (text) => {
   if (typeof text !== 'string') {
@@ -512,7 +511,24 @@ if (conversationHistory) {
     
       return tables;
     }
-    
+    // Regular expressions to match specific patterns
+        const fractionRegex = /\\frac{([^{}]+)}{([^{}]+)}/g;
+        const sqrtRegex = /\\sqrt{([^{}]+)}/g;
+
+    // Helper function to replace matched patterns with readable context
+        function replaceMathExpressions(expression) {
+          // Replace fractions
+          expression = expression.replace(fractionRegex, (match, numerator, denominator) => {
+            return `(${numerator}) / (${denominator})`;
+          });
+
+          // Replace square roots
+          expression = expression.replace(sqrtRegex, (match, radicand) => {
+            return `√(${radicand})`;
+          });
+
+          return expression;
+        }
   
     apiResponse.on("end", () => {
       const parsedResponse = JSON.parse(rawData);
@@ -554,7 +570,39 @@ if (conversationHistory) {
           codeBlocks: [],
           tables: [],
           imageUrls: [], // Initialize imageUrls to an empty array
+          mathBlock: [], // Initialize mathBlock to an empty array
         };
+        // Extract mathematical expressions from the response message
+        
+        const mathExpressionRegex = /\$\$(.*?)\$\$/g;
+        let mathExpressions = [];
+        let remainingMessage = responseMessage;
+        let match;
+        while ((match = mathExpressionRegex.exec(responseMessage)) !== null) {
+          const expression = match[1];
+          console.log('Extracted Math Expression:', expression);
+          mathExpressions.push(expression);
+    
+          // Remove the extracted expression from the remaining message
+          remainingMessage = remainingMessage.replace(match[0], '');
+        }
+    
+         // Apply readable context to math expressions
+        const readableMathExpressions = mathExpressions.map(expression => replaceMathExpressions(expression));
+
+        // Create the mathBlock to store the mathematical expressions
+        const mathBlock = {
+          expressions: readableMathExpressions.map(expression => `$$${expression}$$`),
+        };
+        
+        
+        
+
+        // Update the finalResponse with the mathBlock and updated message
+        finalResponse.mathBlock = mathBlock;
+        finalResponse.message = remainingMessage.trim();
+
+
         // If there is a code block
         if (responseMessage.includes("```")) {
           console.log("Detected a code block in the response");
@@ -604,6 +652,8 @@ if (conversationHistory) {
             }
           }
           // After code block parsing:
+          finalResponse.mathBlock = mathBlock;
+          finalResponse.message = remainingMessage; // Update the message after removing math expressions
           remainingMessage = remainingMessage.trim();
           finalResponse.message = remainingMessage; // the remainingMessage after removing code blocks
           finalResponse.codeBlocks = codeBlocks;
@@ -650,7 +700,6 @@ if (conversationHistory) {
         }
         // Check if the message contains image references// Extract image URLs from the response message
         const imageRegex = /IMGI\((https:\/\/image\.pollinations\.ai\/prompt\/[^)]+)\)/g;
-        let match;
         const imageUrls = [];
         while ((match = imageRegex.exec(responseMessage)) !== null) {
           const imageUrl = match[1];
@@ -706,6 +755,7 @@ if (conversationHistory) {
           codeBlocks: finalResponse.codeBlocks,
           tables: finalResponse.tables,
           imageUrls: finalResponse.imageUrls,
+          mathBlock: finalResponse.mathBlock,
         });
       }
     });

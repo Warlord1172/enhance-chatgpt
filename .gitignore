@@ -26,3 +26,4 @@ yarn-error.log*
 # Admin key
 key.txt
 .env
+math expression test.txt
