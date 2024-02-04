@@ -512,22 +512,153 @@ if (conversationHistory) {
       return tables;
     }
     // Regular expressions to match specific patterns
-        const fractionRegex = /\\frac{([^{}]+)}{([^{}]+)}/g;
-        const sqrtRegex = /\\sqrt{([^{}]+)}/g;
+    const fractionRegex = /\\frac{([^{}]+)}{([^{}]+)}/g;
+    const sqrtRegex = /\\sqrt{([^{}]+)}/g;
+    const integralRegex = /\\int_{([^{}]+)}{([^{}]+)}/g;
+    const summationRegex = /\\sum_{([^{}]+)}{([^{}]+)}/g;
+    const productRegex = /\\prod_{([^{}]+)}{([^{}]+)}/g;
+    const limitRegex = /\\lim_{([^{}]+)}{([^{}]+)}/g;
+    const logarithmRegex = /\\log_{([^{}]+)}{([^{}]+)}/g;
+    const trigonometryRegex = /\\(sin|cos|tan|sec|csc|cot){([^{}]+)}/g;
+    const greekLetterRegex = /\\(alpha|beta|gamma|delta|epsilon|theta|lambda|mu|pi|phi|sigma|omega)/g;
+    const implicationRegex = /\\(Rightarrow|Leftrightarrow)/g;
+    const inequalityRegex = /\\(leq|geq|neq)/g;
+    const infinityRegex = /\\infty/g;
+    const multiplicationRegex = /\\times/g;
+    const divisionRegex = /\\div/g;
+    const approximateRegex = /\\approx/g;
+    const subsetRegex = /\\subseteq/g;
+    const supersetRegex = /\\supseteq/g;
+    const emptySetRegex = /\\emptyset/g;
+    const quantifierRegex = /\\(forall|exists)/g;;
+    const binomialCoefficientRegex = /\\binom{([^{}]+)}{([^{}]+)}/g;
+    const matrixRegex = /\\begin{bmatrix}([^{}]+)\\end{bmatrix}/g;
+    const vectorRegex = /\\begin{bmatrix}([^{}]+)\\end{bmatrix}/g;
+    const unionRegex = /\\cup/g;
+    const intersectionRegex = /\\cap/g;
+    const negationRegex = /\\neg/g;
 
     // Helper function to replace matched patterns with readable context
-        function replaceMathExpressions(expression) {
-          // Replace fractions
-          expression = expression.replace(fractionRegex, (match, numerator, denominator) => {
-            return `(${numerator}) / (${denominator})`;
-          });
+    function replaceMathExpressions(expression) {
+        // Replace fractions
+        expression = expression.replace(fractionRegex, (match, numerator, denominator) => {
+          return `(${numerator}) / (${denominator})`;
+        });
 
-          // Replace square roots
-          expression = expression.replace(sqrtRegex, (match, radicand) => {
-            return `√(${radicand})`;
-          });
+        // Replace square roots
+        expression = expression.replace(sqrtRegex, (match, radicand) => {
+          return `√(${radicand})`;
+        });
 
-          return expression;
+        // Replace integrals
+        expression = expression.replace(integralRegex, (match, lower, upper) => {
+          return `∫(${lower},${upper})`;
+        });
+
+        // Replace summations
+        expression = expression.replace(summationRegex, (match, start, end) => {
+          return `Σ(${start},${end})`;
+        });
+
+        // Replace products
+        expression = expression.replace(productRegex, (match, start, end) => {
+          return `Π(${start},${end})`;
+        });
+
+        // Replace limits
+        expression = expression.replace(limitRegex, (match, variable, value) => {
+          return `lim(${variable}→${value})`;
+        });
+
+        // Replace logarithms
+        expression = expression.replace(logarithmRegex, (match, base, argument) => {
+          return `log${base}(${argument})`;
+        });
+
+        // Replace trigonometric functions
+        expression = expression.replace(trigonometryRegex, (match, func, argument) => {
+          return `${func}(${argument})`;
+        });
+
+        // Replace Greek letters
+        expression = expression.replace(greekLetterRegex, (match, letter) => {
+          return `Σ${letter}`;
+        });
+
+        // Replace implications
+        expression = expression.replace(implicationRegex, (match, implication) => {
+          return `⇒${implication}`;
+        });
+
+        // Replace inequalities
+        expression = expression.replace(inequalityRegex, (match, inequality) => {
+          return `${inequality}`;
+        });
+
+        // Replace infinity symbol
+        expression = expression.replace(infinityRegex, "∞");
+
+        // Replace multiplication symbol
+        expression = expression.replace(multiplicationRegex, "×");
+
+        // Replace division symbol
+        expression = expression.replace(divisionRegex, "÷");
+
+        // Replace approximate symbol
+        expression = expression.replace(approximateRegex, "≈");
+
+        // Replace subset symbol
+        expression = expression.replace(subsetRegex, "⊆");
+
+        // Replace superset symbol
+        expression = expression.replace(supersetRegex, "⊇");
+
+        // Replace empty set symbol
+        expression = expression.replace(emptySetRegex, "∅");
+
+        // Replace quantifiers
+        expression = expression.replace(quantifierRegex, (match, quantifier) => {
+          if (quantifier === "exists") {
+            return "∃";
+          } else {
+            return `∀${quantifier}`;
+          }
+        });
+        // Replace binomial coefficients
+        expression = expression.replace(binomialCoefficientRegex, (match, n, k) => {
+          return `(${n} choose ${k})`;
+        });
+
+        // Replace matrices
+        expression = expression.replace(matrixRegex, (match, matrix) => {
+          return `[${
+            matrix
+              .trim()
+              .split(" ")
+              .join(", ")
+          }]`;
+        });
+
+        // Replace vectors
+        expression = expression.replace(vectorRegex, (match, vector) => {
+          return `[${
+            vector
+              .trim()
+              .split(" ")
+              .join(", ")
+          }]`;
+        });
+
+        // Replace union symbol
+        expression = expression.replace(unionRegex, "∪");
+
+        // Replace intersection symbol
+        expression = expression.replace(intersectionRegex, "∩");
+
+        // Replace negation symbol
+        expression = expression.replace(negationRegex, "¬");
+
+        return expression;
         }
   
     apiResponse.on("end", () => {
@@ -583,8 +714,9 @@ if (conversationHistory) {
           console.log('Extracted Math Expression:', expression);
           mathExpressions.push(expression);
     
-          // Remove the extracted expression from the remaining message
-          remainingMessage = remainingMessage.replace(match[0], '');
+            // Replace the extracted expression with its symbol
+            const symbol = replaceMathExpressions(expression);
+            remainingMessage = remainingMessage.replace(match[0], symbol);
         }
     
          // Apply readable context to math expressions
@@ -594,15 +726,16 @@ if (conversationHistory) {
         const mathBlock = {
           expressions: readableMathExpressions.map(expression => `$$${expression}$$`),
         };
-        
-        
-        
 
         // Update the finalResponse with the mathBlock and updated message
         finalResponse.mathBlock = mathBlock;
         finalResponse.message = remainingMessage.trim();
-
-
+         // Check if any math expressions were extracted
+        if (mathExpressions.length === 0) {
+          console.log('No math blocks detected in the response');
+        } else {
+          console.log('Math blocks detected in the response');
+        }
         // If there is a code block
         if (responseMessage.includes("```")) {
           console.log("Detected a code block in the response");
@@ -654,9 +787,9 @@ if (conversationHistory) {
           // After code block parsing:
           finalResponse.mathBlock = mathBlock;
           finalResponse.message = remainingMessage; // Update the message after removing math expressions
-          remainingMessage = remainingMessage.trim();
           finalResponse.message = remainingMessage; // the remainingMessage after removing code blocks
           finalResponse.codeBlocks = codeBlocks;
+          remainingMessage = remainingMessage.trim();
         } else {
           // No code block detected in the response
           console.log("No code block detected in the response");
