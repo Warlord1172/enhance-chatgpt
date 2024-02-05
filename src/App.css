@@ -666,6 +666,35 @@
   margin: 0.5rem;
 }
 
+/* Math section */
+
+.math-block {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.math-expression {
+  display: inline-block;
+  margin-bottom: 5px;
+}
+
+.math-expression-text {
+  font-family: "Latin Modern Math", "Computer Modern", sans-serif;
+  /* Use "Latin Modern Math" as the preferred font family */
+  /* If not available, fallback to "Computer Modern" */
+  /* If neither are available, use a default sans-serif font */
+  font-size: 18px;
+  /* Adjust the font size as needed */
+  color: #333;
+  /* Set the desired color for the math expressions */
+  background-color: #f5f5f5;
+  /* Set the desired background color for the math expressions */
+  padding: 5px;
+  /* Adjust the padding as needed */
+  border-radius: 5px;
+  /* Adjust the border radius as needed */
+}
+
 /* Loading animation section */
 .loading-spinner {
   display: flex;

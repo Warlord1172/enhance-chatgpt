@@ -24,7 +24,7 @@ import WindowClosePrompt from './windowcloseprompt';
 import SystemMessage from "./message";
 import IPC from "./IPC.js";
 import { FormControl, InputLabel, Select, MenuItem } from "@material-ui/core";
-
+import MathBlock from "./MathBlock";// Import the MathBlock component
 //import fs from 'fs';
 //import axios from 'axios';
 // Main application component
@@ -33,6 +33,7 @@ function App() {
   useEffect(() => {
     getEngines();
   });
+  
   // Various state variables
   const [selectedComponent, setSelectedComponent] = useState(null); // component selection
   const [sessionId, setSessionId] = useState(null);
@@ -364,6 +365,16 @@ function App() {
             { user: "assistant", codeBlocks: { language, code } },
           ];
         });
+      }
+       // Check if the response includes a mathBlock object
+      if (data.mathBlock && data.mathBlock.expressions.length > 0) {
+        // Extract the math expressions from the mathBlock
+        const expressions = data.mathBlock.expressions;
+        // Add a mathBlock object to the chatLog instead of a regular message
+        chatLogNew = [
+          ...chatLogNew,
+          { user: "assistant", mathBlock: { expressions } },
+        ];
       }
       setChatLog(chatLogNew);
       setChatThreads(
@@ -725,27 +736,34 @@ function App() {
                   Scroll to Latest
                 </button>
                 <div className="chat-log">
-                  {chatLog.map((message, index) => {
-                    if (message.codeBlocks) {
-                      return (
-                        <CodeBlock
-                          key={index}
-                          code={message.codeBlocks.code}
-                          language={message.codeBlocks.language}
-                        />
-                      );
-                    } else {
-                      return (
-                        <ChatMessage
-                          key={index}
-                          message={message}
-                          updateMessage={updateMessage}
-                          refreshUI={refreshUI}
-                        />
-                      );
-                    }
-                  })}
-                </div>
+                {chatLog.map((message, index) => {
+                  if (message.codeBlocks) {
+                    return (
+                      <CodeBlock
+                        key={index}
+                        code={message.codeBlocks.code}
+                        language={message.codeBlocks.language}
+                      />
+                    );
+                  } else if (message.mathBlock) {
+                    return (
+                      <MathBlock
+                        key={index}
+                        expressions={message.mathBlock.expressions}
+                      />
+                    );
+                  } else {
+                    return (
+                      <ChatMessage
+                        key={index}
+                        message={message}
+                        updateMessage={updateMessage}
+                        refreshUI={refreshUI}
+                      />
+                    );
+                  }
+                })}
+              </div>
               </section>
               <div className="chat-input-holder">
                 <form onSubmit={handleSubmit}>
@@ -794,7 +812,12 @@ function App() {
 );
 };
 const ChatMessage = ({ message }) => {
-  const md = new MarkdownIt();
+  const md = new MarkdownIt({
+    // Enable math delimiters for inline math expressions
+    inlineMath: [["$", "$"]],
+    // Enable math delimiters for displayed math expressions
+    displayMath: [["$$", "$$"]],
+  });
 
   const extractTables = (markdownString) => {
     const htmlString = md.render(markdownString);
@@ -805,7 +828,7 @@ const ChatMessage = ({ message }) => {
 
   const isChatGPT = message.user === "assistant"; // Determine if the message is from ChatGPT
 
-  if (message.codeBlocks) {
+  if (message.codeBlocks || (message.mathBlock && message.mathBlock.expressions.length > 0)) {
     return (
       <div className={`chat-message ${isChatGPT && "chatgpt"}`}>
         <div className="chat-message-center">
@@ -817,11 +840,32 @@ const ChatMessage = ({ message }) => {
             )}
           </div>
           <div className="message">
-            <ReactMarkdown>{message.message}</ReactMarkdown>
-            <CodeBlock
-              code={message.codeBlocks.code}
-              language={message.codeBlocks.language}
-            />
+            <ReactMarkdown
+              // Disable HTML rendering to prevent the math expression from being rendered as HTML
+              skipHtml={true}
+              // Render the math expression as raw source
+              renderers={{
+                math: (text) => text,
+                inlineMath: (text) => text,
+              }}
+            >
+              {message.message}
+            </ReactMarkdown>
+            {message.codeBlocks && (
+              <CodeBlock
+                code={message.codeBlocks.code}
+                language={message.codeBlocks.language}
+              />
+            )}
+            {message.mathBlock && message.mathBlock.expressions.length > 0 && (
+              <div className="math-block">
+                {message.mathBlock.expressions.map((expression, index) => (
+                  <div key={index} className="math-expression">
+                    <span className="math-expression-text">{expression}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -850,7 +894,8 @@ const ChatMessage = ({ message }) => {
                     key={index}
                     alt={`drawing ${index + 1}`}
                   />
-                ))}{message.imageUrls.length === 0 && (
+                ))}
+                {message.imageUrls.length === 0 && (
                   <div className="loading-spinner">
                     {" "}
                     <img
@@ -867,10 +912,9 @@ const ChatMessage = ({ message }) => {
               ))}
             </div>
           </div>
-        </div>        
+        </div>
       </div>
     );
-    
   }
 };
 export default App;

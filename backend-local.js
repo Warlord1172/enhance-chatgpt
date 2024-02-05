@@ -786,8 +786,7 @@ if (conversationHistory) {
           }
           // After code block parsing:
           finalResponse.mathBlock = mathBlock;
-          finalResponse.message = remainingMessage; // Update the message after removing math expressions
-          finalResponse.message = remainingMessage; // the remainingMessage after removing code blocks
+          finalResponse.message = remainingMessage; // Update the message after removing expressions
           finalResponse.codeBlocks = codeBlocks;
           remainingMessage = remainingMessage.trim();
         } else {
