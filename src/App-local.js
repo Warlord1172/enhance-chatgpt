@@ -745,11 +745,11 @@ function App() {
                         language={message.codeBlocks.language}
                       />
                     );
-                  } else if (message.mathBlock) {
+                  } else if (message.mathBlocks) {
                     return (
                       <MathBlock
                         key={index}
-                        expressions={message.mathBlock.expressions}
+                        expressions={message.mathBlocks}
                       />
                     );
                   } else {
@@ -857,11 +857,11 @@ const ChatMessage = ({ message }) => {
                 language={message.codeBlocks.language}
               />
             )}
-            {message.mathBlock && message.mathBlock.expressions.length > 0 && (
+            {message.mathBlocks && message.mathBlocks.length > 0 && (
               <div className="math-block">
-                {message.mathBlock.expressions.map((expression, index) => (
+                {message.mathBlocks.map((mathBlocks, index) => (
                   <div key={index} className="math-expression">
-                    <span className="math-expression-text">{expression}</span>
+                    <span className="math-expression-text">{mathBlocks}</span>
                   </div>
                 ))}
               </div>

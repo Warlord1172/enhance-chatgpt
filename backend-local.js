@@ -512,19 +512,19 @@ if (conversationHistory) {
       return tables;
     }
     // Regular expressions to match specific patterns
-    const fractionRegex = /\\frac{([^{}]+)}{([^{}]+)}/g;
+    const fractionRegex = /\\frac\{([^{}]+)\}\{([^{}]+)\}/g;
     const sqrtRegex = /\\sqrt{([^{}]+)}/g;
+    const logarithmRegex = /\\log_{([^{}]+)}{([^{}]+)}/g;
+    const trigonometryRegex = /\\(sin|cos|tan|sec|csc|cot){([^{}]+)}/g;
+    const greekLetterRegex = /\\(alpha|beta|gamma|delta|epsilon|theta|lambda|mu|pi|phi|sigma|omega)/g;
     const integralRegex = /\\int_{([^{}]+)}{([^{}]+)}/g;
     const summationRegex = /\\sum_{([^{}]+)}{([^{}]+)}/g;
     const productRegex = /\\prod_{([^{}]+)}{([^{}]+)}/g;
     const limitRegex = /\\lim_{([^{}]+)}{([^{}]+)}/g;
-    const logarithmRegex = /\\log_{([^{}]+)}{([^{}]+)}/g;
-    const trigonometryRegex = /\\(sin|cos|tan|sec|csc|cot){([^{}]+)}/g;
-    const greekLetterRegex = /\\(alpha|beta|gamma|delta|epsilon|theta|lambda|mu|pi|phi|sigma|omega)/g;
     const implicationRegex = /\\(Rightarrow|Leftrightarrow)/g;
     const inequalityRegex = /\\(leq|geq|neq)/g;
     const infinityRegex = /\\infty/g;
-    const multiplicationRegex = /\\times/g;
+    const multiplicationRegex = /\\(times|cdot)/g;
     const divisionRegex = /\\div/g;
     const approximateRegex = /\\approx/g;
     const subsetRegex = /\\subseteq/g;
@@ -542,7 +542,15 @@ if (conversationHistory) {
     function replaceMathExpressions(expression) {
         // Replace fractions
         expression = expression.replace(fractionRegex, (match, numerator, denominator) => {
-          return `(${numerator}) / (${denominator})`;
+          let numeratorValue = numerator ? numerator.trim() : '';
+          let denominatorValue = denominator ? denominator.trim() : '';
+
+          // Handle the case where numerator or denominator is not defined
+          if (!numeratorValue || !denominatorValue) {
+            return "Invalid fraction";
+          }
+
+          return `(${numeratorValue}) / (${denominatorValue})`;
         });
 
         // Replace square roots
@@ -552,37 +560,93 @@ if (conversationHistory) {
 
         // Replace integrals
         expression = expression.replace(integralRegex, (match, lower, upper) => {
-          return `∫(${lower},${upper})`;
+          let lowerval = lower ? lower.trim() : '';
+          let upperval = upper ? upper.trim() : '';
+
+          // Handle the case where lower or upper is not defined
+          if (!lowerval || !upperval) {
+            return "Invalid integral";
+          }
+          return `∫(${lowerval},${upperval})`;
         });
 
         // Replace summations
         expression = expression.replace(summationRegex, (match, start, end) => {
-          return `Σ(${start},${end})`;
+          let startval = start ? start.trim() : '';
+          let endval = end ? end.trim() : '';
+
+          // Handle the case where start or end is not defined
+          if (!startval || !endval) {
+            return "Invalid summation";
+          }
+          return `Σ(${startval},${endval})`;
         });
 
         // Replace products
         expression = expression.replace(productRegex, (match, start, end) => {
-          return `Π(${start},${end})`;
+          let startval = start ? start.trim() : '';
+          let endval = end ? end.trim() : '';
+
+          // Handle the case where start or end is not defined
+          if (!startval || !endval) {
+            return "Invalid product";
+          }
+          return `Π(${startval},${endval})`;
         });
 
         // Replace limits
         expression = expression.replace(limitRegex, (match, variable, value) => {
-          return `lim(${variable}→${value})`;
+          let varval = variable ? variable.trim() : '';
+          let valval = value ? value.trim() : '';
+
+          // Handle the case where variable or value is not defined
+          if (!varval || !valval) {
+            return "Invalid limit";
+          }
+          return `lim(${varval}→${valval})`;
         });
 
         // Replace logarithms
         expression = expression.replace(logarithmRegex, (match, base, argument) => {
-          return `log${base}(${argument})`;
+          let baseval = base ? base.trim() : '';
+          let argval = argument ? argument.trim() : '';
+
+          // Handle the case where base or argument is not defined
+          if (!baseval || !argval) {
+            return "Invalid logarithm";
+          }
+          return `log_${baseval}(${argval})`;
         });
 
         // Replace trigonometric functions
         expression = expression.replace(trigonometryRegex, (match, func, argument) => {
-          return `${func}(${argument})`;
+          let funcval = func ? func.trim() : '';
+          let argval = argument ? argument.trim() : '';
+
+          // Handle the case where function or argument is not defined
+          if (!funcval || !argval) {
+            return "Invalid Trigonometric function";
+          }
+          return `${funcval}(${argval})`;
         });
 
         // Replace Greek letters
         expression = expression.replace(greekLetterRegex, (match, letter) => {
-          return `Σ${letter}`;
+          const greekLetterMapping = {
+            alpha: 'α',
+            beta: 'β',
+            gamma: 'γ',
+            delta: 'δ',
+            epsilon: 'ε',
+            theta: 'θ',
+            lambda: 'λ',
+            mu: 'μ',
+            pi: 'π',
+            phi: 'φ',
+            sigma: 'σ',
+            omega: 'ω'
+          };
+          return greekLetterMapping[letter];
         });
 
         // Replace implications
@@ -626,7 +690,14 @@ if (conversationHistory) {
         });
         // Replace binomial coefficients
         expression = expression.replace(binomialCoefficientRegex, (match, n, k) => {
-          return `(${n} choose ${k})`;
+          let nval = n ? n.trim() : '';
+          let kval = k ? k.trim() : '';
+
+          // Handle the case where n or k is not defined
+          if (!nval || !kval) {
+            return "Invalid binomial coefficients";
+          }
+          return `(${nval} choose ${kval})`;
         });
 
         // Replace matrices
@@ -703,38 +774,36 @@ if (conversationHistory) {
           imageUrls: [], // Initialize imageUrls to an empty array
           mathBlock: [], // Initialize mathBlock to an empty array
         };
-        // Extract mathematical expressions from the response message
-        
-        const mathExpressionRegex = /\$\$(.*?)\$\$/g;
-        let mathExpressions = [];
-        let remainingMessage = responseMessage;
-        let match;
-        while ((match = mathExpressionRegex.exec(responseMessage)) !== null) {
-          const expression = match[1];
-          console.log('Extracted Math Expression:', expression);
-          mathExpressions.push(expression);
-    
-            // Replace the extracted expression with its symbol
-            const symbol = replaceMathExpressions(expression);
-            remainingMessage = remainingMessage.replace(match[0], symbol);
-        }
-    
-         // Apply readable context to math expressions
-        const readableMathExpressions = mathExpressions.map(expression => replaceMathExpressions(expression));
+        // Check if the message contains math blocks
+        if (responseMessage.includes("$$")) {
+          console.log("Detected math blocks in the response");
 
-        // Create the mathBlock to store the mathematical expressions
-        const mathBlock = {
-          expressions: readableMathExpressions.map(expression => `$$${expression}$$`),
-        };
+          // Extract math blocks from the response message using a regular expression
+          const mathBlockRegex = /\$\$(.*?)\$\$/g;
+          const mathBlocks = responseMessage.match(mathBlockRegex) || [];
 
-        // Update the finalResponse with the mathBlock and updated message
-        finalResponse.mathBlock = mathBlock;
-        finalResponse.message = remainingMessage.trim();
-         // Check if any math expressions were extracted
-        if (mathExpressions.length === 0) {
-          console.log('No math blocks detected in the response');
+
+          // Replace math expressions within each math block
+          mathBlocks.forEach((block, index) => {
+            mathBlocks[index] = replaceMathExpressions(block);
+            responseMessage = responseMessage.replace(block, mathBlocks[index]);
+          });
+          console.log(`Extracted math expression: ${mathBlocks}`);
+          console.log(`Updated response message: ${responseMessage}`);
+          // Create the final response object with the processed message and math blocks
+          finalResponse = {
+            message: responseMessage,
+            mathBlocks: mathBlocks,
+          };
         } else {
-          console.log('Math blocks detected in the response');
+          // No math blocks detected in the response
+          console.log("No math blocks detected in the response");
+
+          // Create the final response object with the original message
+          finalResponse = {
+            message: responseMessage,
+            mathBlocks: [],
+          };
         }
         // If there is a code block
         if (responseMessage.includes("```")) {
@@ -785,7 +854,6 @@ if (conversationHistory) {
             }
           }
           // After code block parsing:
-          finalResponse.mathBlock = mathBlock;
           finalResponse.message = remainingMessage; // Update the message after removing expressions
           finalResponse.codeBlocks = codeBlocks;
           remainingMessage = remainingMessage.trim();
@@ -833,6 +901,7 @@ if (conversationHistory) {
         // Check if the message contains image references// Extract image URLs from the response message
         const imageRegex = /IMGI\((https:\/\/image\.pollinations\.ai\/prompt\/[^)]+)\)/g;
         const imageUrls = [];
+        let match;
         while ((match = imageRegex.exec(responseMessage)) !== null) {
           const imageUrl = match[1];
           console.log('Match:', match); // Log the match result
