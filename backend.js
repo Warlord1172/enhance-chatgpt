@@ -12,6 +12,7 @@ const port = 10080;
 app.use(cookieParser()); // To parse cookies from the request
 const sessionData = {};
 
+//for sessions
 app.use((req, res, next) => {
   if (!req.cookies.sessionId) {
       const sessionId = uuidv4();
@@ -151,7 +152,7 @@ app.use((err, req, res, next) => {
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, 'build')));
 
-
+// grabbing models using key
 const getModels = (Key) => {
   return new Promise((resolve, reject) => {
     const options = {
@@ -197,6 +198,7 @@ const cacheDuration = 60 * 60 * 1000; // milliseconds
 let lastFetchTime = null;
 let storedModels = null;
 
+//storing models to  a file for caching purposes
 const fetchAndCacheModels = (apiKey) => {
   console.log("Fetching models from OpenAI API...");
 
@@ -210,7 +212,7 @@ const fetchAndCacheModels = (apiKey) => {
       console.error("Failed to fetch models:", error);
     });
 };
-
+// loading models from  the cache if it's not expired yet
 const loadModelsFromCache = (apiKey) => {
   if (fs.existsSync("modelsCache.json")) {
     const cacheData = fs.readFileSync("modelsCache.json", "utf8");
@@ -240,6 +242,7 @@ const loadModelsFromCache = (apiKey) => {
   }
 };
 
+// storing models to  the cache file
 const saveModelsToCache = (apiKey) => {
   const cacheData = {
     models: storedModels,
@@ -267,6 +270,7 @@ process.on("SIGINT", () => {
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
+// fetching models using api key
 app.get('/api/models', async (req, res) => {
   const sessionId = req.cookies.sessionId;
   if (!sessionId || !sessionData[sessionId] || !sessionData[sessionId].key) {
@@ -329,6 +333,7 @@ const estimateTokensInText = (text) => {
 };
 console.log('Estimate Tokens function defined');
 
+// calculate model token limits
 app.post("/api/get-model-token-limits", (req, res) => {
   // get current model
   const model = req.body.currentModel;
@@ -347,6 +352,8 @@ app.post("/api/get-model-token-limits", (req, res) => {
   res.json(response);
 });
 
+
+// chat response handling
 app.post("/api/chat", async (req, res) => {
   console.log("Received a POST request at /chat");
   console.log(req.body);
@@ -712,6 +719,7 @@ if (conversationHistory) {
   apiRequest.end();
 });
 
+//backend pairing to frontend server
 app.listen(port, () => {
   console.log(`Example app listening at https://chatgpt-unleashed.onrender.com:${port}`);
 });
