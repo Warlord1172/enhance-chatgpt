@@ -267,7 +267,7 @@ process.on("SIGINT", () => {
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-app.get('/API/models', async (req, res) => {
+app.get('/api/models', async (req, res) => {
   const sessionId = req.cookies.sessionId;
   if (!sessionId || !sessionData[sessionId] || !sessionData[sessionId].key) {
     return res.status(400).json({ error: "API key is not set. Please use /api/save-key endpoint to set the key." });
@@ -296,21 +296,22 @@ app.get('*', (req, res) => {
 
 console.log('Middleware configured');
 // api key handling
+
 app.post("/api/save-key", (req, res) => {
   const { key } = req.body;
   const sessionId = req.cookies.sessionId;  // Get session ID from the cookie
   sessionData[sessionId] = {
-      key: key
-    }; 
-    if (key === '69') {
-      console.log("Activated Guest Controls");
-      sessionData[sessionId].key = "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";
-    } else if (key === '179109') {
-      console.log("Activated Admin Controls");
-      sessionData[sessionId].key = "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";
-    } else {
-      sessionData[sessionId].key = key;
-    }
+    key: key
+  }; 
+
+  if (key === '179109') {
+    console.log("Activated Admin Controls");
+    const adminKey = process.env.ADMIN_KEY || fs.readFileSync('key.txt', 'utf8');
+    sessionData[sessionId].key = adminKey;
+  } else {
+    sessionData[sessionId].key = key;
+  }
+
   // Save the key to your backend
   console.log("Received key:", sessionData[sessionId].key);
   res.cookie('sessionId', sessionId, { httpOnly: true });
