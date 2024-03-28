@@ -1,0 +1,24 @@
+Here's an example of how you can modify the frontend code to render the math expression using MathJax:
+
+Include the MathJax library in your HTML file. You can either host the library locally or use a CDN. Here's an example using the MathJax CDN:
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+Modify the frontend code to render the math expression using MathJax. Assuming you have a container element with the id "expression-container" to display the math expression, you can use the following code:
+// Assuming the response JSON is stored in a variable called `responseData`
+const mathExpression = responseData.mathBlock?.expressions[0];
+
+// Assuming you have a container element with the id "expression-container" to display the math expression
+const expressionContainer = document.getElementById("expression-container");
+
+// Render the math expression using MathJax
+expressionContainer.innerHTML = mathExpression;
+
+// Typeset the rendered math expression
+MathJax.typesetPromise([expressionContainer]);
+In this code, mathExpression is the math expression extracted from the response JSON. The code sets the innerHTML of the expressionContainer to the math expression, and then uses MathJax.typesetPromise to typeset the rendered math expression.
+
+Make sure to adjust the code according to your specific frontend implementation, such as selecting the appropriate container element and integrating it into your existing codebase.
+
+By rendering the math expression using MathJax, you should be able to display it correctly on the frontend.
+
+Let me know if you have any further questions or need additional assistance!
