@@ -28,8 +28,8 @@ const modelTokenLimits = {
   "gpt-3.5-turbo-0613":4096,
   "gpt-3.5-turbo-1106":4096, //returns 16384 apparently
   "gpt-4-1106-preview":4096, // returns 128000 apparently
-  "gpt-4-32k": 32768,
-  "gpt-4-32k-0613":32768,
+  "gpt-4-turbo": 128000,
+  "gpt-4-32k-0314":32768,
   "gpt-3.5-turbo-16k":16384,
   "text-davinci-002": 4096,
   "code-davinci-002": 8001,
@@ -172,7 +172,7 @@ const getModels = (Key) => {
       response.on("end", () => {
         try {
             // A list of available models
-            const availableModels = ["gpt-3.5-turbo-0301","gpt-3.5-turbo","gpt-3.5-turbo-0613","gpt-3.5-turbo-1106","gpt-3.5-turbo-16k-0613", "gpt-3.5-turbo-16k","gpt-4","gpt-4-0613","gpt-4-0314","gpt-4-1106-preview","gpt-4-32k","gpt-4-32k-0613"];
+            const availableModels = ["gpt-3.5-turbo-0301","gpt-3.5-turbo","gpt-3.5-turbo-0613","gpt-3.5-turbo-1106","gpt-3.5-turbo-16k-0613", "gpt-3.5-turbo-16k","gpt-4","gpt-4-0613","gpt-4-0314","gpt-4-1106-preview","gpt-4-turbo","gpt-4-32k-0314"];
             const parsedData = JSON.parse(data);
             const engines = parsedData.data;
             const deprecatedModelsList = engines.filter(engine => !availableModels.includes(engine.id));
