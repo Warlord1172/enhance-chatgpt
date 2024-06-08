@@ -30,7 +30,7 @@ const modelTokenLimits = {
   "gpt-4-1106-preview":4096, // returns 128000 apparently
   "gpt-4-turbo": 4096,
   "gpt-4-32k-0314":32768,
-  "gpt-4o":128000,
+  "gpt-4o":4096,
   "gpt-3.5-turbo-16k":16384,
   "text-davinci-002": 4096,
   "code-davinci-002": 8001,
