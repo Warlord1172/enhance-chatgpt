@@ -24,8 +24,8 @@ app.use((req, res, next) => {
 // max_token limits
 const modelTokenLimits = {
   "gpt-3.5-turbo": 4096,
-  "gpt-3.5-turbo-0301": 4096,
-  "gpt-3.5-turbo-0613":4096,
+  // "gpt-3.5-turbo-0301": 4096,
+  // "gpt-3.5-turbo-0613":4096,
   "gpt-3.5-turbo-1106":4096, //returns 16384 apparently
   "gpt-4-1106-preview":4096, // returns 128000 apparently
   "gpt-4-turbo": 4096,
@@ -37,18 +37,19 @@ const modelTokenLimits = {
   "gpt-4": 8192,
   "gpt-4-0314": 8192,
   "gpt-4-0613": 8192,
-  "gpt-3.5-turbo-16k-0613":16384,
-  "text-davinci-003": 4096,
-  "text-curie-001": 2049,
-  "text-babbage-001": 2049,
-  "text-ada-001": 2049,
-  "davinci": 2049,
-  "curie": 2049,
-  "babbage": 2049,
-  "ada": 2049,
-  "code-davinci-001": 8001,
-  "code-cushman-002": 2047,
-  "code-cushman-001": 2047,
+  "gpt-4o-mini":16384,
+  // "gpt-3.5-turbo-16k-0613":16384,
+  // "text-davinci-003": 4096,
+  // "text-curie-001": 2049,
+  // "text-babbage-001": 2049,
+  // "text-ada-001": 2049,
+  // "davinci": 2049,
+  // "curie": 2049,
+  // "babbage": 2049,
+  // "ada": 2049,
+  // "code-davinci-001": 8001,
+  // "code-cushman-002": 2047,
+  // "code-cushman-001": 2047,
 };
 const Codelanguage = {
   Python: ["Python", "py"],
@@ -173,7 +174,7 @@ const getModels = (Key) => {
       response.on("end", () => {
         try {
             // A list of available models
-            const availableModels = ["gpt-3.5-turbo-0301","gpt-3.5-turbo","gpt-3.5-turbo-0613","gpt-3.5-turbo-1106","gpt-3.5-turbo-16k-0613", "gpt-3.5-turbo-16k","gpt-4","gpt-4-0613","gpt-4-0314","gpt-4-1106-preview","gpt-4-turbo","gpt-4-32k-0314","gpt-4o"];
+            const availableModels = ["gpt-3.5-turbo","gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k","gpt-4","gpt-4-0613","gpt-4-0314","gpt-4-1106-preview","gpt-4-turbo","gpt-4-32k-0314","gpt-4o","gpt-4o-mini"];
             const parsedData = JSON.parse(data);
             const engines = parsedData.data;
             const deprecatedModelsList = engines.filter(engine => !availableModels.includes(engine.id));

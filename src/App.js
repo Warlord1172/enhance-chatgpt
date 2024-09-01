@@ -41,7 +41,7 @@ function App() {
   const [showError, setShowError] = useState(false); // Flag for showing error
   const [input, setInput] = useState(""); // Current input
   const [Models, setModels] = useState([{ id: "Loading...", ready: false }]); // AI models
-  const [currentModel, setCurrentModel] = useState("gpt-3.5-turbo"); // Selected AI model
+  const [currentModel, setCurrentModel] = useState("gpt-4"); // Selected AI model
   const [updatedSystemMessage, setUpdatedSystemMessage] = useState(false); //set System role
   const [submitConfirm, setSubmitConfirm] = useState("");
   const [temperature, setTemperature] = useState(0.5);
